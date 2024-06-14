@@ -1,8 +1,15 @@
-
+import React, { useContext } from 'react';
+import { AuthContext } from '../Global/AuthContext';
 import Logo from '../../assets/logo.png';
 
-function Navbar() {
+const Navbar: React.FC = () => {
+  const authContext = useContext(AuthContext);
 
+  if (!authContext) {
+    throw new Error("AuthContext must be used within an AuthProvider");
+  }
+
+  const { user, logout } = authContext;
 
   return (
     <nav className='pl-7 pr-7 bg-white mb-5'>
@@ -24,14 +31,13 @@ function Navbar() {
         <div className="hidden w-full md:block md:w-auto" id="navbar-default">
           <ul className="font-medium flex flex-col p-4 md:p-0 mt-4 rounded-lg md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-5">
             <li>
-              <a href="/home" className="block py-2 px-3 text-black rounded md:bg-transparent md:p-0 dark:text-black md:hover:text-blue-700 " aria-current="page">Home</a>
-            </li>
-           
-            <li>
-              <a href="/profile" className="block py-2 px-3 text-black rounded md:bg-transparent md:p-0 dark:text-black md:hover:text-blue-700 " aria-current="page">Profile</a>
+              <a href="/home" className="block py-2 px-3 text-black rounded md:bg-transparent md:p-0 dark:text-black md:hover:text-blue-700" aria-current="page">Home</a>
             </li>
             <li>
-                <a href="/" className="block py-2 px-3 text-black rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-black md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-black md:dark:hover:bg-transparent">Logout</a>
+              <a href="/profile" className="block py-2 px-3 text-black rounded md:bg-transparent md:p-0 dark:text-black md:hover:text-blue-700" aria-current="page">{user ? user.email : 'Profile'}</a>
+            </li>
+            <li>
+              <a href="/" onClick={logout} className="block py-2 px-3 text-black rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-black md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-black md:dark:hover:bg-transparent">Logout</a>
             </li>
           </ul>
         </div>

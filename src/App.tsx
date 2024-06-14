@@ -11,14 +11,16 @@ import ProfileForm from './Pages/Profile'
 import WelcomePage from './Pages/WelcomePage'
 import SignInForm from './Pages/SignIn'
 import Translate from './Pages/Translate'
+import { AuthProvider } from './components/Global/AuthContext'
 
 function App() {
   return (
+  <AuthProvider>
     <BrowserRouter>
       <Routes>
         <Route path='/' element={<WelcomePage/>}></Route>
         <Route path='/signin' element={<SignInForm/>}></Route>
-        <Route path='/home' element={<Homepage/>}></Route>
+        <Route path='/dashboard' element={<Homepage/>}></Route>
         <Route path='/email' element={<EmailService/>}></Route>
         <Route path='/businessproposal' element={<BussinessProposalService/>}></Route>
         <Route path='/offerletter' element={<OfferLetterService/>}></Route>
@@ -31,6 +33,7 @@ function App() {
 
       </Routes>
     </BrowserRouter>
+    </AuthProvider>
   )
 }
 

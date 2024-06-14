@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Navbar from "../components/Global/Navbar";
 
 function ContentGenerationService(){
     const [formData, setFormData] = useState({
@@ -14,20 +15,42 @@ function ContentGenerationService(){
         references: ''
     });
 
+    const [generatedContent, setGeneratedContent] = useState('');
+    const [error, setError] = useState('');
+
     const handleChange = (e: { target: { name: any; value: any; }; }) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
     };
 
-    const handleSubmit = (e: { preventDefault: () => void; }) => {
+    const handleSubmit = async (e: { preventDefault: () => void; }) => {
         e.preventDefault();
-       
-        console.log(formData);
+        setError('');
+        setGeneratedContent('');
+        try {
+            const response = await fetch('http://127.0.0.1:8000/content_generator/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                setGeneratedContent(data.generated_content);
+            } else {
+                setError(data.error || 'An error occurred');
+            }
+        } catch (error) {
+            setError('An error occurred');
+        }
     };
 
     return (
 
         <>
+        <Navbar/>
         <h1 className="text-center text-3xl mt-5">Content Generator</h1>
         <form className="w-full max-w-3xl mx-auto p-8" onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
