@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
-import { AuthContext } from '../Global/AuthContext';
+import { AuthContext } from './AuthContext';
 import Logo from '../../assets/logo.png';
+import '../../App.css'
 
 const Navbar: React.FC = () => {
   const authContext = useContext(AuthContext);
@@ -12,7 +13,7 @@ const Navbar: React.FC = () => {
   const { user, logout } = authContext;
 
   return (
-    <nav className='pl-7 pr-7 bg-white mb-5'>
+    <nav className='pl-7 pr-7'>
       <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4 ">
         <img src={Logo} style={{height: '55px', width: '80px'}} alt="ProdigiDesk Logo" />
         <button
@@ -31,7 +32,7 @@ const Navbar: React.FC = () => {
         <div className="hidden w-full md:block md:w-auto" id="navbar-default">
           <ul className="font-medium flex flex-col p-4 md:p-0 mt-4 rounded-lg md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-5">
             <li>
-              <a href="/home" className="block py-2 px-3 text-black rounded md:bg-transparent md:p-0 dark:text-black md:hover:text-blue-700" aria-current="page">Home</a>
+              <a href="/dashboard" className="block py-2 px-3 text-black rounded md:bg-transparent md:p-0 dark:text-black md:hover:text-blue-700" aria-current="page">Home</a>
             </li>
             <li>
               <a href="/profile" className="block py-2 px-3 text-black rounded md:bg-transparent md:p-0 dark:text-black md:hover:text-blue-700" aria-current="page">{user ? user.email : 'Profile'}</a>

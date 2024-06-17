@@ -12,27 +12,29 @@ import WelcomePage from './Pages/WelcomePage'
 import SignInForm from './Pages/SignIn'
 import Translate from './Pages/Translate'
 import { AuthProvider } from './components/Global/AuthContext'
+import Footer from './components/Global/Footer'
 
 function App() {
   return (
-  <AuthProvider>
-    <BrowserRouter>
-      <Routes>
-        <Route path='/' element={<WelcomePage/>}></Route>
-        <Route path='/signin' element={<SignInForm/>}></Route>
-        <Route path='/dashboard' element={<Homepage/>}></Route>
-        <Route path='/email' element={<EmailService/>}></Route>
-        <Route path='/businessproposal' element={<BussinessProposalService/>}></Route>
-        <Route path='/offerletter' element={<OfferLetterService/>}></Route>
-        <Route path='/sales' element={<SalesScriptService/>}></Route>
-        <Route path='/summarize' element={<SummarizeService/>}></Route>
-        <Route path='/contentgeneration' element={<ContentGenerationService/>}></Route>
-        <Route path='/profile' element={<ProfileForm/>}></Route>
-        <Route path='/translate' element={<Translate/>}></Route>
-
-
-      </Routes>
-    </BrowserRouter>
+    <AuthProvider>
+      <div className="flex flex-col min-h-screen">
+        <BrowserRouter>
+          <Routes>
+            <Route path='/' element={<WelcomePage/>}></Route>
+            <Route path='/signin' element={<SignInForm/>}></Route>
+            <Route path='/dashboard' element={<Homepage/>}></Route>
+            <Route path='/email' element={<EmailService/>}></Route>
+            <Route path='/businessproposal' element={<BussinessProposalService/>}></Route>
+            <Route path='/offerletter' element={<OfferLetterService/>}></Route>
+            <Route path='/sales' element={<SalesScriptService/>}></Route>
+            <Route path='/summarize' element={<SummarizeService/>}></Route>
+            <Route path='/contentgeneration' element={<ContentGenerationService/>}></Route>
+            <Route path='/profile' element={<ProfileForm/>}></Route>
+            <Route path='/translate' element={<Translate/>}></Route>
+          </Routes>
+        </BrowserRouter>
+        <Footer />
+      </div>
     </AuthProvider>
   )
 }

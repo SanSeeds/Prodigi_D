@@ -35,7 +35,7 @@ function SummarizeService(){
     return (
         <>
         <Navbar/>
-        <h1 className="text-center text-3xl mt-5">Summarize Document</h1>
+        <h1 className="text-center text-3xl mt-5 font-bold" style={{ fontFamily: "'Poppins', sans-serif" }}>Summarize Document</h1>
         <form className="w-full max-w-3xl mx-auto p-8" onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div className="flex flex-col">

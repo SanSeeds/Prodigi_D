@@ -16,9 +16,9 @@ function Translate(){
     return (
       <>
       <Nav/>
-      <div className="flex flex-col items-center mt-12 bg-gray-100 min-h-screen py-10">
+      <div className="flex flex-col items-center mt-12 min-h-screen py-10">
         <h2 className="text-3xl font-bold mb-8 text-gray-800">Translate</h2>
-        <div className="flex flex-col md:flex-row justify-center items-center w-full max-w-4xl bg-white p-8 shadow-lg rounded-lg">
+        <div className="flex flex-col md:flex-row justify-center items-center w-full max-w-4xl  p-8">
           <div className="flex flex-col items-center w-full md:w-1/2 p-4">
             <label className="mb-2 text-gray-600">Input Language</label>
             <select

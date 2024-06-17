@@ -58,7 +58,7 @@ function OfferLetterService() {
   return (
     <>
     <Navbar/>
-      <h1 className="text-center text-3xl mt-5 text-black">Offer Letter Generation</h1>
+      <h1 className="text-center text-3xl mt-5 text-black font-bold" style={{ fontFamily: "'Poppins', sans-serif" }}>Offer Letter Generation</h1>
       <form className="w-full max-w-3xl mx-auto p-8 rounded" onSubmit={handleSubmit}>
         <div className="mb-6">
           <label className="block mb-2 font-bold text-black">Company Details</label>

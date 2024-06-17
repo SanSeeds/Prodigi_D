@@ -1,0 +1,4 @@
+#nav-text:hover {
+    transform: scale(1.05) translateZ(0);
+    box-shadow: rgba(0, 0, 0, 0.2);
+}

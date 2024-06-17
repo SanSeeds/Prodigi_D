@@ -16,7 +16,7 @@ const WelcomePage = () => {
     return (
         <>
             <Nav/>
-            <div className={`bg-gray-100 min-h-screen flex flex-col items-center justify-start  p-5 ${isModalOpen ? 'blur-sm' : ''}`}>
+            <div className={` max-h-screen flex flex-col items-center justify-start ${isModalOpen ? 'blur-sm' : ''}`}>
                 <h1 className="text-center text-4xl m-8">Welcome To ProdigiDesk</h1>
                 <h1 className="text-3xl font-bold mb-4 text-center">Revolutionize Your Workflow with ProdigiDesk</h1>
                 <h2 className="text-xl font-semibold mb-6 mt-4 text-center">Unlock opportunities Like Never Before!</h2>
@@ -28,7 +28,7 @@ const WelcomePage = () => {
                     <li>Supports content creation, aiding in the crafting of engaging blog posts and email newsletters</li>
                     <li>Business proposal generator to create impressive business proposals</li>
                 </ul>
-                <div className="flex space-x-4">
+                <div className="flex space-x-4 mb-7">
                     <button onClick={openModal} className="px-4 py-2 bg-blue-500 text-white rounded-md">About</button>
                     <a href="/signin"> <button className="px-4 py-2 bg-blue-500 text-white rounded-md">Sign In</button></a>
                     <a href="/translate"> <button className="px-4 py-2 bg-blue-500 text-white rounded-md">Translate</button></a>
@@ -52,6 +52,7 @@ const WelcomePage = () => {
                     </div>
                 </div>
             )}
+          
         </>
     );
 };

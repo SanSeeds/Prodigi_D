@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Logo from '../../assets/logo.png';
+import '../../styles/Nav.css'
 
 function Nav() {
   const [isPopupOpen, setPopupOpen] = useState(false);
@@ -9,11 +10,11 @@ function Nav() {
   };
 
   return (
-    <nav className='pl-7 pr-7 bg-white'>
+    <nav className='pl-7 pr-7 '>
       <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4 ">
-        <a href="/">
+       <a href="/">
           <img src={Logo} style={{height: '55px', width: '80px'}} alt="ProdigiDesk Logo" />
-        </a>       
+        </a>        
         <button
           data-collapse-toggle="navbar-default"
           type="button"
@@ -30,8 +31,8 @@ function Nav() {
           <div className="fixed inset-0 flex items-center justify-center z-50">
             <div className="absolute inset-0 bg-gray-800 opacity-75" onClick={togglePopup}></div>
             <div className="relative p-8 bg-white w-full max-w-xl m-auto rounded-lg shadow-lg">
-              <h2 className="text-2xl font-semibold mb-4 text-black">About</h2>
-              <p className="mb-4">
+              <h2 className="text-2xl font-semibold mb-4 text-black" >About</h2>
+              <p className="mb-4" >
                 ProdigiDesk is a versatile tool designed to streamline office operations and enhance productivity through automation. It uses Generative AI to build applications such as E-Mail generator, Document summarizer, Offer Letter generator, Sales script generator, content generator - aids in crafting of engaging blog posts and email newsletters, and Business proposal generator to create impressive business proposals.
               </p>
               <p className="mb-4">
@@ -47,13 +48,13 @@ function Nav() {
         <div className="hidden w-full md:block md:w-auto" id="navbar-default">
           <ul className="font-medium flex flex-col p-4 md:p-0 mt-4 rounded-lg md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-5">
             <li>
-              <a href="/signin" className="block py-2 px-3 text-black rounded md:bg-transparent md:p-0 dark:text-black md:hover:text-blue-700 " aria-current="page">Sign In</a>
+              <a href="/signin" className="block py-2 px-3 text-black rounded md:bg-transparent md:p-0 dark:text-black md:hover:text-blue-700 " aria-current="page" id='nav-text'>Sign In</a>
             </li>
             <li>
-              <a className="block py-2 px-3 text-black rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-black md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-black md:dark:hover:bg-transparent" onClick={togglePopup}>About</a>
+              <a id='nav-text' className="block py-2 px-3 text-black rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-black md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-black md:dark:hover:bg-transparent" onClick={togglePopup}>About</a>
             </li>
             <li>
-              <a href="/translate" className="block py-2 px-3 text-black rounded md:bg-transparent md:p-0 dark:text-black md:hover:text-blue-700 " aria-current="page">Translate</a>
+              <a href="/translate" id='nav-text' className="block py-2 px-3 text-black rounded md:bg-transparent md:p-0 dark:text-black md:hover:text-blue-700 " aria-current="page">Translate</a>
             </li>
           </ul>
         </div>

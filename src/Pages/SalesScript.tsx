@@ -1,9 +1,15 @@
+import Navbar from "../components/Global/Navbar";
+
 function SalesScriptService(){
   return (
+    <>
+              <Navbar />
+              <h1 className="text-center text-3xl mb-6 text-black font-bold" style={{ fontFamily: "'Poppins', sans-serif" }}>Sales Script Generator</h1>
+
     <div className="min-h-screen flex items-center justify-center">
-      <form className="bg-white p-6 rounded-lg shadow-lg w-full max-w-4xl space-y-4">
+      <form className="p-6 w-full max-w-4xl space-y-4">
         <div>
-          <label htmlFor="company-details" className="block text-sm font-medium text-gray-700">Company Details</label>
+          <label htmlFor="company-details" className="block text-sm font-bold text-gray-700">Company Details</label>
           <textarea
             id="company-details"
             name="company-details"
@@ -13,7 +19,7 @@ function SalesScriptService(){
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="number-of-words" className="block text-sm font-medium text-gray-700">Number of words</label>
+            <label htmlFor="number-of-words" className="block text-sm font-bold text-gray-700">Number of words</label>
             <input
               type="text"
               id="number-of-words"
@@ -22,7 +28,7 @@ function SalesScriptService(){
             />
           </div>
           <div>
-            <label htmlFor="product-descriptions" className="block text-sm font-medium text-gray-700">Names and descriptions of the products or services being sold</label>
+            <label htmlFor="product-descriptions" className="block text-sm font-bold text-gray-700">Names and descriptions of the products or services being sold</label>
             <textarea
               id="product-descriptions"
               name="product-descriptions"
@@ -33,7 +39,7 @@ function SalesScriptService(){
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="features-benefits" className="block text-sm font-medium text-gray-700">Key features and benefits of each product or service</label>
+            <label htmlFor="features-benefits" className="block text-sm font-bold text-gray-700">Key features and benefits of each product or service</label>
             <textarea
               id="features-benefits"
               name="features-benefits"
@@ -42,7 +48,7 @@ function SalesScriptService(){
             ></textarea>
           </div>
           <div>
-            <label htmlFor="pricing-information" className="block text-sm font-medium text-gray-700">Pricing information, if relevant</label>
+            <label htmlFor="pricing-information" className="block text-sm font-bold text-gray-700">Pricing information, if relevant</label>
             <textarea
               id="pricing-information"
               name="pricing-information"
@@ -53,7 +59,7 @@ function SalesScriptService(){
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="promotions" className="block text-sm font-medium text-gray-700">Any current promotions, discounts, or special offers</label>
+            <label htmlFor="promotions" className="block text-sm font-bold text-gray-700">Any current promotions, discounts, or special offers</label>
             <textarea
               id="promotions"
               name="promotions"
@@ -62,7 +68,7 @@ function SalesScriptService(){
             ></textarea>
           </div>
           <div>
-            <label htmlFor="target-audience" className="block text-sm font-medium text-gray-700">Target Audience</label>
+            <label htmlFor="target-audience" className="block text-sm font-bold text-gray-700">Target Audience</label>
             <textarea
               id="target-audience"
               name="target-audience"
@@ -73,7 +79,7 @@ function SalesScriptService(){
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="sales-objectives" className="block text-sm font-medium text-gray-700">Sales Objectives</label>
+            <label htmlFor="sales-objectives" className="block text-sm font-bold text-gray-700">Sales Objectives</label>
             <textarea
               id="sales-objectives"
               name="sales-objectives"
@@ -82,7 +88,7 @@ function SalesScriptService(){
             ></textarea>
           </div>
           <div>
-            <label htmlFor="tone-style" className="block text-sm font-medium text-gray-700">Desired tone and style of the script</label>
+            <label htmlFor="tone-style" className="block text-sm font-bold text-gray-700">Desired tone and style of the script</label>
             <textarea
               id="tone-style"
               name="tone-style"
@@ -92,7 +98,7 @@ function SalesScriptService(){
           </div>
         </div>
         <div>
-          <label htmlFor="competitive-advantage" className="block text-sm font-medium text-gray-700">Competitive Advantage</label>
+          <label htmlFor="competitive-advantage" className="block text-sm font-bold text-gray-700">Competitive Advantage</label>
           <textarea
             id="competitive-advantage"
             name="competitive-advantage"
@@ -101,7 +107,7 @@ function SalesScriptService(){
           ></textarea>
         </div>
         <div>
-          <label htmlFor="testimonials" className="block text-sm font-medium text-gray-700">Testimonials or success stories to include for credibility</label>
+          <label htmlFor="testimonials" className="block text-sm font-bold text-gray-700">Testimonials or success stories to include for credibility</label>
           <textarea
             id="testimonials"
             name="testimonials"
@@ -110,7 +116,7 @@ function SalesScriptService(){
           ></textarea>
         </div>
         <div>
-          <label htmlFor="compliance" className="block text-sm font-medium text-gray-700">Compliance and Legal Considerations</label>
+          <label htmlFor="compliance" className="block text-sm font-bold text-gray-700">Compliance and Legal Considerations</label>
           <textarea
             id="compliance"
             name="compliance"
@@ -119,7 +125,7 @@ function SalesScriptService(){
           ></textarea>
         </div>
         <div>
-          <label htmlFor="tech-integration" className="block text-sm font-medium text-gray-700">Technological Integration</label>
+          <label htmlFor="tech-integration" className="block text-sm font-bold text-gray-700">Technological Integration</label>
           <textarea
             id="tech-integration"
             name="tech-integration"
@@ -137,6 +143,8 @@ function SalesScriptService(){
         </div>
       </form>
     </div>
+    </>
+    
   );
 }
 

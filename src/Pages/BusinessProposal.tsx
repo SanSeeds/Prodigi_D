@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Navbar from "../components/Global/Navbar";
 
 function BussinessProposalService(){
     const [formData, setFormData] = useState({
@@ -29,10 +30,12 @@ function BussinessProposalService(){
       };
     
       return (
-        <div className="min-h-screen  flex items-center justify-center">
+        <>
+          <Navbar />
+          <div className="min-h-screen  flex items-center justify-center">
           <div className=" w-full max-w-3xl mx-auto p-8 rounded">
-            <h1 className="text-center text-3xl mb-6">Business Proposal Generator</h1>
-            <form onSubmit={handleSubmit}>
+            <h1 className="text-center text-3xl mb-6 font-bold" style={{ fontFamily: "'Poppins', sans-serif" }}>Business Proposal Generator</h1>
+            <form onSubmit={handleSubmit} className="mt-4">
               <div className="mb-6">
                 <label className="block mb-2 font-bold text-black">Introduction of Your Business</label>
                 <textarea
@@ -178,6 +181,8 @@ function BussinessProposalService(){
             </form>
           </div>
         </div>
+        </>
+       
       );
     }
     
