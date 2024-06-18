@@ -28,23 +28,34 @@ function BusinessProposalService() {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+
+        const form = new FormData();
+        form.append('business_introduction', formData.businessIntroduction);
+        form.append('proposal_objective', formData.proposalObjective);
+        form.append('number_of_words', formData.numberOfWords);
+        form.append('scope_of_work', formData.scopeOfWork);
+        form.append('project_phases', formData.projectPhases);
+        form.append('expected_outcomes', formData.expectedOutcomes);
+        form.append('innovative_approaches', formData.innovativeApproaches);
+        form.append('technologies_used', formData.technologiesUsed);
+        form.append('target_audience', formData.targetAudience);
+        form.append('budget_information', formData.budgetInformation);
+        form.append('timeline', formData.timeline);
+        form.append('benefits_to_recipient', formData.benefitsToRecipient);
+        form.append('closing_remarks', formData.closingRemarks);
+
         try {
-            const response = await axios.post<{ generated_content: string }>('http://localhost:8000/business_proposal_generator/', formData, {
+            const response = await axios.post('http://localhost:8000/business_proposal_generator/', form, {
                 headers: {
-                    'Content-Type': 'application/json',
-                    'api_key' : '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'
+                    'Content-Type': 'multipart/form-data'
                 },
+                withCredentials: true
             });
 
-            if (response.data && response.data.generated_content) {
-                setGeneratedContent(response.data.generated_content);
-                setError('');
-            } else {
-                setError('Failed to generate business proposal. No content received.');
-            }
+            setGeneratedContent(response.data.generated_content);
+            setError('');
         } catch (error) {
             if (axios.isAxiosError(error)) {
-                // AxiosError type assertion
                 const axiosError = error as AxiosError;
                 if (axiosError.response) {
                     console.error('Error response data:', axiosError.response.data);
@@ -54,10 +65,10 @@ function BusinessProposalService() {
                     console.error('Error request:', axiosError.request);
                 }
             } else {
-                // Generic error handling
                 console.error(error);
             }
             setError('Failed to generate business proposal. Please try again.');
+            setGeneratedContent('');
         }
     };
 
