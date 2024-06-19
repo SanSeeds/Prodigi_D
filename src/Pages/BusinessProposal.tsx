@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import Navbar from "../components/Global/Navbar";
 
 function BusinessProposalService() {
@@ -18,57 +18,47 @@ function BusinessProposalService() {
         benefitsToRecipient: "",
         closingRemarks: "",
     });
-    const [generatedContent, setGeneratedContent] = useState<string>("");
-    const [error, setError] = useState<string>("");
+    const [generatedContent, setGeneratedContent] = useState("");
+    const [error, setError] = useState("");
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const handleChange = (e: { target: { name: any; value: any; }; }) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
     };
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: { preventDefault: () => void; }) => {
         e.preventDefault();
-
-        const form = new FormData();
-        form.append('business_introduction', formData.businessIntroduction);
-        form.append('proposal_objective', formData.proposalObjective);
-        form.append('number_of_words', formData.numberOfWords);
-        form.append('scope_of_work', formData.scopeOfWork);
-        form.append('project_phases', formData.projectPhases);
-        form.append('expected_outcomes', formData.expectedOutcomes);
-        form.append('innovative_approaches', formData.innovativeApproaches);
-        form.append('technologies_used', formData.technologiesUsed);
-        form.append('target_audience', formData.targetAudience);
-        form.append('budget_information', formData.budgetInformation);
-        form.append('timeline', formData.timeline);
-        form.append('benefits_to_recipient', formData.benefitsToRecipient);
-        form.append('closing_remarks', formData.closingRemarks);
+        setError('');
+        setGeneratedContent('');
 
         try {
-            const response = await axios.post('http://localhost:8000/business_proposal_generator/', form, {
+            const response = await axios.post<{ generated_content: string }>('http://localhost:8000/business_proposal_generator/', formData, {
                 headers: {
-                    'Content-Type': 'multipart/form-data'
+                    'Content-Type': 'application/json'
                 },
                 withCredentials: true
             });
 
             setGeneratedContent(response.data.generated_content);
-            setError('');
         } catch (error) {
             if (axios.isAxiosError(error)) {
-                const axiosError = error as AxiosError;
+                const axiosError = error;
                 if (axiosError.response) {
                     console.error('Error response data:', axiosError.response.data);
                     console.error('Error response status:', axiosError.response.status);
                     console.error('Error response headers:', axiosError.response.headers);
+                    setError(axiosError.response.data.error || 'Failed to generate business proposal. Please try again.');
                 } else if (axiosError.request) {
                     console.error('Error request:', axiosError.request);
+                    setError('Failed to generate business proposal. Please try again.');
+                } else {
+                    console.error('Error:', axiosError.message);
+                    setError('Failed to generate business proposal. Please try again.');
                 }
             } else {
-                console.error(error);
+                console.error('Error:', error);
+                setError('Failed to generate business proposal. Please try again.');
             }
-            setError('Failed to generate business proposal. Please try again.');
-            setGeneratedContent('');
         }
     };
 
@@ -79,7 +69,6 @@ function BusinessProposalService() {
                 <div className="w-full max-w-3xl mx-auto p-8 rounded">
                     <h1 className="text-center text-3xl mb-6 font-bold" style={{ fontFamily: "'Poppins', sans-serif" }}>Business Proposal Generator</h1>
                     <form onSubmit={handleSubmit} className="mt-4">
-                        {/* Form fields */}
                         <div className="mb-6">
                             <label className="block mb-2 font-bold text-black">Introduction of Your Business</label>
                             <textarea

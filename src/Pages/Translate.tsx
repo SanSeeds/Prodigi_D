@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Nav from "../components/Global/Nav";
+import axios from 'axios'; // Import Axios
 
 function Translate() {
   const [inputLanguage, setInputLanguage] = useState('English');
@@ -10,24 +11,18 @@ function Translate() {
 
   const handleTranslate = async () => {
     try {
-      const response = await fetch('http://localhost:8000/translate/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          input_text: inputText,
-          from_language: inputLanguage,
-          to_language: translatedLanguage
-        })
+      const response = await axios.post('http://localhost:8000/translate/', {
+        input_text: inputText,
+        from_language: inputLanguage,
+        to_language: translatedLanguage
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Translation request failed');
+      const data = response.data;
+
+      if (response.status !== 200) {
+        throw new Error(data.error || 'Translation request failed');
       }
 
-      const data = await response.json();
       if (data.error) {
         setError(data.error);
         setTranslatedText('');
@@ -36,8 +31,9 @@ function Translate() {
         setError('');
       }
     } catch (error) {
-      console.log(error);
-      
+      console.log('Error:', error);
+      setError('Error during translation. Please try again.');
+      setTranslatedText('');
     }
   };
 
@@ -74,7 +70,7 @@ function Translate() {
               onChange={(e) => setTranslatedLanguage(e.target.value)}
               className="border rounded-md p-3 mb-4 w-full md:w-64 bg-gray-50 shadow-sm"
             >
-             <option value="English">English</option>
+              <option value="English">English</option>
               <option value="Hindi">Hindi</option>
               <option value="Telugu">Telugu</option>
               <option value="Marathi">Marathi</option>

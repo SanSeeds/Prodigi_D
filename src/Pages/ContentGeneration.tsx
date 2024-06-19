@@ -1,18 +1,6 @@
 import { useState } from "react";
+import axios, { AxiosError } from "axios";
 import Navbar from "../components/Global/Navbar";
-
-const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
-    const token = localStorage.getItem('authToken');
-    const headers = {
-        'Content-Type': 'application/json',
-        ...options.headers,
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-    };
-
-    const response = await fetch(url, { ...options, headers });
-    return response;
-};
-
 
 function ContentGenerationService() {
     const [formData, setFormData] = useState({
@@ -36,30 +24,55 @@ function ContentGenerationService() {
         setFormData({ ...formData, [name]: value });
     };
 
-    const handleSubmit = async (e: { preventDefault: () => void; }) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setError('');
         setGeneratedContent('');
         try {
             console.log('Form data:', formData); // Log form data
-            const response = await fetchWithAuth('http://127.0.0.1:8000/content_generator/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
+            const response = await axios.post<{ generated_content: string }>('http://localhost:8000/content_generator/', 
+                {
+                    company_info: formData.companyInfo,
+                    content_purpose: formData.purpose,
+                    desired_action: formData.action,
+                    topic_details: formData.topicDetails,
+                    keywords: formData.keywords,
+                    audience_profile: formData.audienceProfile,
+                    format_structure: formData.format,
+                    num_words: formData.numberOfWords,
+                    seo_keywords: formData.seoKeywords,
+                    references: formData.references,
                 },
-                body: JSON.stringify(formData),
-            });
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    withCredentials: true, // To include cookies if login_required
+                }
+            );
 
-            const data = await response.json();
-            console.log('Response:', data); // Log response data
-            if (response.ok) {
-                setGeneratedContent(data.generated_content);
+            console.log('Response:', response.data); // Log response data
+            if (response.data && response.data.generated_content) {
+                setGeneratedContent(response.data.generated_content);
             } else {
-                setError(data.error || 'An error occurred');
+                setError('Failed to generate content. No content received.');
             }
         } catch (error) {
-            console.error('Fetch error:', error); // Log fetch error
-            setError('An error occurred');
+            if (axios.isAxiosError(error)) {
+                // AxiosError type assertion
+                const axiosError = error as AxiosError;
+                if (axiosError.response) {
+                    console.error('Error response data:', axiosError.response.data);
+                    console.error('Error response status:', axiosError.response.status);
+                    console.error('Error response headers:', axiosError.response.headers);
+                } else if (axiosError.request) {
+                    console.error('Error request:', axiosError.request);
+                }
+            } else {
+                // Generic error handling
+                console.log(error);
+            }
+            setError('Failed to generate content. Please try again.');
         }
     };
 

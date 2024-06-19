@@ -22,6 +22,7 @@ function App() {
           <Routes>
             <Route path='/' element={<WelcomePage/>}></Route>
             <Route path='/signin' element={<SignInForm/>}></Route>
+            
             <Route path='/dashboard' element={<Homepage/>}></Route>
             <Route path='/email' element={<EmailService/>}></Route>
             <Route path='/businessproposal' element={<BussinessProposalService/>}></Route>
