@@ -33,9 +33,8 @@ const SignInForm: React.FC = () => {
             if (response.ok) {
                 const accessToken = data.access;
                 const refreshToken = data.refresh;
-                const expiry = 3600; // 1 hour in seconds
+                const expiry = 3600 * 3600; // 1 hour in seconds
                 login({ email }, accessToken, refreshToken, expiry); // Save user info and tokens to context
-                console.log(accessToken, refreshToken, expiry, email);
                 navigate('/dashboard');
             } else {
                 setError(data.error);
