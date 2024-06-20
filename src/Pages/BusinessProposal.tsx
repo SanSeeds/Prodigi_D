@@ -211,7 +211,7 @@ function BusinessProposalService() {
                         </div>
                     </form>
                     {generatedContent && (
-                        <div className="mt-6 p-6 border rounded bg-white shadow-sm">
+                        <div className="mt-6 p-6 border rounded shadow-sm">
                             <h2 className="text-2xl font-bold mb-4">Generated Content</h2>
                             <p>{generatedContent}</p>
                         </div>

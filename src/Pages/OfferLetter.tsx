@@ -1,4 +1,5 @@
 import { useState } from "react";
+import axios from 'axios';
 import Navbar from "../components/Global/Navbar";
 
 function OfferLetterService() {
@@ -24,6 +25,8 @@ function OfferLetterService() {
   });
 
   const [generatedContent, setGeneratedContent] = useState('');
+  const [translatedContent, setTranslatedContent] = useState('');
+  const [selectedLanguage, setSelectedLanguage] = useState('English');
   const [error, setError] = useState('');
 
   const handleChange = (e: { target: { name: any; value: any; }; }) => {
@@ -35,17 +38,16 @@ function OfferLetterService() {
     e.preventDefault();
     setError('');  // Clear previous error message
     setGeneratedContent('');  // Clear previous generated content
+    setTranslatedContent('');  // Clear previous translated content
     try {
-      const response = await fetch('http://127.0.0.1:8000/offer_letter_generator/', {
-        method: 'POST',
+      const response = await axios.post('http://127.0.0.1:8000/offer_letter_generator/', formData, {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
       });
 
-      const data = await response.json();
-      if (response.ok) {
+      const data = response.data;
+      if (response.status === 200) {
         setGeneratedContent(data.generated_content);
       } else {
         setError(data.error || 'An error occurred');
@@ -55,9 +57,32 @@ function OfferLetterService() {
     }
   };
 
+  const handleTranslate = async () => {
+    try {
+      const response = await axios.post('http://127.0.0.1:8000/translate/', {
+        input_text: generatedContent,
+        from_language: 'English', // Assuming the original text is in English
+        to_language: selectedLanguage,
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = response.data;
+      if (response.status === 200) {
+        setTranslatedContent(data.translated_text);
+      } else {
+        setError(data.error || 'Translation error occurred');
+      }
+    } catch (error) {
+      setError('Translation error occurred');
+    }
+  };
+
   return (
     <>
-    <Navbar/>
+      <Navbar />
       <h1 className="text-center text-3xl mt-5 text-black font-bold" style={{ fontFamily: "'Poppins', sans-serif" }}>Offer Letter Generation</h1>
       <form className="w-full max-w-3xl mx-auto p-8 rounded" onSubmit={handleSubmit}>
         <div className="mb-6">
@@ -272,6 +297,31 @@ function OfferLetterService() {
         <div className="w-full max-w-3xl mx-auto p-8 mt-6 rounded bg-gray-100">
           <h2 className="text-xl font-bold mb-4">Generated Offer Letter</h2>
           <pre className="whitespace-pre-wrap">{generatedContent}</pre>
+          <div className="flex items-center mt-4">
+            <select
+              value={selectedLanguage}
+              onChange={(e) => setSelectedLanguage(e.target.value)}
+              className="p-3 border rounded shadow-sm text-black mr-4"
+            >
+              <option value="English">English</option>
+              <option value="Hindi">Hindi</option>
+              <option value="Telugu">Telugu</option>
+              <option value="Marathi">Marathi</option>
+              {/* Add more languages as needed */}
+            </select>
+            <button
+              onClick={handleTranslate}
+              className="px-6 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+            >
+              Translate
+            </button>
+          </div>
+        </div>
+      )}
+      {translatedContent && (
+        <div className="w-full max-w-3xl mx-auto p-8 mt-6 rounded bg-gray-100">
+          <h2 className="text-xl font-bold mb-4">Translated Offer Letter</h2>
+          <pre className="whitespace-pre-wrap">{translatedContent}</pre>
         </div>
       )}
       {error && (
