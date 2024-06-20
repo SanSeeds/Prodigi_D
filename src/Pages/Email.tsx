@@ -1,5 +1,6 @@
 import { ChangeEvent, FormEvent, useState } from "react";
 import Navbar from "../components/Global/Navbar";
+import axios from "axios";
 
 function EmailService() {
     const [formData, setFormData] = useState({
@@ -17,6 +18,10 @@ function EmailService() {
         closingRemarks: "",
     });
 
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [generatedEmail, setGeneratedEmail] = useState("");
+
     const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
         if (type === "checkbox" && e.target instanceof HTMLInputElement) {
@@ -32,10 +37,26 @@ function EmailService() {
         setFormData({ ...formData, keywords: newKeywords });
     };
 
-    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        // Handle form submission
-        console.log(formData);
+        setLoading(true);
+        setError(null);
+
+        try {
+            const response = await axios.post<{ generated_content: string }>('http://localhost:8000/email_generator/', formData, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'api_key' : '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'
+                },
+                withCredentials: true
+            });
+
+            setGeneratedEmail(response.data.generated_content);
+        } catch (error) {
+            // setError(error.response ? error.response.data.error : "An error occurred");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -186,11 +207,19 @@ function EmailService() {
                             <button
                                 type="submit"
                                 className="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                                disabled={loading}
                             >
-                                Generate Email
+                                {loading ? "Generating..." : "Generate Email"}
                             </button>
                         </div>
                     </form>
+                    {error && <div className="mt-4 text-red-500">{error}</div>}
+                    {generatedEmail && (
+                        <div className="mt-4 p-4 bg-gray-100 rounded">
+                            <h2 className="text-2xl font-bold mb-2">Generated Email</h2>
+                            <p>{generatedEmail}</p>
+                        </div>
+                    )}
                 </div>
             </div>
         </>
