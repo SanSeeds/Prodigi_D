@@ -1,64 +1,90 @@
-import { ChangeEvent, FormEvent, useState } from "react";
-import Navbar from "../components/Global/Navbar";
-import axios from "axios";
+import { useState, useContext, ChangeEvent, FormEvent } from 'react';
+import Navbar from '../components/Global/Navbar';
+import axios, { AxiosError } from 'axios';
+import { AuthContext } from '../components/Global/AuthContext';
 
 function EmailService() {
-    const [formData, setFormData] = useState({
-        purpose: "",
-        otherPurpose: "",
-        subject: "",
-        rephraseSubject: false,
-        to: "",
-        tone: "Formal",
-        keywords: Array(8).fill(""),
-        contextualBackground: "",
-        callToAction: "Reply",
-        additionalDetails: "",
-        priorityLevel: "Low",
-        closingRemarks: "",
-    });
+  const [formData, setFormData] = useState({
+    purpose: '',
+    otherPurpose: '',
+    subject: '',
+    rephraseSubject: false,
+    to: '',
+    tone: 'Formal',
+    keywords: Array(8).fill(''),
+    contextualBackground: '',
+    callToAction: 'Reply',
+    additionalDetails: '',
+    priorityLevel: 'Low',
+    closingRemarks: '',
+  });
 
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
-    const [generatedEmail, setGeneratedEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [generatedEmail, setGeneratedEmail] = useState<string>('');
 
-    const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-        const { name, value, type } = e.target;
-        if (type === "checkbox" && e.target instanceof HTMLInputElement) {
-            setFormData({ ...formData, [name]: e.target.checked });
-        } else {
-            setFormData({ ...formData, [name]: value });
-        }
+  const authContext = useContext(AuthContext);
+
+  if (!authContext) {
+    throw new Error('AuthContext must be used within an AuthProvider');
+  }
+
+  const { accessToken } = authContext;
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target;
+    if (type === 'checkbox' && e.target instanceof HTMLInputElement) {
+      setFormData({ ...formData, [name]: e.target.checked });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
+  };
+
+  const handleKeywordChange = (index: number, value: string) => {
+    const newKeywords = [...formData.keywords];
+    newKeywords[index] = value;
+    setFormData({ ...formData, keywords: newKeywords });
+  };
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    const payload = {
+      ...formData,
+      purpose: formData.purpose === 'Other' ? formData.otherPurpose : formData.purpose,
+      callToAction: formData.callToAction === 'Other' ? formData.callToAction : formData.callToAction,
     };
 
-    const handleKeywordChange = (index: number, value: string) => {
-        const newKeywords = [...formData.keywords];
-        newKeywords[index] = value;
-        setFormData({ ...formData, keywords: newKeywords });
-    };
+    try {
+      const response = await axios.post<{ generated_content: string }>('http://localhost:8000/email_generator/', payload, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+        },
+        withCredentials: true,
+      });
 
-    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        setLoading(true);
-        setError(null);
-
-        try {
-            const response = await axios.post<{ generated_content: string }>('http://localhost:8000/email_generator/', formData, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'api_key' : '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'
-                },
-                withCredentials: true
-            });
-
-            setGeneratedEmail(response.data.generated_content);
-        } catch (error) {
-            // setError(error.response ? error.response.data.error : "An error occurred");
-        } finally {
-            setLoading(false);
-        }
-    };
-
+      setGeneratedEmail(response.data.generated_content);
+    } catch (error) {
+        if (axios.isAxiosError(error)) {
+            // AxiosError type assertion
+            const axiosError = error as AxiosError;
+            if (axiosError.response) {
+              console.error('Error response data:', axiosError.response.data);
+              console.error('Error response status:', axiosError.response.status);
+              console.error('Error response headers:', axiosError.response.headers);
+            } else if (axiosError.request) {
+              console.error('Error request:', axiosError.request);
+            }
+          }  else {
+        setError('An error occurred');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
     return (
         <>
             <Navbar />
@@ -215,7 +241,7 @@ function EmailService() {
                     </form>
                     {error && <div className="mt-4 text-red-500">{error}</div>}
                     {generatedEmail && (
-                        <div className="mt-4 p-4 bg-gray-100 rounded">
+                        <div className="mt-4 p-4 rounded">
                             <h2 className="text-2xl font-bold mb-2">Generated Email</h2>
                             <p>{generatedEmail}</p>
                         </div>

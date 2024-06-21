@@ -1,66 +1,80 @@
-import { useState } from "react";
-import axios from "axios";
-import Navbar from "../components/Global/Navbar";
+import { useState, useContext, ChangeEvent, FormEvent } from 'react';
+import Navbar from '../components/Global/Navbar';
+import axios, { AxiosError } from 'axios';
+import { AuthContext } from '../components/Global/AuthContext';
 
 function BusinessProposalService() {
-    const [formData, setFormData] = useState({
-        businessIntroduction: "",
-        proposalObjective: "New Project",
-        numberOfWords: "",
-        scopeOfWork: "",
-        projectPhases: "",
-        expectedOutcomes: "",
-        innovativeApproaches: "",
-        technologiesUsed: "",
-        targetAudience: "",
-        budgetInformation: "",
-        timeline: "",
-        benefitsToRecipient: "",
-        closingRemarks: "",
-    });
-    const [generatedContent, setGeneratedContent] = useState("");
-    const [error, setError] = useState("");
+  const [formData, setFormData] = useState({
+    businessIntroduction: '',
+    proposalObjective: 'New Project',
+    numberOfWords: '',
+    scopeOfWork: '',
+    projectPhases: '',
+    expectedOutcomes: '',
+    innovativeApproaches: '',
+    technologiesUsed: '',
+    targetAudience: '',
+    budgetInformation: '',
+    timeline: '',
+    benefitsToRecipient: '',
+    closingRemarks: '',
+  });
 
-    const handleChange = (e: { target: { name: any; value: any; }; }) => {
-        const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
-    };
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [generatedContent, setGeneratedContent] = useState<string>('');
 
-    const handleSubmit = async (e: { preventDefault: () => void; }) => {
-        e.preventDefault();
-        setError('');
-        setGeneratedContent('');
+  const authContext = useContext(AuthContext);
 
-        try {
-            const response = await axios.post<{ generated_content: string }>('http://localhost:8000/business_proposal_generator/', formData, {
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                withCredentials: true
-            });
+  if (!authContext) {
+    throw new Error('AuthContext must be used within an AuthProvider');
+  }
 
-            setGeneratedContent(response.data.generated_content);
-        } catch (error) {
-            if (axios.isAxiosError(error)) {
-                const axiosError = error;
-                if (axiosError.response) {
-                    console.error('Error response data:', axiosError.response.data);
-                    console.error('Error response status:', axiosError.response.status);
-                    console.error('Error response headers:', axiosError.response.headers);
-                    setError(axiosError.response.data.error || 'Failed to generate business proposal. Please try again.');
-                } else if (axiosError.request) {
-                    console.error('Error request:', axiosError.request);
-                    setError('Failed to generate business proposal. Please try again.');
-                } else {
-                    console.error('Error:', axiosError.message);
-                    setError('Failed to generate business proposal. Please try again.');
-                }
-            } else {
-                console.error('Error:', error);
-                setError('Failed to generate business proposal. Please try again.');
-            }
+  const { accessToken } = authContext;
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await axios.post<{ generated_content: string }>('http://localhost:8000/business_proposal_generator/', formData, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+        },
+        withCredentials: true,
+      });
+
+      setGeneratedContent(response.data.generated_content);
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const axiosError = error as AxiosError;
+        if (axiosError.response) {
+          console.error('Error response data:', axiosError.response.data);
+          console.error('Error response status:', axiosError.response.status);
+          console.error('Error response headers:', axiosError.response.headers);
+        //   setError(axiosError.response.data.error || 'Failed to generate business proposal. Please try again.');
+        } else if (axiosError.request) {
+          console.error('Error request:', axiosError.request);
+          setError('Failed to generate business proposal. Please try again.');
+        } else {
+          console.error('Error:', axiosError.message);
+          setError('Failed to generate business proposal. Please try again.');
         }
-    };
+      } else {
+        console.error('Error:', error);
+        setError('Failed to generate business proposal. Please try again.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
     return (
         <>
