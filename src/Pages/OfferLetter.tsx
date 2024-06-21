@@ -1,6 +1,7 @@
-import { useState } from "react";
-import axios from 'axios';
+import { useState, useContext } from "react";
+import axios, { AxiosError } from 'axios';
 import Navbar from "../components/Global/Navbar";
+import { AuthContext } from '../components/Global/AuthContext';
 
 function OfferLetterService() {
   const [formData, setFormData] = useState({
@@ -29,6 +30,14 @@ function OfferLetterService() {
   const [selectedLanguage, setSelectedLanguage] = useState('English');
   const [error, setError] = useState('');
 
+  const authContext = useContext(AuthContext);
+
+  if (!authContext) {
+    throw new Error("AuthContext must be used within an AuthProvider");
+  }
+
+  const { accessToken } = authContext;
+
   const handleChange = (e: { target: { name: any; value: any; }; }) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -36,13 +45,14 @@ function OfferLetterService() {
 
   const handleSubmit = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
-    setError('');  // Clear previous error message
-    setGeneratedContent('');  // Clear previous generated content
-    setTranslatedContent('');  // Clear previous translated content
+    setError('');
+    setGeneratedContent('');
+    setTranslatedContent('');
     try {
       const response = await axios.post('http://127.0.0.1:8000/offer_letter_generator/', formData, {
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
         },
       });
 
@@ -53,32 +63,55 @@ function OfferLetterService() {
         setError(data.error || 'An error occurred');
       }
     } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const axiosError = error;
+        if (axiosError.response) {
+          console.error('Error response data:', axiosError.response.data);
+          console.error('Error response status:', axiosError.response.status);
+          console.error('Error response headers:', axiosError.response.headers);
+        } else if (axiosError.request) {
+          console.error('Error request:', axiosError.request);
+        }
+      } else {
+        console.log(error);
+      }
       setError('An error occurred');
     }
   };
-
   const handleTranslate = async () => {
     try {
-      const response = await axios.post('http://127.0.0.1:8000/translate/', {
-        input_text: generatedContent,
-        from_language: 'English', // Assuming the original text is in English
-        to_language: selectedLanguage,
+      const response = await axios.post<{ translated_content: string }>('http://127.0.0.1:8000/translate_content/', {
+        generated_content: generatedContent,
+        language: selectedLanguage,
       }, {
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`, // Include access token
         },
       });
 
-      const data = response.data;
-      if (response.status === 200) {
-        setTranslatedContent(data.translated_text);
+      if (response.data && response.data.translated_content) {
+        setTranslatedContent(response.data.translated_content);
       } else {
-        setError(data.error || 'Translation error occurred');
+        setError('Translation error occurred');
       }
     } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const axiosError = error as AxiosError;
+        if (axiosError.response) {
+          console.error('Error response data:', axiosError.response.data);
+          console.error('Error response status:', axiosError.response.status);
+          console.error('Error response headers:', axiosError.response.headers);
+        } else if (axiosError.request) {
+          console.error('Error request:', axiosError.request);
+        }
+      } else {
+        console.log(error);
+      }
       setError('Translation error occurred');
     }
   };
+
 
   return (
     <>
