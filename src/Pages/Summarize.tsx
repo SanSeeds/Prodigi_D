@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from 'axios';
 import Navbar from "../components/Global/Navbar";
+import TranslateComponent from "../components/Global/TranslateContent"; // Import the TranslateComponent
 
 function SummarizeService() {
     const [formData, setFormData] = useState({
@@ -17,6 +18,7 @@ function SummarizeService() {
     });
 
     const [generatedContent, setGeneratedContent] = useState<string | null>(null);
+    const [translatedContent, setTranslatedContent] = useState<string>(''); // State for translated content
     const [error, setError] = useState<string | null>(null);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -48,17 +50,18 @@ function SummarizeService() {
         }
 
         try {
-            const response = await axios.post('http://localhost:8000/summarize_document/', form, {
+            const response = await axios.post<{ generated_content: string }>('http://localhost:8000/summarize_document/', form, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 },
                 withCredentials: true
             });
             setGeneratedContent(response.data.generated_content);
+            setTranslatedContent(''); // Clear translated content when new content is generated
             setError(null);
         } catch (error) {
-            // setError(error.response ? error.response.data.error : 'An error occurred');
             setGeneratedContent(null);
+            console.log('An error occurred');
         }
     };
 
@@ -133,7 +136,7 @@ function SummarizeService() {
                             name="importantElements"
                             value={formData.importantElements}
                             onChange={handleChange}
-                            className="p-3 border rounded shadow-sm text-black "
+                            className="p-3 border rounded shadow-sm text-black"
                         />
                     </div>
                     <div className="flex flex-col">
@@ -187,7 +190,7 @@ function SummarizeService() {
                             type="file"
                             name="uploadFile"
                             onChange={handleFileChange}
-                            className="p-3 border rounded shadow-sm text-black "
+                            className="p-3 border rounded shadow-sm text-black"
                         />
                     </div>
                 </div>
@@ -201,6 +204,17 @@ function SummarizeService() {
                 <div className="w-full max-w-3xl mx-auto p-8 mt-6 rounded">
                     <h2 className="font-bold text-xl mb-2">Generated Summary:</h2>
                     <p>{generatedContent}</p>
+                    <TranslateComponent 
+                        generatedContent={generatedContent} 
+                        setTranslatedContent={setTranslatedContent} 
+                        setError={setError} 
+                    />
+                </div>
+            )}
+            {translatedContent && (
+                <div className="w-full max-w-3xl mx-auto mt-6 p-6">
+                    <h2 className="text-2xl font-bold mb-4">Translated Content</h2>
+                    <p className="text-black whitespace-pre-line">{translatedContent}</p>
                 </div>
             )}
             {error && (

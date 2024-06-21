@@ -2,6 +2,8 @@ import { useState, useContext } from 'react';
 import axios, { AxiosError } from 'axios';
 import Navbar from '../components/Global/Navbar';
 import { AuthContext } from '../components/Global/AuthContext';
+import TranslateComponent from '../components/Global/TranslateContent'; // Import the TranslateComponent
+
 
 function SalesScriptService() {
   const [formData, setFormData] = useState({
@@ -21,6 +23,7 @@ function SalesScriptService() {
   });
 
   const [generatedScript, setGeneratedScript] = useState<string>('');
+  const [translatedScript, setTranslatedScript] = useState<string>(''); // State for translated script
   const [error, setError] = useState<string>('');
   const authContext = useContext(AuthContext);
 
@@ -239,14 +242,28 @@ function SalesScriptService() {
         </form>
       </div>
       {generatedScript && (
-        <div className="mt-6 p-6 border rounded shadow-sm flex justify-center">
+        <div className="mt-6 p-6 flex justify-center">
           <div className=" max-w-4xl">
             <h2 className="text-2xl font-bold mb-4 text-center">Generated Sales Script:</h2>
             <pre className="whitespace-pre-wrap p-4 rounded-md">{generatedScript}</pre>
+            <TranslateComponent 
+              generatedContent={generatedScript} 
+              setTranslatedContent={setTranslatedScript} 
+              setError={setError} 
+            />
           </div>
         </div>
       )}
       
+      {translatedScript && (
+        <div className="mt-6 p-6 flex justify-center">
+          <div className=" max-w-4xl">
+            <h2 className="text-2xl font-bold mb-4 text-center">Translated Sales Script:</h2>
+            <pre className="whitespace-pre-wrap p-4">{translatedScript}</pre>
+          </div>
+        </div>
+      )}
+
       {error && (
         <div className="mt-6 p-6 border rounded bg-red-100 text-red-800 shadow-sm">
           {error}

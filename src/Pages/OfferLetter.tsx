@@ -1,7 +1,8 @@
 import { useState, useContext } from "react";
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 import Navbar from "../components/Global/Navbar";
 import { AuthContext } from '../components/Global/AuthContext';
+import TranslateComponent from '../components/Global/TranslateContent'; // Import the new TranslateComponent
 
 function OfferLetterService() {
   const [formData, setFormData] = useState({
@@ -27,7 +28,6 @@ function OfferLetterService() {
 
   const [generatedContent, setGeneratedContent] = useState('');
   const [translatedContent, setTranslatedContent] = useState('');
-  const [selectedLanguage, setSelectedLanguage] = useState('English');
   const [error, setError] = useState('');
 
   const authContext = useContext(AuthContext);
@@ -78,40 +78,6 @@ function OfferLetterService() {
       setError('An error occurred');
     }
   };
-  const handleTranslate = async () => {
-    try {
-      const response = await axios.post<{ translated_content: string }>('http://127.0.0.1:8000/translate_content/', {
-        generated_content: generatedContent,
-        language: selectedLanguage,
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`, // Include access token
-        },
-      });
-
-      if (response.data && response.data.translated_content) {
-        setTranslatedContent(response.data.translated_content);
-      } else {
-        setError('Translation error occurred');
-      }
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        const axiosError = error as AxiosError;
-        if (axiosError.response) {
-          console.error('Error response data:', axiosError.response.data);
-          console.error('Error response status:', axiosError.response.status);
-          console.error('Error response headers:', axiosError.response.headers);
-        } else if (axiosError.request) {
-          console.error('Error request:', axiosError.request);
-        }
-      } else {
-        console.log(error);
-      }
-      setError('Translation error occurred');
-    }
-  };
-
 
   return (
     <>
@@ -325,32 +291,18 @@ function OfferLetterService() {
         </div>
       </form>
       {generatedContent && (
-        <div className="w-full max-w-3xl mx-auto p-8 mt-6 rounded bg-gray-100">
+        <div className="w-full max-w-3xl mx-auto p-8 mt-6 rounded">
           <h2 className="text-xl font-bold mb-4">Generated Offer Letter</h2>
           <pre className="whitespace-pre-wrap">{generatedContent}</pre>
-          <div className="flex items-center mt-4">
-            <select
-              value={selectedLanguage}
-              onChange={(e) => setSelectedLanguage(e.target.value)}
-              className="p-3 border rounded shadow-sm text-black mr-4"
-            >
-              <option value="English">English</option>
-              <option value="Hindi">Hindi</option>
-              <option value="Telugu">Telugu</option>
-              <option value="Marathi">Marathi</option>
-              {/* Add more languages as needed */}
-            </select>
-            <button
-              onClick={handleTranslate}
-              className="px-6 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-            >
-              Translate
-            </button>
-          </div>
+          <TranslateComponent 
+            generatedContent={generatedContent} 
+            setTranslatedContent={setTranslatedContent} 
+            setError={setError}
+          />
         </div>
       )}
       {translatedContent && (
-        <div className="w-full max-w-3xl mx-auto p-8 mt-6 rounded bg-gray-100">
+        <div className="w-full max-w-3xl mx-auto p-8 mt-6 rounded">
           <h2 className="text-xl font-bold mb-4">Translated Offer Letter</h2>
           <pre className="whitespace-pre-wrap">{translatedContent}</pre>
         </div>

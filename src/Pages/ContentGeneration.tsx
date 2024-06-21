@@ -2,6 +2,7 @@ import { useState, useContext } from 'react';
 import axios, { AxiosError } from 'axios';
 import Navbar from '../components/Global/Navbar';
 import { AuthContext } from '../components/Global/AuthContext';
+import TranslateComponent from '../components/Global/TranslateContent'; // Import the TranslateComponent
 
 function ContentGenerationService() {
   const [formData, setFormData] = useState({
@@ -18,6 +19,7 @@ function ContentGenerationService() {
   });
 
   const [generatedContent, setGeneratedContent] = useState('');
+  const [translatedContent, setTranslatedContent] = useState(''); // State for translated content
   const [error, setError] = useState('');
   const authContext = useContext(AuthContext);
 
@@ -36,6 +38,7 @@ function ContentGenerationService() {
     e.preventDefault();
     setError('');
     setGeneratedContent('');
+    setTranslatedContent(''); // Clear translated content when generating new content
     try {
       console.log('Form data:', formData); // Log form data
       const response = await axios.post<{ generated_content: string }>('http://localhost:8000/content_generator/', 
@@ -218,9 +221,20 @@ function ContentGenerationService() {
         </div>
       </form>
       {generatedContent && (
-        <div className="w-full max-w-3xl mx-auto p-8 mt-6 border rounded shadow-sm">
+        <div className="w-full max-w-3xl mx-auto p-8 mt-6">
           <h2 className="text-xl font-bold mb-4">Generated Content</h2>
           <p className="text-black whitespace-pre-line">{generatedContent}</p>
+          <TranslateComponent 
+            generatedContent={generatedContent} 
+            setTranslatedContent={setTranslatedContent} 
+            setError={setError} 
+          />
+        </div>
+      )}
+      {translatedContent && (
+        <div className="w-full max-w-3xl mx-auto p-8 mt-6">
+          <h2 className="text-xl font-bold mb-4">Translated Content</h2>
+          <p className="text-black whitespace-pre-line">{translatedContent}</p>
         </div>
       )}
       {error && (
