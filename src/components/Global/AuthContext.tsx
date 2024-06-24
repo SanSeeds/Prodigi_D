@@ -1,5 +1,5 @@
-// src/context/AuthContext.tsx
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
+import axios from 'axios';
 
 interface User {
     email: string;
@@ -29,7 +29,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const storedAccessToken = localStorage.getItem('accessToken');
         const storedRefreshToken = localStorage.getItem('refreshToken');
         const tokenExpiry = localStorage.getItem('tokenExpiry');
-        
+
         if (storedUser && storedAccessToken && storedRefreshToken && tokenExpiry) {
             const isExpired = new Date().getTime() > parseInt(tokenExpiry, 10);
             if (!isExpired) {
@@ -56,14 +56,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setRefreshToken(refreshToken);
     };
 
-    const logout = () => {
-        localStorage.removeItem('user');
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('tokenExpiry');
-        setUser(null);
-        setAccessToken(null);
-        setRefreshToken(null);
+    const logout = async () => {
+        try {
+            await axios.post('/api/logout/', {}, {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`
+                }
+            });
+        } catch (error) {
+            console.error('Error logging out:', error);
+        } finally {
+            localStorage.removeItem('user');
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('tokenExpiry');
+            setUser(null);
+            setAccessToken(null);
+            setRefreshToken(null);
+            window.location.href = '/'; // Redirect to home page or login page
+        }
     };
 
     return (

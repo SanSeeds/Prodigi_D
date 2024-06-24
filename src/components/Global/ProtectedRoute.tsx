@@ -1,9 +1,8 @@
 import React, { useContext } from 'react';
-import { Route, Navigate } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
 import { AuthContext } from './AuthContext';
-// import Homepage from '../../Pages/Homepage';
 
-const ProtectedRoute: React.FC<any> = ({ element, ...rest }) => {
+const ProtectedRoute: React.FC = () => {
     const authContext = useContext(AuthContext);
 
     if (!authContext) {
@@ -16,7 +15,7 @@ const ProtectedRoute: React.FC<any> = ({ element, ...rest }) => {
         return <Navigate to="/signin" />;
     }
 
-    return <Route {...rest} element={element} />;
+    return <Outlet />;
 };
 
 export default ProtectedRoute;

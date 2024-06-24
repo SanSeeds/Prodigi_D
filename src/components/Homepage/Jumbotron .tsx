@@ -7,7 +7,7 @@ interface HeroSectionProps {
 const HeroSection: React.FC<HeroSectionProps> = ({ scrollToServices }) => {
   return (
     <section className="bg-center bg-no-repeat bg-blend-multiply h-full w-full flex items-center">
-      <div className="px-4 mx-auto max-w-screen-xl text-center py-24 lg:py-56">
+      <div className="px-4 mx-auto max-w-screen-xl text-center py-24 lg:py-6">
         <h1 className="mb-4 text-4xl font-extrabold tracking-tight leading-none text-black md:text-5xl lg:text-6xl">
         Revolutionize Your Workflow with ProdigiDesk
         </h1>

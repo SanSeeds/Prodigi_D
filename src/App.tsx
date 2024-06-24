@@ -13,6 +13,7 @@ import SignInForm from './Pages/SignIn'
 import Translate from './Pages/Translate'
 import { AuthProvider } from './components/Global/AuthContext'
 import Footer from './components/Global/Footer'
+import ForgetPassword from './components/SignInPage/ForgetPassword'
 
 function App() {
   return (
@@ -32,6 +33,8 @@ function App() {
             <Route path='/contentgeneration' element={<ContentGenerationService/>}></Route>
             <Route path='/profile' element={<ProfileForm/>}></Route>
             <Route path='/translate' element={<Translate/>}></Route>
+            <Route path='/forgotPassword' element={<ForgetPassword/>}></Route>
+
           </Routes>
         </BrowserRouter>
         <Footer />

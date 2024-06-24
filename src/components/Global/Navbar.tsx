@@ -1,9 +1,9 @@
-import React, { useContext } from 'react';
 import { AuthContext } from './AuthContext';
 import Logo from '../../assets/logo.png';
-import '../../App.css'
+import '../../App.css';
+import { useContext } from 'react';
 
-const Navbar: React.FC = () => {
+const Navbar = () => {
   const authContext = useContext(AuthContext);
 
   if (!authContext) {
