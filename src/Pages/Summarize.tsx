@@ -1,7 +1,8 @@
-import { useState } from "react";
-import axios from 'axios';
+import { useState, useContext, ChangeEvent, FormEvent } from 'react';
+import axios, { AxiosError } from 'axios';
 import Navbar from "../components/Global/Navbar";
 import TranslateComponent from "../components/Global/TranslateContent"; // Import the TranslateComponent
+import { AuthContext } from '../components/Global/AuthContext';
 
 function SummarizeService() {
     const [formData, setFormData] = useState({
@@ -19,21 +20,32 @@ function SummarizeService() {
 
     const [generatedContent, setGeneratedContent] = useState<string | null>(null);
     const [translatedContent, setTranslatedContent] = useState<string>(''); // State for translated content
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const authContext = useContext(AuthContext);
+  
+    if (!authContext) {
+      throw new Error('AuthContext must be used within an AuthProvider');
+    }
+  
+    const { accessToken } = authContext;
+
+    const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
     };
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files.length > 0) {
             setFormData({ ...formData, uploadFile: e.target.files[0] });
         }
     };
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        setLoading(true);
+        setError(null);
 
         const form = new FormData();
         form.append('document_context', formData.documentContext);
@@ -52,22 +64,37 @@ function SummarizeService() {
         try {
             const response = await axios.post<{ generated_content: string }>('http://localhost:8000/summarize_document/', form, {
                 headers: {
-                    'Content-Type': 'multipart/form-data'
+                    'Content-Type': 'multipart/form-data',
+                    'Authorization': `Bearer ${accessToken}`,
                 },
                 withCredentials: true
             });
             setGeneratedContent(response.data.generated_content);
             setTranslatedContent(''); // Clear translated content when new content is generated
-            setError(null);
         } catch (error) {
-            setGeneratedContent(null);
-            console.log('An error occurred');
+            if (axios.isAxiosError(error)) {
+                // AxiosError type assertion
+                const axiosError = error as AxiosError;
+                if (axiosError.response) {
+                    console.error('Error response data:', axiosError.response.data);
+                    console.error('Error response status:', axiosError.response.status);
+                    console.error('Error response headers:', axiosError.response.headers);
+                } else if (axiosError.request) {
+                    console.error('Error request:', axiosError.request);
+                }
+            } else {
+                setError('An error occurred');
+            }
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
         <>
             <Navbar />
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="w-full max-w-3xl mx-auto p-8 rounded-lg">
             <h1 className="text-center text-3xl mt-5 font-bold" style={{ fontFamily: "'Poppins', sans-serif" }}>Summarize Document</h1>
             <form className="w-full max-w-3xl mx-auto p-8" onSubmit={handleSubmit}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -195,15 +222,16 @@ function SummarizeService() {
                     </div>
                 </div>
                 <div className="flex justify-center">
-                    <button type="submit" className="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-                        Summarize
+                    <button type="submit" className="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" disabled={loading}>
+                        {loading ? "Generating..." : "Summarize"}
                     </button>
                 </div>
             </form>
+            {error && <div className="mt-4 text-red-500">{error}</div>}
             {generatedContent && (
-                <div className="w-full max-w-3xl mx-auto p-8 mt-6 rounded">
-                    <h2 className="font-bold text-xl mb-2">Generated Summary:</h2>
-                    <p>{generatedContent}</p>
+                <div className="mt-4 p-4">
+                    <h2 className="text-2xl font-bold mb-2">Generated Content</h2>
+                    <pre className="whitespace-pre-wrap">{generatedContent}</pre>
                     <TranslateComponent 
                         generatedContent={generatedContent} 
                         setTranslatedContent={setTranslatedContent} 
@@ -212,17 +240,13 @@ function SummarizeService() {
                 </div>
             )}
             {translatedContent && (
-                <div className="w-full max-w-3xl mx-auto mt-6 p-6">
-                    <h2 className="text-2xl font-bold mb-4">Translated Content</h2>
-                    <p className="text-black whitespace-pre-line">{translatedContent}</p>
+                <div className="mt-4 p-4">
+                    <h2 className="text-2xl font-bold mb-2">Translated Content</h2>
+                    <pre className="whitespace-pre-wrap">{translatedContent}</pre>
                 </div>
             )}
-            {error && (
-                <div className="mt-8 p-4 border rounded bg-red-100 text-red-700">
-                    <h2 className="font-bold text-xl mb-2">Error:</h2>
-                    <p>{error}</p>
-                </div>
-            )}
+            </div>
+            </div>
         </>
     );
 }

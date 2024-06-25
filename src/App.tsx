@@ -14,6 +14,7 @@ import Translate from './Pages/Translate'
 import { AuthProvider } from './components/Global/AuthContext'
 import Footer from './components/Global/Footer'
 import ForgetPassword from './components/SignInPage/ForgetPassword'
+import SignUpForm from './components/SignInPage/SignupPage'
 
 function App() {
   return (
@@ -23,7 +24,7 @@ function App() {
           <Routes>
             <Route path='/' element={<WelcomePage/>}></Route>
             <Route path='/signin' element={<SignInForm/>}></Route>
-            
+            <Route path='/signup' element={<SignUpForm/>}></Route>
             <Route path='/dashboard' element={<Homepage/>}></Route>
             <Route path='/email' element={<EmailService/>}></Route>
             <Route path='/businessproposal' element={<BussinessProposalService/>}></Route>
