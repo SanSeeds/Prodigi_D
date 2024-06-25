@@ -1,19 +1,25 @@
 import React from 'react';
-import '../../styles/Services.css'
+import { Link } from 'react-router-dom';
+import '../../styles/Services.css';
 
-function ServicesOffered(props: { link: string | undefined; title: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined; description: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined; }) {
-    return (
-        <div className='pl-5 pr-5'>
-            <a href={props.link} className=" cards mt-8 block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100  dark:border-gray-700 " >
-            <h5 className="mb-2 text-2xl font-bold tracking-tight text-black dark:text-black">{props.title}</h5>
-            <p className="font-normal text-black dark:text-black">{props.description}</p>
-        </a>
-        </div>
-        
-    );
+interface ServiceProps {
+    link: string;
+    title: string;
+    description: string;
 }
 
-export default function Services() {
+const ServicesOffered: React.FC<ServiceProps> = ({ link, title, description }) => {
+    return (
+        <div className='pl-5 pr-5'>
+            <Link to={link} className="cards mt-8 block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:border-gray-700">
+                <h5 className="mb-2 text-2xl font-bold tracking-tight text-black dark:text-black">{title}</h5>
+                <p className="font-normal text-black dark:text-black">{description}</p>
+            </Link>
+        </div>
+    );
+};
+
+const Services: React.FC = () => {
     const services = [
         {
             title: 'Email',
@@ -61,4 +67,6 @@ export default function Services() {
             </div>
         </div>
     );
-}
+};
+
+export default Services;
