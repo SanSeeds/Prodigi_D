@@ -26,6 +26,8 @@ function App() {
             <Route path="/" element={<WelcomePage />} />
             <Route path="/signin" element={<SignInForm />} />
             <Route path="/signup" element={<SignUpForm />} />
+            <Route path="/translate" element={<Translate />} />
+
             <Route path="/forgotPassword" element={<ForgetPassword />} />
             {/* Protected Routes */}
             <Route element={<PrivateRoute />}>
@@ -37,7 +39,6 @@ function App() {
               <Route path="/summarize" element={<SummarizeService />} />
               <Route path="/contentgeneration" element={<ContentGenerationService />} />
               <Route path="/profile" element={<ProfileForm />} />
-              <Route path="/translate" element={<Translate />} />
             </Route>
           </Routes>
         </BrowserRouter>
