@@ -16,6 +16,8 @@ import Footer from './components/Global/Footer';
 import ForgetPassword from './components/SignInPage/ForgetPassword';
 import SignUpForm from './components/SignInPage/SignupPage';
 import PrivateRoute from './components/Global/PrivateRoute'; // Import PrivateRoute
+import Subscription from './Pages/Subscription';
+import Payment from './Pages/Payment';
 
 function App() {
   return (
@@ -27,6 +29,8 @@ function App() {
             <Route path="/signin" element={<SignInForm />} />
             <Route path="/signup" element={<SignUpForm />} />
             <Route path="/translate" element={<Translate />} />
+            <Route path="/subscription" element={<Subscription />} />
+            <Route path="/payment" element={<Payment />} />
 
             <Route path="/forgotPassword" element={<ForgetPassword />} />
             {/* Protected Routes */}
