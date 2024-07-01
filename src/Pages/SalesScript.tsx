@@ -2,8 +2,11 @@ import { useState, useContext } from 'react';
 import axios, { AxiosError } from 'axios';
 import Navbar from '../components/Global/Navbar';
 import { AuthContext } from '../components/Global/AuthContext';
-import TranslateComponent from '../components/Global/TranslateContent'; // Import the TranslateComponent
+import TranslateComponent from '../components/Global/TranslateContent';
+import CryptoJS from 'crypto-js'; // Import CryptoJS for AES decryption
 
+const AES_IV = CryptoJS.enc.Base64.parse("KRP1pDpqmy2eJos035bxdg==");
+const AES_SECRET_KEY = CryptoJS.enc.Base64.parse("HOykfyW56Uesby8PTgxtSA==");
 
 function SalesScriptService() {
   const [formData, setFormData] = useState({
@@ -43,16 +46,27 @@ function SalesScriptService() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setGeneratedScript('');
+    setTranslatedScript('')
     try {
-      const response = await axios.post<{ generated_content: string }>('http://localhost:8000/sales_script_generator/', formData, {
+      const response = await axios.post<{ encrypted_content: string }>('http://localhost:8000/sales_script_generator/', formData, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${accessToken}`, // Include access token
         },
       });
 
-      if (response.data && response.data.generated_content) {
-        setGeneratedScript(response.data.generated_content);
+      if (response.data && response.data.encrypted_content) {
+        // Ensure the content is base64 decoded before decrypting
+        const decryptedBytes = CryptoJS.AES.decrypt(response.data.encrypted_content, AES_SECRET_KEY, { iv: AES_IV });
+        const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8);
+        console.log(decryptedText);
+        
+        if (!decryptedText) {
+          throw new Error('Decryption failed');
+        }
+
+        setGeneratedScript(decryptedText);
         setError('');
       } else {
         setError('Failed to generate sales script. No content received.');
@@ -198,7 +212,7 @@ function SalesScriptService() {
               ></textarea>
             </div>
             <div>
-              <label htmlFor="testimonials" className="block text-sm font-bold text-gray-700">Customer Testimonials or Case Studies</label>
+              <label htmlFor="testimonials" className="block text-sm font-bold text-gray-700">Testimonials or Case Studies</label>
               <textarea
                 id="testimonials"
                 name="testimonials"
@@ -209,7 +223,7 @@ function SalesScriptService() {
               ></textarea>
             </div>
             <div>
-              <label htmlFor="compliance" className="block text-sm font-bold text-gray-700">Compliance and Regulatory Requirements</label>
+              <label htmlFor="compliance" className="block text-sm font-bold text-gray-700">Compliance and Legal Requirements</label>
               <textarea
                 id="compliance"
                 name="compliance"
@@ -220,7 +234,7 @@ function SalesScriptService() {
               ></textarea>
             </div>
             <div>
-              <label htmlFor="tech_integration" className="block text-sm font-bold text-gray-700">Technical Integrations</label>
+              <label htmlFor="tech_integration" className="block text-sm font-bold text-gray-700">Technical Integration</label>
               <textarea
                 id="tech_integration"
                 name="tech_integration"
@@ -231,44 +245,32 @@ function SalesScriptService() {
               ></textarea>
             </div>
           </div>
-          <div className="flex justify-center">
-            <button
-              type="submit"
-              className="flex items-center px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-            >
-              Generate Sales Script
-            </button>
-          </div>
+          <button type="submit" className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            Generate Sales Script
+          </button>
         </form>
-      </div>
-      {generatedScript && (
-        <div className="mt-6 p-6 flex justify-center">
-          <div className=" max-w-4xl">
-            <h2 className="text-2xl font-bold mb-4 text-center">Generated Sales Script:</h2>
-            <pre className="whitespace-pre-wrap p-4 rounded-md">{generatedScript}</pre>
+        
+        {error && <div className="mt-4 text-red-500">{error}</div>}
+        
+        {generatedScript && (
+          <div className="w-full max-w-3xl mx-auto p-8 mt-6 rounded">
+            <h2 className="text-xl font-bold mb-4">Generated Sales Script:</h2>
+            <p className="whitespace-pre-wrap">{generatedScript}</p>
             <TranslateComponent 
-              generatedContent={generatedScript} 
-              setTranslatedContent={setTranslatedScript} 
-              setError={setError} 
-            />
+          generatedContent={generatedScript} 
+          setTranslatedContent={setTranslatedScript} 
+          setError={setError}
+          />
           </div>
-        </div>
-      )}
-      
-      {translatedScript && (
-        <div className="mt-6 p-6 flex justify-center">
-          <div className=" max-w-4xl">
-            <h2 className="text-2xl font-bold mb-4 text-center">Translated Sales Script:</h2>
-            <pre className="whitespace-pre-wrap p-4">{translatedScript}</pre>
-          </div>
-        </div>
-      )}
+        )}
 
-      {error && (
-        <div className="mt-6 p-6 border rounded bg-red-100 text-red-800 shadow-sm">
-          {error}
-        </div>
-      )}
+        {translatedScript && (
+          <div className="w-full max-w-3xl mx-auto p-8 mt-6 rounded">
+            <h2 className="text-xl font-bold mb-4">Translated Sales Script:</h2>
+            <p className='whitespace-pre-wrap'>{translatedScript}</p>
+          </div>
+        )}
+      </div>
     </>
   );
 }

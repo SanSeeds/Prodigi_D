@@ -3,6 +3,10 @@ import Navbar from '../components/Global/Navbar';
 import axios, { AxiosError } from 'axios';
 import { AuthContext } from '../components/Global/AuthContext';
 import TranslateComponent from '../components/Global/TranslateContent'; // Import the new TranslateComponent
+import CryptoJS from 'crypto-js'; // Import CryptoJS for AES decryption
+
+const AES_IV = CryptoJS.enc.Base64.parse("KRP1pDpqmy2eJos035bxdg==");
+const AES_SECRET_KEY = CryptoJS.enc.Base64.parse("HOykfyW56Uesby8PTgxtSA==");
 
 function EmailService() {
     const [formData, setFormData] = useState({
@@ -60,7 +64,7 @@ function EmailService() {
       };
   
       try {
-        const response = await axios.post<{ generated_content: string }>('http://localhost:8000/email_generator/', payload, {
+        const response = await axios.post<{ encrypted_content: string }>('http://localhost:8000/email_generator/', payload, {
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${accessToken}`,
@@ -68,21 +72,36 @@ function EmailService() {
           withCredentials: true,
         });
   
-        setGeneratedEmail(response.data.generated_content);
-      } catch (error) {
-          if (axios.isAxiosError(error)) {
-              // AxiosError type assertion
-              const axiosError = error as AxiosError;
-              if (axiosError.response) {
-                console.error('Error response data:', axiosError.response.data);
-                console.error('Error response status:', axiosError.response.status);
-                console.error('Error response headers:', axiosError.response.headers);
-              } else if (axiosError.request) {
-                console.error('Error request:', axiosError.request);
-              }
-            }  else {
-          setError('An error occurred');
+        if (response.data && response.data.encrypted_content) {
+          // Decrypt the content
+          const decryptedBytes = CryptoJS.AES.decrypt(response.data.encrypted_content, AES_SECRET_KEY, { iv: AES_IV });
+          const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8);
+          
+          if (!decryptedText) {
+            throw new Error('Decryption failed');
+          }
+  
+          setGeneratedEmail(decryptedText);
+          setError('');
+        } else {
+          setError('Failed to generate email. No content received.');
         }
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          // AxiosError type assertion
+          const axiosError = error as AxiosError;
+          if (axiosError.response) {
+            console.error('Error response data:', axiosError.response.data);
+            console.error('Error response status:', axiosError.response.status);
+            console.error('Error response headers:', axiosError.response.headers);
+          } else if (axiosError.request) {
+            console.error('Error request:', axiosError.request);
+          }
+        } else {
+          // Generic error handling
+          console.error('An error occurred:', error);
+        }
+        setError('Failed to generate email. Please try again.');
       } finally {
         setLoading(false);
       }

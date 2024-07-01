@@ -2,7 +2,11 @@ import { useState, useContext, ChangeEvent, FormEvent } from 'react';
 import Navbar from '../components/Global/Navbar';
 import axios, { AxiosError } from 'axios';
 import { AuthContext } from '../components/Global/AuthContext';
-import TranslateComponent from '../components/Global/TranslateContent'; // Import TranslateComponent
+import TranslateComponent from '../components/Global/TranslateContent';
+import CryptoJS from 'crypto-js';
+
+const AES_IV = CryptoJS.enc.Base64.parse("KRP1pDpqmy2eJos035bxdg==");
+const AES_SECRET_KEY = CryptoJS.enc.Base64.parse("HOykfyW56Uesby8PTgxtSA==");
 
 function BusinessProposalService() {
   const [formData, setFormData] = useState({
@@ -21,7 +25,7 @@ function BusinessProposalService() {
     closingRemarks: '',
   });
 
-  const [loading, setLoading] = useState(false);
+  // const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [generatedContent, setGeneratedContent] = useState<string>('');
   const [translatedContent, setTranslatedContent] = useState<string>('');
@@ -41,11 +45,11 @@ function BusinessProposalService() {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true);
+    // setLoading(true);
     setError(null);
 
     try {
-      const response = await axios.post<{ generated_content: string }>('http://localhost:8000/business_proposal_generator/', formData, {
+      const response = await axios.post<{ encrypted_content: string }>('http://localhost:8000/business_proposal_generator/', formData, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${accessToken}`,
@@ -53,7 +57,19 @@ function BusinessProposalService() {
         withCredentials: true,
       });
 
-      setGeneratedContent(response.data.generated_content);
+      if (response.data && response.data.encrypted_content) {
+        const decryptedBytes = CryptoJS.AES.decrypt(response.data.encrypted_content, AES_SECRET_KEY, { iv: AES_IV });
+        const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8);
+        console.log(decryptedText);
+        
+        if (!decryptedText) {
+          throw new Error('Decryption failed');
+        }
+
+        setGeneratedContent(decryptedText);
+      } else {
+        setError('Failed to generate business proposal. No content received.');
+      }
     } catch (error) {
       if (axios.isAxiosError(error)) {
         const axiosError = error as AxiosError;
@@ -61,22 +77,20 @@ function BusinessProposalService() {
           console.error('Error response data:', axiosError.response.data);
           console.error('Error response status:', axiosError.response.status);
           console.error('Error response headers:', axiosError.response.headers);
-        //   setError(axiosError.response.data.error || 'Failed to generate business proposal. Please try again.');
         } else if (axiosError.request) {
           console.error('Error request:', axiosError.request);
-          setError('Failed to generate business proposal. Please try again.');
         } else {
           console.error('Error:', axiosError.message);
-          setError('Failed to generate business proposal. Please try again.');
         }
       } else {
         console.error('Error:', error);
-        setError('Failed to generate business proposal. Please try again.');
       }
+      setError('Failed to generate business proposal. Please try again.');
     } finally {
-      setLoading(false);
+      // setLoading(false);
     }
   };
+
 
   return (
     <>

@@ -2,7 +2,11 @@ import { useState, useContext } from "react";
 import axios from 'axios';
 import Navbar from "../components/Global/Navbar";
 import { AuthContext } from '../components/Global/AuthContext';
-import TranslateComponent from '../components/Global/TranslateContent'; // Import the new TranslateComponent
+import CryptoJS from 'crypto-js'; // Import CryptoJS for AES decryption
+import TranslateComponent from "../components/Global/TranslateContent";
+
+const AES_IV = CryptoJS.enc.Base64.parse("KRP1pDpqmy2eJos035bxdg==");
+const AES_SECRET_KEY = CryptoJS.enc.Base64.parse("HOykfyW56Uesby8PTgxtSA==");
 
 function OfferLetterService() {
   const [formData, setFormData] = useState({
@@ -58,7 +62,18 @@ function OfferLetterService() {
 
       const data = response.data;
       if (response.status === 200) {
-        setGeneratedContent(data.generated_content);
+        const encryptedContent = data.encrypted_content;
+        console.log('Encrypted Content:', encryptedContent); // Debugging statement
+
+        // Ensure the content is base64 decoded before decrypting
+        const decryptedBytes = CryptoJS.AES.decrypt(encryptedContent, AES_SECRET_KEY, { iv: AES_IV });
+        const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8);
+        
+        if (!decryptedText) {
+          throw new Error('Decryption failed');
+        }
+
+        setGeneratedContent(decryptedText);
       } else {
         setError(data.error || 'An error occurred');
       }
@@ -220,7 +235,7 @@ function OfferLetterService() {
             />
           </div>
           <div className="flex flex-col">
-            <label className="mb-2 font-bold text-black">Duration</label>
+            <label className="mb-2 font-bold text-black">Duration of Employment</label>
             <input
               type="text"
               name="duration"
@@ -241,31 +256,29 @@ function OfferLetterService() {
           ></textarea>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <div className="flex flex-col">
-            <label className="mb-2 font-bold text-black">Deadline for accepting the offer</label>
-            <input
-              type="date"
-              name="deadline"
-              value={formData.deadline}
-              onChange={handleChange}
-              className="p-3 border rounded shadow-sm text-black"
-            />
-          </div>
-          <div className="flex flex-col">
-            <label className="mb-2 font-bold text-black">Contact information for questions</label>
-            <input
-              type="text"
-              name="contactInfo"
-              value={formData.contactInfo}
-              onChange={handleChange}
-              className="p-3 border rounded shadow-sm text-black"
-            />
-          </div>
+        <div className="mb-6">
+          <label className="block mb-2 font-bold text-black">Acceptance Deadline</label>
+          <input
+            type="date"
+            name="deadline"
+            value={formData.deadline}
+            onChange={handleChange}
+            className="p-3 border rounded shadow-sm text-black w-full"
+          />
         </div>
 
         <div className="mb-6">
-          <label className="block mb-2 font-bold text-black">Documents needed to submit</label>
+          <label className="block mb-2 font-bold text-black">Contact Information</label>
+          <textarea
+            name="contactInfo"
+            value={formData.contactInfo}
+            onChange={handleChange}
+            className="p-3 border rounded shadow-sm text-black w-full"
+          ></textarea>
+        </div>
+
+        <div className="mb-6">
+          <label className="block mb-2 font-bold text-black">Documents Needed for Onboarding</label>
           <textarea
             name="documentsNeeded"
             value={formData.documentsNeeded}
@@ -284,16 +297,16 @@ function OfferLetterService() {
           ></textarea>
         </div>
 
-        <div className="flex justify-center">
-          <button type="submit" className="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-            Generate
-          </button>
+        <div className="text-center">
+          <button type="submit" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Generate Offer Letter</button>
         </div>
       </form>
+
+      {error && <p className="text-red-500 text-center">{error}</p>}
       {generatedContent && (
         <div className="w-full max-w-3xl mx-auto p-8 mt-6 rounded">
           <h2 className="text-xl font-bold mb-4">Generated Offer Letter</h2>
-          <pre className="whitespace-pre-wrap">{generatedContent}</pre>
+          <p className="whitespace-pre-wrap">{generatedContent}</p>
           <TranslateComponent 
             generatedContent={generatedContent} 
             setTranslatedContent={setTranslatedContent} 
@@ -307,12 +320,9 @@ function OfferLetterService() {
           <pre className="whitespace-pre-wrap">{translatedContent}</pre>
         </div>
       )}
-      {error && (
-        <div className="w-full max-w-3xl mx-auto p-8 mt-6 rounded bg-red-100 text-red-800">
-          <h2 className="text-xl font-bold mb-4">Error</h2>
-          <p>{error}</p>
-        </div>
-      )}
+      
+
+      
     </>
   );
 }
