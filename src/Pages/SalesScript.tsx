@@ -1,12 +1,13 @@
 import { useState, useContext } from 'react';
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 import Navbar from '../components/Global/Navbar';
 import { AuthContext } from '../components/Global/AuthContext';
 import TranslateComponent from '../components/Global/TranslateContent';
-import CryptoJS from 'crypto-js'; // Import CryptoJS for AES decryption
+import CryptoJS from 'crypto-js';
 
-const AES_IV = CryptoJS.enc.Base64.parse("KRP1pDpqmy2eJos035bxdg==");
-const AES_SECRET_KEY = CryptoJS.enc.Base64.parse("HOykfyW56Uesby8PTgxtSA==");
+// Encryption keys
+const ENCRYPTION_IV = CryptoJS.enc.Base64.parse("3G1Nd0j0l5BdPmJh01NrYg==");
+const ENCRYPTION_SECRET_KEY = CryptoJS.enc.Base64.parse("XGp3hFq56Vdse3sLTtXyQQ==");
 
 function SalesScriptService() {
   const [formData, setFormData] = useState({
@@ -25,9 +26,9 @@ function SalesScriptService() {
     tech_integration: '',
   });
 
-  const [generatedScript, setGeneratedScript] = useState<string>('');
-  const [translatedScript, setTranslatedScript] = useState<string>(''); // State for translated script
-  const [error, setError] = useState<string>('');
+  const [generatedScript, setGeneratedScript] = useState('');
+  const [translatedScript, setTranslatedScript] = useState('');
+  const [error, setError] = useState('');
   const authContext = useContext(AuthContext);
 
   if (!authContext) {
@@ -36,45 +37,51 @@ function SalesScriptService() {
 
   const { accessToken } = authContext;
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: { target: { name: any; value: any; }; }) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
+    setError('');
     setGeneratedScript('');
-    setTranslatedScript('')
-    try {
-      const response = await axios.post<{ encrypted_content: string }>('http://localhost:8000/sales_script_generator/', formData, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`, // Include access token
-        },
-      });
+    setTranslatedScript('');
 
+    try {
+      console.log('Form data:', formData);
+      
+      // Encrypt the payload
+      const payload = JSON.stringify(formData);
+      const encryptedPayload = CryptoJS.AES.encrypt(payload, ENCRYPTION_SECRET_KEY, { iv: ENCRYPTION_IV }).toString();
+
+      const response = await axios.post('http://localhost:8000/sales_script_generator/', 
+        { encrypted_content: encryptedPayload },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      console.log('Response:', response.data);
       if (response.data && response.data.encrypted_content) {
-        // Ensure the content is base64 decoded before decrypting
-        const decryptedBytes = CryptoJS.AES.decrypt(response.data.encrypted_content, AES_SECRET_KEY, { iv: AES_IV });
+        // Decrypt the content
+        const decryptedBytes = CryptoJS.AES.decrypt(response.data.encrypted_content, ENCRYPTION_SECRET_KEY, { iv: ENCRYPTION_IV });
         const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8);
-        console.log(decryptedText);
-        
+
         if (!decryptedText) {
           throw new Error('Decryption failed');
         }
 
         setGeneratedScript(decryptedText);
-        setError('');
       } else {
         setError('Failed to generate sales script. No content received.');
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        // AxiosError type assertion
-        const axiosError = error as AxiosError;
+        const axiosError = error;
         if (axiosError.response) {
           console.error('Error response data:', axiosError.response.data);
           console.error('Error response status:', axiosError.response.status);
@@ -83,8 +90,7 @@ function SalesScriptService() {
           console.error('Error request:', axiosError.request);
         }
       } else {
-        // Generic error handling
-        console.log(error);
+        console.error(error);
       }
       setError('Failed to generate sales script. Please try again.');
     }
@@ -93,184 +99,164 @@ function SalesScriptService() {
   return (
     <>
       <Navbar />
-      
-      <h1 className="text-center text-3xl mb-6 text-black font-bold" style={{ fontFamily: "'Poppins', sans-serif" }}>
+      <h1 className="text-center text-3xl mt-5 font-bold" style={{ fontFamily: "'Poppins', sans-serif" }}>
         Sales Script Generator
       </h1>
-
-      <div className="min-h-screen flex flex-col items-center justify-center">
-        <form className="p-6 w-full max-w-4xl space-y-4" onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="company_details" className="block text-sm font-bold text-gray-700">Company Details</label>
+      <form className="w-full max-w-3xl mx-auto p-8" onSubmit={handleSubmit}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div className="flex flex-col">
+            <label className="mb-2 font-bold text-black">Company Details</label>
             <textarea
-              id="company_details"
               name="company_details"
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              rows={2}
               value={formData.company_details}
               onChange={handleChange}
-            ></textarea>
+              className="p-3 border rounded shadow-sm text-black"
+            />
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="num_words" className="block text-sm font-bold text-gray-700">Number of words</label>
-              <input
-                type="text"
-                id="num_words"
-                name="num_words"
-                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                value={formData.num_words}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label htmlFor="product_descriptions" className="block text-sm font-bold text-gray-700">Names and Descriptions of Products</label>
-              <textarea
-                id="product_descriptions"
-                name="product_descriptions"
-                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                rows={2}
-                value={formData.product_descriptions}
-                onChange={handleChange}
-              ></textarea>
-            </div>
-            <div>
-              <label htmlFor="features_benefits" className="block text-sm font-bold text-gray-700">Key Features and Benefits</label>
-              <textarea
-                id="features_benefits"
-                name="features_benefits"
-                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                rows={2}
-                value={formData.features_benefits}
-                onChange={handleChange}
-              ></textarea>
-            </div>
-            <div>
-              <label htmlFor="pricing_info" className="block text-sm font-bold text-gray-700">Pricing Information</label>
-              <textarea
-                id="pricing_info"
-                name="pricing_info"
-                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                rows={2}
-                value={formData.pricing_info}
-                onChange={handleChange}
-              ></textarea>
-            </div>
-            <div>
-              <label htmlFor="promotions" className="block text-sm font-bold text-gray-700">Promotions or Special Offers</label>
-              <textarea
-                id="promotions"
-                name="promotions"
-                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                rows={2}
-                value={formData.promotions}
-                onChange={handleChange}
-              ></textarea>
-            </div>
-            <div>
-              <label htmlFor="target_audience" className="block text-sm font-bold text-gray-700">Target Audience</label>
-              <textarea
-                id="target_audience"
-                name="target_audience"
-                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                rows={2}
-                value={formData.target_audience}
-                onChange={handleChange}
-              ></textarea>
-            </div>
-            <div>
-              <label htmlFor="sales_objectives" className="block text-sm font-bold text-gray-700">Sales Objectives</label>
-              <textarea
-                id="sales_objectives"
-                name="sales_objectives"
-                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                rows={2}
-                value={formData.sales_objectives}
-                onChange={handleChange}
-              ></textarea>
-            </div>
-            <div>
-              <label htmlFor="tone_style" className="block text-sm font-bold text-gray-700">Tone and Style</label>
-              <textarea
-                id="tone_style"
-                name="tone_style"
-                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                rows={2}
-                value={formData.tone_style}
-                onChange={handleChange}
-              ></textarea>
-            </div>
-            <div>
-              <label htmlFor="competitive_advantage" className="block text-sm font-bold text-gray-700">Competitive Advantages</label>
-              <textarea
-                id="competitive_advantage"
-                name="competitive_advantage"
-                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                rows={2}
-                value={formData.competitive_advantage}
-                onChange={handleChange}
-              ></textarea>
-            </div>
-            <div>
-              <label htmlFor="testimonials" className="block text-sm font-bold text-gray-700">Testimonials or Case Studies</label>
-              <textarea
-                id="testimonials"
-                name="testimonials"
-                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                rows={2}
-                value={formData.testimonials}
-                onChange={handleChange}
-              ></textarea>
-            </div>
-            <div>
-              <label htmlFor="compliance" className="block text-sm font-bold text-gray-700">Compliance and Legal Requirements</label>
-              <textarea
-                id="compliance"
-                name="compliance"
-                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                rows={2}
-                value={formData.compliance}
-                onChange={handleChange}
-              ></textarea>
-            </div>
-            <div>
-              <label htmlFor="tech_integration" className="block text-sm font-bold text-gray-700">Technical Integration</label>
-              <textarea
-                id="tech_integration"
-                name="tech_integration"
-                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                rows={2}
-                value={formData.tech_integration}
-                onChange={handleChange}
-              ></textarea>
-            </div>
+          <div className="flex flex-col">
+            <label className="mb-2 font-bold">Number of words</label>
+            <input
+              type="number"
+              name="num_words"
+              value={formData.num_words}
+              onChange={handleChange}
+              className="p-3 border rounded shadow-sm text-black"
+            />
           </div>
-          <button type="submit" className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-            Generate Sales Script
-          </button>
-        </form>
-        
-        {error && <div className="mt-4 text-red-500">{error}</div>}
-        
-        {generatedScript && (
-          <div className="w-full max-w-3xl mx-auto p-8 mt-6 rounded">
-            <h2 className="text-xl font-bold mb-4">Generated Sales Script:</h2>
-            <p className="whitespace-pre-wrap">{generatedScript}</p>
-            <TranslateComponent 
-          generatedContent={generatedScript} 
-          setTranslatedContent={setTranslatedScript} 
-          setError={setError}
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div className="flex flex-col">
+            <label className="mb-2 font-bold text-black">Product Descriptions</label>
+            <textarea
+              name="product_descriptions"
+              value={formData.product_descriptions}
+              onChange={handleChange}
+              className="p-3 border rounded shadow-sm text-black"
+            />
+          </div>
+          <div className="flex flex-col">
+            <label className="mb-2 font-bold text-black">Features and Benefits</label>
+            <textarea
+              name="features_benefits"
+              value={formData.features_benefits}
+              onChange={handleChange}
+              className="p-3 border rounded shadow-sm text-black"
+            />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div className="flex flex-col">
+            <label className="mb-2 font-bold text-black">Pricing Information</label>
+            <textarea
+              name="pricing_info"
+              value={formData.pricing_info}
+              onChange={handleChange}
+              className="p-3 border rounded shadow-sm text-black"
+            />
+          </div>
+          <div className="flex flex-col">
+            <label className="mb-2 font-bold text-black">Promotions</label>
+            <textarea
+              name="promotions"
+              value={formData.promotions}
+              onChange={handleChange}
+              className="p-3 border rounded shadow-sm text-black"
+            />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div className="flex flex-col">
+            <label className="mb-2 font-bold text-black">Target Audience</label>
+            <textarea
+              name="target_audience"
+              value={formData.target_audience}
+              onChange={handleChange}
+              className="p-3 border rounded shadow-sm text-black"
+            />
+          </div>
+          <div className="flex flex-col">
+            <label className="mb-2 font-bold text-black">Sales Objectives</label>
+            <textarea
+              name="sales_objectives"
+              value={formData.sales_objectives}
+              onChange={handleChange}
+              className="p-3 border rounded shadow-sm text-black"
+            />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div className="flex flex-col">
+            <label className="mb-2 font-bold text-black">Tone and Style</label>
+            <textarea
+              name="tone_style"
+              value={formData.tone_style}
+              onChange={handleChange}
+              className="p-3 border rounded shadow-sm text-black"
+            />
+          </div>
+          <div className="flex flex-col">
+            <label className="mb-2 font-bold text-black">Competitive Advantage</label>
+            <textarea
+              name="competitive_advantage"
+              value={formData.competitive_advantage}
+              onChange={handleChange}
+              className="p-3 border rounded shadow-sm text-black"
+            />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div className="flex flex-col">
+            <label className="mb-2 font-bold text-black">Testimonials</label>
+            <textarea
+              name="testimonials"
+              value={formData.testimonials}
+              onChange={handleChange}
+              className="p-3 border rounded shadow-sm text-black"
+            />
+          </div>
+          <div className="flex flex-col">
+            <label className="mb-2 font-bold text-black">Compliance</label>
+            <textarea
+              name="compliance"
+              value={formData.compliance}
+              onChange={handleChange}
+              className="p-3 border rounded shadow-sm text-black"
+            />
+          </div>
+        </div>
+        <div className="flex flex-col mb-6">
+          <label className="mb-2 font-bold text-black">Technology Integration</label>
+          <textarea
+            name="tech_integration"
+            value={formData.tech_integration}
+            onChange={handleChange}
+            className="p-3 border rounded shadow-sm text-black"
           />
-          </div>
-        )}
-
-        {translatedScript && (
-          <div className="w-full max-w-3xl mx-auto p-8 mt-6 rounded">
-            <h2 className="text-xl font-bold mb-4">Translated Sales Script:</h2>
-            <p className='whitespace-pre-wrap'>{translatedScript}</p>
-          </div>
-        )}
-      </div>
+        </div>
+        <button
+          type="submit"
+          className="w-full bg-blue-500 text-white font-bold py-3 px-6 rounded shadow-md hover:bg-blue-600"
+        >
+          Generate Sales Script
+        </button>
+      </form>
+      {error && <div className="text-red-500 text-center mt-4">{error}</div>}
+      {generatedScript && (
+        <div className="w-full max-w-3xl mx-auto p-8 rounded mt-6">
+          <h2 className="text-xl font-bold mb-4 text-black">Generated Sales Script</h2>
+          <p className="whitespace-pre-line text-black">{generatedScript}</p>
+          <TranslateComponent 
+            setError={setError} 
+            generatedContent={generatedScript} setTranslatedContent={setTranslatedScript} />
+        </div>
+      )}
+     
+      {translatedScript && (
+        <div className="w-full max-w-3xl mx-auto p-8  rounded mt-6">
+          <h2 className="text-xl font-bold mb-4 text-black">Translated Sales Script</h2>
+          <p className="whitespace-pre-line text-black">{translatedScript}</p>
+        </div>
+      )}
     </>
   );
 }

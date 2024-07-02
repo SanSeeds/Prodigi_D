@@ -3,10 +3,11 @@ import axios from 'axios';
 import Navbar from '../components/Global/Navbar';
 import { AuthContext } from '../components/Global/AuthContext';
 import TranslateComponent from '../components/Global/TranslateContent';
-import CryptoJS from 'crypto-js'; // Import CryptoJS for AES decryption
+import CryptoJS from 'crypto-js';
 
-const AES_IV = CryptoJS.enc.Base64.parse("KRP1pDpqmy2eJos035bxdg==");
-const AES_SECRET_KEY = CryptoJS.enc.Base64.parse("HOykfyW56Uesby8PTgxtSA==");
+// Encryption keys
+const ENCRYPTION_IV = CryptoJS.enc.Base64.parse("3G1Nd0j0l5BdPmJh01NrYg==");
+const ENCRYPTION_SECRET_KEY = CryptoJS.enc.Base64.parse("XGp3hFq56Vdse3sLTtXyQQ==");
 
 function ContentGenerationService() {
   const [formData, setFormData] = useState({
@@ -23,7 +24,7 @@ function ContentGenerationService() {
   });
 
   const [generatedContent, setGeneratedContent] = useState('');
-  const [translatedContent, setTranslatedContent] = useState(''); // State for translated content
+  const [translatedContent, setTranslatedContent] = useState('');
   const [error, setError] = useState('');
   const authContext = useContext(AuthContext);
 
@@ -42,34 +43,41 @@ function ContentGenerationService() {
     e.preventDefault();
     setError('');
     setGeneratedContent('');
-    setTranslatedContent(''); // Clear translated content when generating new content
+    setTranslatedContent('');
+
     try {
-      console.log('Form data:', formData); // Log form data
+      console.log('Form data:', formData);
+      
+      // Encrypt the payload
+      const payload = JSON.stringify({
+        company_info: formData.companyInfo,
+        content_purpose: formData.purpose,
+        desired_action: formData.action,
+        topic_details: formData.topicDetails,
+        keywords: formData.keywords,
+        audience_profile: formData.audienceProfile,
+        format_structure: formData.format,
+        num_words: formData.numberOfWords,
+        seo_keywords: formData.seoKeywords,
+        references: formData.references,
+      });
+
+      const encryptedPayload = CryptoJS.AES.encrypt(payload, ENCRYPTION_SECRET_KEY, { iv: ENCRYPTION_IV }).toString();
+
       const response = await axios.post('http://localhost:8000/content_generator/', 
-        {
-          company_info: formData.companyInfo,
-          content_purpose: formData.purpose,
-          desired_action: formData.action,
-          topic_details: formData.topicDetails,
-          keywords: formData.keywords,
-          audience_profile: formData.audienceProfile,
-          format_structure: formData.format,
-          num_words: formData.numberOfWords,
-          seo_keywords: formData.seoKeywords,
-          references: formData.references,
-        },
+        { encrypted_content: encryptedPayload },
         {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`, // Include access token
+            'Authorization': `Bearer ${accessToken}`,
           },
         }
       );
 
-      console.log('Response:', response.data); // Log response data
+      console.log('Response:', response.data);
       if (response.data && response.data.encrypted_content) {
         // Decrypt the content
-        const decryptedBytes = CryptoJS.AES.decrypt(response.data.encrypted_content, AES_SECRET_KEY, { iv: AES_IV });
+        const decryptedBytes = CryptoJS.AES.decrypt(response.data.encrypted_content, ENCRYPTION_SECRET_KEY, { iv: ENCRYPTION_IV });
         const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8);
         
         if (!decryptedText) {
@@ -82,7 +90,6 @@ function ContentGenerationService() {
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        // AxiosError type assertion
         const axiosError = error;
         if (axiosError.response) {
           console.error('Error response data:', axiosError.response.data);
@@ -92,7 +99,6 @@ function ContentGenerationService() {
           console.error('Error request:', axiosError.request);
         }
       } else {
-        // Generic error handling
         console.error(error);
       }
       setError('Failed to generate content. Please try again.');
