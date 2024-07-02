@@ -5,8 +5,8 @@ import { AuthContext } from '../components/Global/AuthContext';
 import TranslateComponent from '../components/Global/TranslateContent';
 import CryptoJS from 'crypto-js';
 
-const AES_IV = CryptoJS.enc.Base64.parse("KRP1pDpqmy2eJos035bxdg==");
-const AES_SECRET_KEY = CryptoJS.enc.Base64.parse("HOykfyW56Uesby8PTgxtSA==");
+const AES_IV = CryptoJS.enc.Base64.parse("3G1Nd0j0l5BdPmJh01NrYg==");
+const AES_SECRET_KEY = CryptoJS.enc.Base64.parse("XGp3hFq56Vdse3sLTtXyQQ==");
 
 function BusinessProposalService() {
   const [formData, setFormData] = useState({
@@ -25,7 +25,6 @@ function BusinessProposalService() {
     closingRemarks: '',
   });
 
-  // const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [generatedContent, setGeneratedContent] = useState<string>('');
   const [translatedContent, setTranslatedContent] = useState<string>('');
@@ -45,23 +44,31 @@ function BusinessProposalService() {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // setLoading(true);
     setError(null);
 
     try {
-      const response = await axios.post<{ encrypted_content: string }>('http://localhost:8000/business_proposal_generator/', formData, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
-        },
-        withCredentials: true,
-      });
+      // Encrypt the payload
+      const payload = JSON.stringify(formData);
+      const encryptedPayload = CryptoJS.AES.encrypt(payload, AES_SECRET_KEY, { iv: AES_IV }).toString();
 
+      // Send encrypted payload to backend
+      const response = await axios.post<{ encrypted_content: string }>(
+        'http://localhost:8000/business_proposal_generator/',
+        { encrypted_content: encryptedPayload },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`,
+          },
+          withCredentials: true,
+        }
+      );
+
+      // Decrypt the response
       if (response.data && response.data.encrypted_content) {
         const decryptedBytes = CryptoJS.AES.decrypt(response.data.encrypted_content, AES_SECRET_KEY, { iv: AES_IV });
         const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8);
-        console.log(decryptedText);
-        
+
         if (!decryptedText) {
           throw new Error('Decryption failed');
         }
@@ -86,10 +93,9 @@ function BusinessProposalService() {
         console.error('Error:', error);
       }
       setError('Failed to generate business proposal. Please try again.');
-    } finally {
-      // setLoading(false);
     }
   };
+
 
 
   return (
