@@ -58,7 +58,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const logout = async () => {
         try {
-            await axios.post('/api/logout/', {}, {
+            await axios.post('/logout/', {}, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`
                 }

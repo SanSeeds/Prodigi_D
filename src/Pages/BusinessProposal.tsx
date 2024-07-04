@@ -45,12 +45,12 @@ function BusinessProposalService() {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
-
+  
     try {
       // Encrypt the payload
       const payload = JSON.stringify(formData);
       const encryptedPayload = CryptoJS.AES.encrypt(payload, AES_SECRET_KEY, { iv: AES_IV }).toString();
-
+  
       // Send encrypted payload to backend
       const response = await axios.post<{ encrypted_content: string }>(
         'http://localhost:8000/business_proposal_generator/',
@@ -63,17 +63,20 @@ function BusinessProposalService() {
           withCredentials: true,
         }
       );
-
+  
       // Decrypt the response
       if (response.data && response.data.encrypted_content) {
         const decryptedBytes = CryptoJS.AES.decrypt(response.data.encrypted_content, AES_SECRET_KEY, { iv: AES_IV });
         const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8);
-
+  
         if (!decryptedText) {
           throw new Error('Decryption failed');
         }
-
-        setGeneratedContent(decryptedText);
+  
+        const parsedContent = JSON.parse(decryptedText);
+        const formattedContent = parsedContent.generated_content.replace(/\n/g, '<br>');
+  
+        setGeneratedContent(formattedContent);
       } else {
         setError('Failed to generate business proposal. No content received.');
       }
@@ -95,6 +98,7 @@ function BusinessProposalService() {
       setError('Failed to generate business proposal. Please try again.');
     }
   };
+  
 
 
 
@@ -247,34 +251,36 @@ function BusinessProposalService() {
             </div>
           </form>
           {generatedContent && (
-            <div className="mt-6 p-6">
-              <h2 className="text-2xl font-bold mb-4">Generated Content</h2>
-              <p>{generatedContent}</p>
-            </div>
-          )}
+          <div className="mt-6 p-6">
+            <h2 className="text-2xl font-bold mb-4">Generated Content</h2>
+            <div dangerouslySetInnerHTML={{ __html: generatedContent }} />
+          </div>
+        )}
         {generatedContent && (
-            <TranslateComponent
-              generatedContent={generatedContent}
-              setTranslatedContent={setTranslatedContent} // Now storing translated content in its own state
-              setError={setError}
-            />
-          )}
-          {translatedContent && (
-            <div className="mt-6 p-6">
-              <h2 className="text-2xl font-bold mb-4">Translated Content</h2>
-              <p>{translatedContent}</p>
-            </div>
-          )}
-          {error && (
-            <div className="mt-6 p-6 border rounded bg-red-100 text-red-800 shadow-sm">
-              <p>{error}</p>
-            </div>
-          )}
-          
-        </div>
+          <TranslateComponent
+            generatedContent={generatedContent}
+            setTranslatedContent={setTranslatedContent} // Now storing translated content in its own state
+            setError={setError}
+          />
+        )}
+        {translatedContent && (
+          <div className="mt-6 p-6">
+            <h2 className="text-2xl font-bold mb-4">Translated Content</h2>
+            <div dangerouslySetInnerHTML={{ __html: translatedContent }} />
+          </div>
+        )}
+        {error && (
+          <div className="mt-6 p-6 border rounded bg-red-100 text-red-800 shadow-sm">
+            <p>{error}</p>
+          </div>
+        )}
       </div>
-    </>
-  );
+    </div>
+  </>
+
+  
+);
 }
+
 
 export default BusinessProposalService;

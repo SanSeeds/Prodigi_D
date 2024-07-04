@@ -75,7 +75,10 @@ function SalesScriptService() {
           throw new Error('Decryption failed');
         }
 
-        setGeneratedScript(decryptedText);
+        const parsedContent = JSON.parse(decryptedText);
+        const formattedContent = parsedContent.generated_content.replace(/\[|\]/g, '').replace(/\n/g, '\n');
+
+        setGeneratedScript(formattedContent);
       } else {
         setError('Failed to generate sales script. No content received.');
       }
@@ -252,7 +255,7 @@ function SalesScriptService() {
       )}
      
       {translatedScript && (
-        <div className="w-full max-w-3xl mx-auto p-8  rounded mt-6">
+        <div className="w-full max-w-3xl mx-auto p-8  rounded">
           <h2 className="text-xl font-bold mb-4 text-black">Translated Sales Script</h2>
           <p className="whitespace-pre-line text-black">{translatedScript}</p>
         </div>

@@ -2,110 +2,119 @@ import { useState, useContext, ChangeEvent, FormEvent } from 'react';
 import Navbar from '../components/Global/Navbar';
 import axios, { AxiosError } from 'axios';
 import { AuthContext } from '../components/Global/AuthContext';
-import TranslateComponent from '../components/Global/TranslateContent'; // Import the new TranslateComponent
-import CryptoJS from 'crypto-js'; // Import CryptoJS for AES decryption
+import TranslateComponent from '../components/Global/TranslateContent'; 
+import CryptoJS from 'crypto-js';
 
-const AES_IV = CryptoJS.enc.Base64.parse("KRP1pDpqmy2eJos035bxdg==");
-const AES_SECRET_KEY = CryptoJS.enc.Base64.parse("HOykfyW56Uesby8PTgxtSA==");
+const AES_IV = CryptoJS.enc.Base64.parse("3G1Nd0j0l5BdPmJh01NrYg==");
+const AES_SECRET_KEY = CryptoJS.enc.Base64.parse("XGp3hFq56Vdse3sLTtXyQQ==");
 
 function EmailService() {
     const [formData, setFormData] = useState({
-      purpose: '',
-      otherPurpose: '',
-      subject: '',
-      rephraseSubject: false,
-      to: '',
-      tone: 'Formal',
-      keywords: Array(8).fill(''),
-      contextualBackground: '',
-      callToAction: 'Reply',
-      additionalDetails: '',
-      priorityLevel: 'Low',
-      closingRemarks: '',
+        purpose: '',
+        otherPurpose: '',
+        subject: '',
+        rephraseSubject: false,
+        to: '',
+        tone: 'Formal',
+        keywords: Array(8).fill(''),
+        contextualBackground: '',
+        callToAction: 'Reply',
+        additionalDetails: '',
+        priorityLevel: 'Low',
+        closingRemarks: '',
     });
-  
+
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [generatedEmail, setGeneratedEmail] = useState<string>('');
     const [translatedEmail, setTranslatedEmail] = useState<string>('');
-  
+
     const authContext = useContext(AuthContext);
-  
+
     if (!authContext) {
-      throw new Error('AuthContext must be used within an AuthProvider');
+        throw new Error('AuthContext must be used within an AuthProvider');
     }
-  
+
     const { accessToken } = authContext;
-  
+
     const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-      const { name, value, type } = e.target;
-      if (type === 'checkbox' && e.target instanceof HTMLInputElement) {
-        setFormData({ ...formData, [name]: e.target.checked });
-      } else {
-        setFormData({ ...formData, [name]: value });
-      }
+        const { name, value, type } = e.target;
+        if (type === 'checkbox' && e.target instanceof HTMLInputElement) {
+            setFormData({ ...formData, [name]: e.target.checked });
+        } else {
+            setFormData({ ...formData, [name]: value });
+        }
     };
-  
+
     const handleKeywordChange = (index: number, value: string) => {
-      const newKeywords = [...formData.keywords];
-      newKeywords[index] = value;
-      setFormData({ ...formData, keywords: newKeywords });
+        const newKeywords = [...formData.keywords];
+        newKeywords[index] = value;
+        setFormData({ ...formData, keywords: newKeywords });
     };
-  
+
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
-      setLoading(true);
-      setError(null);
-  
-      const payload = {
-        ...formData,
-        purpose: formData.purpose === 'Other' ? formData.otherPurpose : formData.purpose,
-        callToAction: formData.callToAction === 'Other' ? formData.callToAction : formData.callToAction,
-      };
-  
-      try {
-        const response = await axios.post<{ encrypted_content: string }>('http://localhost:8000/email_generator/', payload, {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`,
-          },
-          withCredentials: true,
-        });
-  
-        if (response.data && response.data.encrypted_content) {
-          // Decrypt the content
-          const decryptedBytes = CryptoJS.AES.decrypt(response.data.encrypted_content, AES_SECRET_KEY, { iv: AES_IV });
-          const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8);
-          
-          if (!decryptedText) {
-            throw new Error('Decryption failed');
-          }
-  
-          setGeneratedEmail(decryptedText);
-          setError('');
-        } else {
-          setError('Failed to generate email. No content received.');
+        e.preventDefault();
+        setLoading(true);
+        setError(null);
+
+        try {
+            // Encrypt the payload
+            const payload = JSON.stringify({
+                ...formData,
+                purpose: formData.purpose === 'Other' ? formData.otherPurpose : formData.purpose,
+                callToAction: formData.callToAction === 'Other' ? formData.callToAction : formData.callToAction,
+            });
+            const encryptedPayload = CryptoJS.AES.encrypt(payload, AES_SECRET_KEY, { iv: AES_IV }).toString();
+
+            // Send encrypted payload to backend
+            const response = await axios.post<{ encrypted_content: string }>(
+                'http://localhost:8000/email_generator/',
+                { encrypted_content: encryptedPayload },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${accessToken}`,
+                    },
+                    withCredentials: true,
+                }
+            );
+
+            // Decrypt the response
+            if (response.data && response.data.encrypted_content) {
+                const decryptedBytes = CryptoJS.AES.decrypt(response.data.encrypted_content, AES_SECRET_KEY, { iv: AES_IV });
+                const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8);
+
+                if (!decryptedText) {
+                    throw new Error('Decryption failed');
+                }
+
+                const parsedContent = JSON.parse(decryptedText);
+                const formattedContent = parsedContent.generated_content.replace(/\n/g, '\n');
+
+                setGeneratedEmail(formattedContent);
+                setError('');
+            } else {
+                setError('Failed to generate email. No content received.');
+            }
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                const axiosError = error as AxiosError;
+                if (axiosError.response) {
+                    console.error('Error response data:', axiosError.response.data);
+                    console.error('Error response status:', axiosError.response.status);
+                    console.error('Error response headers:', axiosError.response.headers);
+                } else if (axiosError.request) {
+                    console.error('Error request:', axiosError.request);
+                }
+            } else {
+                console.error('An error occurred:', error);
+            }
+            setError('Failed to generate email. Please try again.');
+        } finally {
+            setLoading(false);
         }
-      } catch (error) {
-        if (axios.isAxiosError(error)) {
-          // AxiosError type assertion
-          const axiosError = error as AxiosError;
-          if (axiosError.response) {
-            console.error('Error response data:', axiosError.response.data);
-            console.error('Error response status:', axiosError.response.status);
-            console.error('Error response headers:', axiosError.response.headers);
-          } else if (axiosError.request) {
-            console.error('Error request:', axiosError.request);
-          }
-        } else {
-          // Generic error handling
-          console.error('An error occurred:', error);
-        }
-        setError('Failed to generate email. Please try again.');
-      } finally {
-        setLoading(false);
-      }
     };
+  
   
     return (
       <>

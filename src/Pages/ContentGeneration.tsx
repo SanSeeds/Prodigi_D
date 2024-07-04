@@ -84,7 +84,8 @@ function ContentGenerationService() {
           throw new Error('Decryption failed');
         }
 
-        setGeneratedContent(decryptedText);
+        const parsedContent = JSON.parse(decryptedText);
+        setGeneratedContent(parsedContent.generated_content);
       } else {
         setError('Failed to generate content. No content received.');
       }

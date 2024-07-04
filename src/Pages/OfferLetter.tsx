@@ -1,12 +1,14 @@
-import { useState, useContext } from "react";
+import { useState, useContext } from 'react';
 import axios from 'axios';
-import Navbar from "../components/Global/Navbar";
+import Navbar from '../components/Global/Navbar';
 import { AuthContext } from '../components/Global/AuthContext';
-import CryptoJS from 'crypto-js'; // Import CryptoJS for AES decryption
-import TranslateComponent from "../components/Global/TranslateContent";
+import CryptoJS from 'crypto-js';
+import { saveAs } from 'file-saver';
+import { Document, IRunOptions, Packer, Paragraph, TextRun } from 'docx';
+import TranslateComponent from '../components/Global/TranslateContent';
 
-const AES_IV = CryptoJS.enc.Base64.parse("KRP1pDpqmy2eJos035bxdg==");
-const AES_SECRET_KEY = CryptoJS.enc.Base64.parse("HOykfyW56Uesby8PTgxtSA==");
+const AES_IV = CryptoJS.enc.Base64.parse('3G1Nd0j0l5BdPmJh01NrYg==');
+const AES_SECRET_KEY = CryptoJS.enc.Base64.parse('XGp3hFq56Vdse3sLTtXyQQ==');
 
 function OfferLetterService() {
   const [formData, setFormData] = useState({
@@ -37,7 +39,7 @@ function OfferLetterService() {
   const authContext = useContext(AuthContext);
 
   if (!authContext) {
-    throw new Error("AuthContext must be used within an AuthProvider");
+    throw new Error('AuthContext must be used within an AuthProvider');
   }
 
   const { accessToken } = authContext;
@@ -53,27 +55,44 @@ function OfferLetterService() {
     setGeneratedContent('');
     setTranslatedContent('');
     try {
-      const response = await axios.post('http://127.0.0.1:8000/offer_letter_generator/', formData, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
-        },
-      });
+      // Encrypt the payload
+      const payload = JSON.stringify(formData);
+      const encryptedPayload = CryptoJS.AES.encrypt(payload, AES_SECRET_KEY, { iv: AES_IV }).toString();
+
+      const response = await axios.post(
+        'http://127.0.0.1:8000/offer_letter_generator/',
+        { encrypted_content: encryptedPayload },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`,
+          },
+        }
+      );
 
       const data = response.data;
       if (response.status === 200) {
         const encryptedContent = data.encrypted_content;
-        console.log('Encrypted Content:', encryptedContent); // Debugging statement
+        console.log('Encrypted Content:', encryptedContent);
 
         // Ensure the content is base64 decoded before decrypting
         const decryptedBytes = CryptoJS.AES.decrypt(encryptedContent, AES_SECRET_KEY, { iv: AES_IV });
         const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8);
-        
+
         if (!decryptedText) {
           throw new Error('Decryption failed');
         }
 
-        setGeneratedContent(decryptedText);
+        // Parse the decrypted JSON
+        const parsedContent = JSON.parse(decryptedText);
+
+        // Convert \n to actual new lines in the string
+        const formattedContent = parsedContent.generated_content.replace(/\\n/g, '\n');
+
+        setGeneratedContent(formattedContent);
+
+        // Generate and download the DOCX file
+        generateDocx(formattedContent);
       } else {
         setError(data.error || 'An error occurred');
       }
@@ -92,6 +111,25 @@ function OfferLetterService() {
       }
       setError('An error occurred');
     }
+  };
+
+  const generateDocx = (content: string | IRunOptions) => {
+    const doc = new Document({
+      sections: [
+        {
+          properties: {},
+          children: [
+            new Paragraph({
+              children: [new TextRun(content)],
+            }),
+          ],
+        },
+      ],
+    });
+
+    Packer.toBlob(doc).then((blob) => {
+      saveAs(blob, 'OfferLetter.docx');
+    });
   };
 
   return (
@@ -320,9 +358,6 @@ function OfferLetterService() {
           <pre className="whitespace-pre-wrap">{translatedContent}</pre>
         </div>
       )}
-      
-
-      
     </>
   );
 }
