@@ -4,6 +4,8 @@ import axios, { AxiosError } from 'axios';
 import { AuthContext } from '../components/Global/AuthContext';
 import TranslateComponent from '../components/Global/TranslateContent';
 import CryptoJS from 'crypto-js';
+import { saveAs } from 'file-saver';
+import { Document, Packer, Paragraph, TextRun } from 'docx';
 
 const AES_IV = CryptoJS.enc.Base64.parse("3G1Nd0j0l5BdPmJh01NrYg==");
 const AES_SECRET_KEY = CryptoJS.enc.Base64.parse("XGp3hFq56Vdse3sLTtXyQQ==");
@@ -45,12 +47,12 @@ function BusinessProposalService() {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
-  
+
     try {
       // Encrypt the payload
       const payload = JSON.stringify(formData);
       const encryptedPayload = CryptoJS.AES.encrypt(payload, AES_SECRET_KEY, { iv: AES_IV }).toString();
-  
+
       // Send encrypted payload to backend
       const response = await axios.post<{ encrypted_content: string }>(
         'http://localhost:8000/business_proposal_generator/',
@@ -63,19 +65,19 @@ function BusinessProposalService() {
           withCredentials: true,
         }
       );
-  
+
       // Decrypt the response
       if (response.data && response.data.encrypted_content) {
         const decryptedBytes = CryptoJS.AES.decrypt(response.data.encrypted_content, AES_SECRET_KEY, { iv: AES_IV });
         const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8);
-  
+
         if (!decryptedText) {
           throw new Error('Decryption failed');
         }
-  
+
         const parsedContent = JSON.parse(decryptedText);
-        const formattedContent = parsedContent.generated_content.replace(/\n/g, '<br>');
-  
+        const formattedContent = parsedContent.generated_content.replace(/\n/g, '\n');
+
         setGeneratedContent(formattedContent);
       } else {
         setError('Failed to generate business proposal. No content received.');
@@ -98,8 +100,45 @@ function BusinessProposalService() {
       setError('Failed to generate business proposal. Please try again.');
     }
   };
-  
 
+  const generateDocx = (content: string, fileName: string) => {
+    const doc = new Document({
+      sections: [
+        {
+          properties: {},
+          children: [
+            new Paragraph({
+              children: [new TextRun(content)],
+            }),
+          ],
+        },
+      ],
+    });
+
+    Packer.toBlob(doc).then((blob) => {
+      saveAs(blob, `${fileName}.docx`);
+    });
+  };
+
+  const handleDownload = (type: string) => () => {
+    try {
+      if (type === 'generated') {
+        if (!generatedContent) {
+          throw new Error('No generated content available.');
+        }
+        generateDocx(generatedContent, 'Generated_Business_Proposal');
+      } else if (type === 'translated') {
+        if (!translatedContent) {
+          throw new Error('No translated content available.');
+        }
+        generateDocx(translatedContent, 'Translated_Business_Proposal');
+      } else {
+        throw new Error('Invalid download type.');
+      }
+    } catch (error) {
+      // setError(error.message);
+    }
+  };
 
 
   return (
@@ -251,36 +290,52 @@ function BusinessProposalService() {
             </div>
           </form>
           {generatedContent && (
-          <div className="mt-6 p-6">
-            <h2 className="text-2xl font-bold mb-4">Generated Content</h2>
-            <div dangerouslySetInnerHTML={{ __html: generatedContent }} />
-          </div>
-        )}
-        {generatedContent && (
-          <TranslateComponent
-            generatedContent={generatedContent}
-            setTranslatedContent={setTranslatedContent} // Now storing translated content in its own state
-            setError={setError}
-          />
-        )}
-        {translatedContent && (
-          <div className="mt-6 p-6">
-            <h2 className="text-2xl font-bold mb-4">Translated Content</h2>
-            <div dangerouslySetInnerHTML={{ __html: translatedContent }} />
-          </div>
-        )}
-        {error && (
-          <div className="mt-6 p-6 border rounded bg-red-100 text-red-800 shadow-sm">
-            <p>{error}</p>
-          </div>
-        )}
+            <div className="mt-6 p-6">
+              <h2 className="text-2xl font-bold mb-4">Generated Content</h2>
+               <p className="text-black whitespace-pre-line">
+            {generatedContent.split('**').map((part, index) => {
+              if (index % 2 === 1) {
+                return <strong key={index}>{part}</strong>;
+              } else {
+                return part;
+              }
+            })}
+          </p>
+          <button
+            onClick={handleDownload('generated')}
+            className="w-full p-3 bg-green-500 text-white font-bold rounded shadow-sm mt-4"
+          >
+            Download Generated Content
+          </button>
+              {/* Translate component */}
+              <TranslateComponent
+                generatedContent={generatedContent}
+                setTranslatedContent={setTranslatedContent}
+                setError={setError}
+              />
+            </div>
+          )}
+          {translatedContent && (
+            <div className="mt-6 p-6">
+              <h2 className="text-2xl font-bold mb-4">Translated Content</h2>
+              <div dangerouslySetInnerHTML={{ __html: translatedContent }} />
+              <button
+            onClick={handleDownload('translated')}
+            className="w-full p-3 bg-green-500 text-white font-bold rounded shadow-sm mt-4"
+          >
+            Download Translated Content
+          </button>
+            </div>
+          )}
+          {error && (
+            <div className="mt-6 p-6 border rounded bg-red-100 text-red-800 shadow-sm">
+              <p>{error}</p>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
-  </>
-
-  
-);
+    </>
+  );
 }
-
 
 export default BusinessProposalService;

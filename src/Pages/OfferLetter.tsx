@@ -35,7 +35,6 @@ function OfferLetterService() {
   const [generatedContent, setGeneratedContent] = useState('');
   const [translatedContent, setTranslatedContent] = useState('');
   const [error, setError] = useState('');
-
   const authContext = useContext(AuthContext);
 
   if (!authContext) {
@@ -54,8 +53,8 @@ function OfferLetterService() {
     setError('');
     setGeneratedContent('');
     setTranslatedContent('');
+
     try {
-      // Encrypt the payload
       const payload = JSON.stringify(formData);
       const encryptedPayload = CryptoJS.AES.encrypt(payload, AES_SECRET_KEY, { iv: AES_IV }).toString();
 
@@ -65,7 +64,7 @@ function OfferLetterService() {
         {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`,
+            Authorization: `Bearer ${accessToken}`,
           },
         }
       );
@@ -73,9 +72,6 @@ function OfferLetterService() {
       const data = response.data;
       if (response.status === 200) {
         const encryptedContent = data.encrypted_content;
-        console.log('Encrypted Content:', encryptedContent);
-
-        // Ensure the content is base64 decoded before decrypting
         const decryptedBytes = CryptoJS.AES.decrypt(encryptedContent, AES_SECRET_KEY, { iv: AES_IV });
         const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8);
 
@@ -83,37 +79,20 @@ function OfferLetterService() {
           throw new Error('Decryption failed');
         }
 
-        // Parse the decrypted JSON
         const parsedContent = JSON.parse(decryptedText);
-
-        // Convert \n to actual new lines in the string
         const formattedContent = parsedContent.generated_content.replace(/\\n/g, '\n');
 
         setGeneratedContent(formattedContent);
-
-        // Generate and download the DOCX file
-        generateDocx(formattedContent);
       } else {
         setError(data.error || 'An error occurred');
       }
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        const axiosError = error;
-        if (axiosError.response) {
-          console.error('Error response data:', axiosError.response.data);
-          console.error('Error response status:', axiosError.response.status);
-          console.error('Error response headers:', axiosError.response.headers);
-        } else if (axiosError.request) {
-          console.error('Error request:', axiosError.request);
-        }
-      } else {
-        console.log(error);
-      }
+      console.error('Error generating offer letter:', error);
       setError('An error occurred');
     }
   };
 
-  const generateDocx = (content: string | IRunOptions) => {
+  const generateDocx = (content: string | IRunOptions, fileName: string) => {
     const doc = new Document({
       sections: [
         {
@@ -127,10 +106,32 @@ function OfferLetterService() {
       ],
     });
 
-    Packer.toBlob(doc).then((blob) => {
-      saveAs(blob, 'OfferLetter.docx');
+    return Packer.toBlob(doc).then((blob) => {
+      saveAs(blob, `${fileName}.docx`);
     });
   };
+
+  const handleDownload = (type: string) => () => {
+    try {
+      if (type === 'generated') {
+        if (!generatedContent) {
+          throw new Error('No generated content available.');
+        }
+        generateDocx(generatedContent, 'Generated_Offer_Letter');
+      } else if (type === 'translated') {
+        if (!translatedContent) {
+          throw new Error('No translated content available.');
+        }
+        generateDocx(translatedContent, 'Translated_Offer_Letter');
+      } else {
+        throw new Error('Invalid download type.');
+      }
+    } catch (error) {
+      // setError(error.message);
+    }
+  };
+
+
 
   return (
     <>
@@ -344,18 +345,41 @@ function OfferLetterService() {
       {generatedContent && (
         <div className="w-full max-w-3xl mx-auto p-8 mt-6 rounded">
           <h2 className="text-xl font-bold mb-4">Generated Offer Letter</h2>
-          <p className="whitespace-pre-wrap">{generatedContent}</p>
-          <TranslateComponent 
-            generatedContent={generatedContent} 
-            setTranslatedContent={setTranslatedContent} 
-            setError={setError}
-          />
+          <p className="text-black whitespace-pre-line">
+            {generatedContent.split('**').map((part, index) => {
+              if (index % 2 === 1) {
+                return <strong key={index}>{part}</strong>;
+              } else {
+                return part;
+              }
+            })}
+          </p>
+          <button
+            onClick={handleDownload('generated')}
+            className="w-full p-3 bg-green-500 text-white font-bold rounded shadow-sm mt-4"
+          >
+            Download Generated Content
+          </button>
+          <TranslateComponent
+              generatedContent={generatedContent}
+              setTranslatedContent={setTranslatedContent}
+              setError={setError}
+            />
+      
         </div>
       )}
       {translatedContent && (
         <div className="w-full max-w-3xl mx-auto p-8 mt-6 rounded">
           <h2 className="text-xl font-bold mb-4">Translated Offer Letter</h2>
           <pre className="whitespace-pre-wrap">{translatedContent}</pre>
+          <div className="flex justify-center mt-4">
+          <button
+            onClick={handleDownload('translated')}
+            className="w-full p-3 bg-green-500 text-white font-bold rounded shadow-sm mt-4"
+          >
+            Download Translated Content
+          </button>
+          </div>
         </div>
       )}
     </>

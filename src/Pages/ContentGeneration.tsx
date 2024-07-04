@@ -4,6 +4,8 @@ import Navbar from '../components/Global/Navbar';
 import { AuthContext } from '../components/Global/AuthContext';
 import TranslateComponent from '../components/Global/TranslateContent';
 import CryptoJS from 'crypto-js';
+import { saveAs } from 'file-saver';
+import { Document, IRunOptions, Packer, Paragraph, TextRun } from 'docx';
 
 // Encryption keys
 const ENCRYPTION_IV = CryptoJS.enc.Base64.parse("3G1Nd0j0l5BdPmJh01NrYg==");
@@ -103,6 +105,45 @@ function ContentGenerationService() {
         console.error(error);
       }
       setError('Failed to generate content. Please try again.');
+    }
+  };
+
+  const generateDocx = (content: string | IRunOptions, fileName: string) => {
+    const doc = new Document({
+      sections: [
+        {
+          properties: {},
+          children: [
+            new Paragraph({
+              children: [new TextRun(content)],
+            }),
+          ],
+        },
+      ],
+    });
+
+    Packer.toBlob(doc).then((blob) => {
+      saveAs(blob, `${fileName}.docx`);
+    });
+  };
+
+  const handleDownload = (type: string) => () => {
+    try {
+      if (type === 'generated') {
+        if (!generatedContent) {
+          throw new Error('No generated content available.');
+        }
+        generateDocx(generatedContent, 'Generated_Content');
+      } else if (type === 'translated') {
+        if (!translatedContent) {
+          throw new Error('No translated content available.');
+        }
+        generateDocx(translatedContent, 'Translated_Content');
+      } else {
+        throw new Error('Invalid download type.');
+      }
+    } catch (error) {
+      // setError(error.message);
     }
   };
 
@@ -209,9 +250,9 @@ function ContentGenerationService() {
             />
           </div>
         </div>
-        <div className="grid grid-cols-1 gap-6 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div className="flex flex-col">
-            <label className="mb-2 font-bold text-black">SEO and Keywords</label>
+            <label className="mb-2 font-bold text-black">SEO Keywords</label>
             <input
               type="text"
               name="seoKeywords"
@@ -220,10 +261,8 @@ function ContentGenerationService() {
               className="p-3 border rounded shadow-sm text-black"
             />
           </div>
-        </div>
-        <div className="grid grid-cols-1 gap-6 mb-6">
           <div className="flex flex-col">
-            <label className="mb-2 font-bold text-black">References and Sources</label>
+            <label className="mb-2 font-bold text-black">References and Resources</label>
             <input
               type="text"
               name="references"
@@ -233,36 +272,53 @@ function ContentGenerationService() {
             />
           </div>
         </div>
-        <div className="flex justify-center">
-          <button type="submit" className="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-            Generate
-          </button>
-        </div>
+        <button
+          type="submit"
+          className="w-full p-3 bg-blue-500 text-white font-bold rounded shadow-sm"
+        >
+          Generate Content
+        </button>
       </form>
+      {error && <div className="text-red-500 text-center mt-4">{error}</div>}
       {generatedContent && (
-        <div className="w-full max-w-3xl mx-auto p-8 mt-6">
-          <h2 className="text-xl font-bold mb-4">Generated Content</h2>
-          <p className="text-black whitespace-pre-line">{generatedContent}</p>
+         <div className="w-full max-w-3xl mx-auto p-8 mt-6 rounded">
+          <h2 className="text-xl font-bold mb-4">Generated Content:</h2>
+          <p className="text-black whitespace-pre-line">
+            {generatedContent.split('**').map((part, index) => {
+              if (index % 2 === 1) {
+                return <strong key={index}>{part}</strong>;
+              } else {
+                return part;
+              }
+            })}
+          </p>
+          <button
+            onClick={handleDownload('generated')}
+            className="w-full p-3 bg-green-500 text-white font-bold rounded shadow-sm mt-4"
+          >
+            Download Generated Content
+          </button>
           <TranslateComponent 
             generatedContent={generatedContent} 
             setTranslatedContent={setTranslatedContent} 
-            setError={setError} 
+            setError={setError}
           />
         </div>
       )}
       {translatedContent && (
-        <div className="w-full max-w-3xl mx-auto p-8 mt-6">
-          <h2 className="text-xl font-bold mb-4">Translated Content</h2>
-          <p className="text-black whitespace-pre-line">{translatedContent}</p>
-        </div>
-      )}
-      {error && (
-        <div className="w-full max-w-3xl mx-auto p-8 mt-6 border rounded shadow-sm text-red-500">
-          {error}
+         <div className="w-full max-w-3xl mx-auto p-8 mt-6 rounded">
+          <h2 className="text-xl font-bold mb-4">Translated Content:</h2>
+          <p className="whitespace-pre-line">{translatedContent}</p>
+          <button
+            onClick={handleDownload('translated')}
+            className="w-full p-3 bg-green-500 text-white font-bold rounded shadow-sm mt-4"
+          >
+            Download Translated Content
+          </button>
         </div>
       )}
     </>
   );
-};
+}
 
 export default ContentGenerationService;

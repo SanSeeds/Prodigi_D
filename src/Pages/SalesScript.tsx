@@ -1,9 +1,11 @@
-import { useState, useContext } from 'react';
+import { useState, useContext, ChangeEvent, FormEvent } from 'react';
 import axios from 'axios';
 import Navbar from '../components/Global/Navbar';
 import { AuthContext } from '../components/Global/AuthContext';
 import TranslateComponent from '../components/Global/TranslateContent';
 import CryptoJS from 'crypto-js';
+import { saveAs } from 'file-saver';
+import { Document, IRunOptions, Packer, Paragraph, TextRun } from 'docx';
 
 // Encryption keys
 const ENCRYPTION_IV = CryptoJS.enc.Base64.parse("3G1Nd0j0l5BdPmJh01NrYg==");
@@ -37,20 +39,18 @@ function SalesScriptService() {
 
   const { accessToken } = authContext;
 
-  const handleChange = (e: { target: { name: any; value: any; }; }) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = async (e: { preventDefault: () => void; }) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
     setGeneratedScript('');
     setTranslatedScript('');
 
     try {
-      console.log('Form data:', formData);
-      
       // Encrypt the payload
       const payload = JSON.stringify(formData);
       const encryptedPayload = CryptoJS.AES.encrypt(payload, ENCRYPTION_SECRET_KEY, { iv: ENCRYPTION_IV }).toString();
@@ -65,7 +65,6 @@ function SalesScriptService() {
         }
       );
 
-      console.log('Response:', response.data);
       if (response.data && response.data.encrypted_content) {
         // Decrypt the content
         const decryptedBytes = CryptoJS.AES.decrypt(response.data.encrypted_content, ENCRYPTION_SECRET_KEY, { iv: ENCRYPTION_IV });
@@ -83,21 +82,50 @@ function SalesScriptService() {
         setError('Failed to generate sales script. No content received.');
       }
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        const axiosError = error;
-        if (axiosError.response) {
-          console.error('Error response data:', axiosError.response.data);
-          console.error('Error response status:', axiosError.response.status);
-          console.error('Error response headers:', axiosError.response.headers);
-        } else if (axiosError.request) {
-          console.error('Error request:', axiosError.request);
-        }
-      } else {
-        console.error(error);
-      }
+      console.error('Error generating sales script:', error);
       setError('Failed to generate sales script. Please try again.');
     }
   };
+
+  const generateDocx = (content: string | IRunOptions, fileName: string) => {
+    const doc = new Document({
+      sections: [
+        {
+          properties: {},
+          children: [
+            new Paragraph({
+              children: [new TextRun(content)],
+            }),
+          ],
+        },
+      ],
+    });
+
+    Packer.toBlob(doc).then((blob) => {
+      saveAs(blob, `${fileName}.docx`);
+    });
+  };
+
+  const handleDownload = (type: string) => () => {
+    try {
+      if (type === 'generated') {
+        if (!generatedScript) {
+          throw new Error('No generated script available.');
+        }
+        generateDocx(generatedScript, 'Generated_Sales_Script');
+      } else if (type === 'translated') {
+        if (!translatedScript) {
+          throw new Error('No translated script available.');
+        }
+        generateDocx(translatedScript, 'Translated_Sales_Script');
+      } else {
+        throw new Error('Invalid download type.');
+      }
+    } catch (error) {
+      // setError(error.message);
+    }
+  };
+
 
   return (
     <>
@@ -247,17 +275,41 @@ function SalesScriptService() {
       {generatedScript && (
         <div className="w-full max-w-3xl mx-auto p-8 rounded mt-6">
           <h2 className="text-xl font-bold mb-4 text-black">Generated Sales Script</h2>
-          <p className="whitespace-pre-line text-black">{generatedScript}</p>
+          <p className="text-black whitespace-pre-line">
+            {generatedScript.split('**').map((part, index) => {
+            if (index % 2 === 1) {
+                return <strong key={index}>{part}</strong>;
+            } else {
+                return part;
+            }
+            })}
+        </p>
+
+          <button
+            onClick={handleDownload('generated')}
+            className="w-full bg-green-500 text-white font-bold py-3 px-6 rounded shadow-md hover:bg-green-600 mt-4"
+          >
+            Download Generated Sales Script
+          </button>
+          {/* Translate component */}
           <TranslateComponent 
             setError={setError} 
-            generatedContent={generatedScript} setTranslatedContent={setTranslatedScript} />
+            generatedContent={generatedScript} 
+            setTranslatedContent={setTranslatedScript} 
+          />
         </div>
       )}
-     
       {translatedScript && (
         <div className="w-full max-w-3xl mx-auto p-8  rounded">
           <h2 className="text-xl font-bold mb-4 text-black">Translated Sales Script</h2>
           <p className="whitespace-pre-line text-black">{translatedScript}</p>
+          {/* Download button for translated script */}
+          <button
+            onClick={handleDownload('translated')}
+            className="w-full bg-green-500 text-white font-bold py-3 px-6 rounded shadow-md hover:bg-green-600 mt-4"
+          >
+            Download Translated Sales Script
+          </button>
         </div>
       )}
     </>
