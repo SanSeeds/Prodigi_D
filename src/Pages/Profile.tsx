@@ -1,6 +1,8 @@
 import React, { useContext, useEffect, useState, FormEvent } from 'react';
 import Navbar from '../components/Global/Navbar';
 import { AuthContext } from '../components/Global/AuthContext';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const ProfileForm: React.FC = () => {
     const authContext = useContext(AuthContext);
@@ -72,7 +74,13 @@ const ProfileForm: React.FC = () => {
             });
 
             if (response.ok) {
-                console.log('Password changed successfully');
+                toast.success('Password changed successfully');
+                setFormData((prevData) => ({
+                    ...prevData,
+                    currentPassword: '',
+                    newPassword: '',
+                    confirmNewPassword: ''
+                }));
             } else {
                 const data = await response.json();
                 setPasswordError(data.error);
@@ -180,6 +188,7 @@ const ProfileForm: React.FC = () => {
                     </button>
                 </form>
             </div>
+            <ToastContainer position="bottom-right" autoClose={5000} />
         </>
     );
 };

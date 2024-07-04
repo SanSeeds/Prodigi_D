@@ -2,11 +2,13 @@ import React, { useState, useContext, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../components/Global/AuthContext';
 import Nav from "../components/Global/Nav";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const SignInForm: React.FC = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
+    const [, setError] = useState('');
     const navigate = useNavigate();
     const authContext = useContext(AuthContext);
 
@@ -35,12 +37,15 @@ const SignInForm: React.FC = () => {
                 const refreshToken = data.refresh;
                 const expiry = 3600 * 3600; // 1 hour in seconds
                 login({ email }, accessToken, refreshToken, expiry); // Save user info and tokens to context
+                toast.success('Logged in successfully');
                 navigate('/dashboard');
             } else {
+                toast.error(data.error);
                 setError(data.error);
             }
         } catch (error) {
             console.error('Error during sign in:', error);
+            toast.error('Something went wrong. Please try again later.');
             setError('Something went wrong. Please try again later.');
         }
     };
@@ -55,7 +60,6 @@ const SignInForm: React.FC = () => {
                             <h1 className="text-xl font-bold leading-tight tracking-tight text-center md:text-2xl dark:text-black">
                                 Sign In
                             </h1>
-                            {error && <div className="text-red-500 text-center">{error}</div>}
                             <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit}>
                                 <div>
                                     <label htmlFor="email" className="block mb-2 text-sm font-medium text-black dark:text-black">User Email</label>
@@ -94,6 +98,7 @@ const SignInForm: React.FC = () => {
                     </div>
                 </div>
             </section>
+            <ToastContainer position="bottom-right" autoClose={5000} />
         </>
     );
 };
