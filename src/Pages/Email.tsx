@@ -3,6 +3,13 @@ import Navbar from '../components/Global/Navbar';
 import axios, { AxiosError } from 'axios';
 import { AuthContext } from '../components/Global/AuthContext';
 import TranslateComponent from '../components/Global/TranslateContent';
+import CryptoJS from 'crypto-js';
+import { saveAs } from 'file-saver';
+import { Document, Packer, Paragraph, TextRun } from 'docx';
+import { toast, ToastContainer } from 'react-toastify';
+
+const AES_IV = CryptoJS.enc.Base64.parse("3G1Nd0j0l5BdPmJh01NrYg==");
+const AES_SECRET_KEY = CryptoJS.enc.Base64.parse("XGp3hFq56Vdse3sLTtXyQQ==");
 
 function EmailService() {
   const [formData, setFormData] = useState({
@@ -55,9 +62,14 @@ function EmailService() {
     setError(null);
 
     try {
+      // Encrypt the payload
+      const payload = JSON.stringify(formData);
+      const encryptedPayload = CryptoJS.AES.encrypt(payload, AES_SECRET_KEY, { iv: AES_IV }).toString();
+
+      // Send encrypted payload to backend
       const response = await axios.post(
         'http://localhost:8000/email_generator/',
-        formData,
+        { encrypted_content: encryptedPayload },
         {
           headers: {
             'Content-Type': 'application/json',
@@ -67,9 +79,23 @@ function EmailService() {
         }
       );
 
-      if (response.data && response.data.generated_content) {
-        setGeneratedEmail(response.data.generated_content);
-        setError('');
+      // Decrypt the response
+      if (response.data && response.data.encrypted_content) {
+        const decryptedBytes = CryptoJS.AES.decrypt(response.data.encrypted_content, AES_SECRET_KEY, { iv: AES_IV });
+        const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8);
+
+        if (!decryptedText) {
+          throw new Error('Decryption failed');
+        }
+
+        const parsedContent = JSON.parse(decryptedText);
+
+        if (parsedContent.generated_content) {
+          setGeneratedEmail(parsedContent.generated_content);
+          toast.success('Email sent successfully!');
+        } else {
+          setError('Failed to generate email. No content received.');
+        }
       } else {
         setError('Failed to generate email. No content received.');
       }
@@ -82,13 +108,54 @@ function EmailService() {
           console.error('Error response headers:', axiosError.response.headers);
         } else if (axiosError.request) {
           console.error('Error request:', axiosError.request);
+        } else {
+          console.error('Error:', axiosError.message);
         }
       } else {
-        console.error('An error occurred:', error);
+        console.error('Error:', error);
       }
       setError('Failed to generate email. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const generateDocx = (content: string, fileName: string) => {
+    const doc = new Document({
+      sections: [
+        {
+          properties: {},
+          children: [
+            new Paragraph({
+              children: [new TextRun(content)],
+            }),
+          ],
+        },
+      ],
+    });
+
+    Packer.toBlob(doc).then((blob) => {
+      saveAs(blob, `${fileName}.docx`);
+    });
+  };
+
+  const handleDownload = (type: string) => () => {
+    try {
+      if (type === 'generated') {
+        if (!generatedEmail) {
+          throw new Error('No generated content available.');
+        }
+        generateDocx(generatedEmail, 'Generated_Email');
+      } else if (type === 'translated') {
+        if (!translatedEmail) {
+          throw new Error('No translated content available.');
+        }
+        generateDocx(translatedEmail, 'Translated_Email');
+      } else {
+        throw new Error('Invalid download type.');
+      }
+    } catch (error) {
+      // setError(error.message);
     }
   };
 
@@ -203,7 +270,7 @@ function EmailService() {
                 <option value="Reply">Reply</option>
                 <option value="A Meeting">A Meeting</option>
                 <option value="A Phone Call">A Phone Call</option>
-                <option value="Other">Other</option>
+                <option value="A Confirmation">A Confirmation</option>
               </select>
             </div>
             <div className="mb-6">
@@ -216,7 +283,7 @@ function EmailService() {
               />
             </div>
             <div className="mb-6">
-              <label className="block mb-2 font-bold text-black">Priority Level (Required)</label>
+              <label className="block mb-2 font-bold text-black">Priority Level (Optional)</label>
               <select
                 name="priorityLevel"
                 value={formData.priorityLevel}
@@ -237,36 +304,56 @@ function EmailService() {
                 className="w-full p-3 border rounded shadow-sm text-gray-700"
               />
             </div>
-            <div className="flex justify-center">
+            <div className="mb-6 text-center">
               <button
                 type="submit"
                 className="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
                 disabled={loading}
               >
-                {loading ? "Generating..." : "Generate Email"}
+                {loading ? 'Generating...' : 'Generate Email'}
               </button>
             </div>
           </form>
-          {error && <div className="mt-4 text-red-500">{error}</div>}
+        
+          {error && <p className="text-center text-red-500">{error}</p>}
           {generatedEmail && (
-            <div className="mt-4 p-4 rounded">
-              <h2 className="text-2xl font-bold mb-2">Generated Email</h2>
-              <pre className="whitespace-pre-wrap">{generatedEmail}</pre>
-              <TranslateComponent 
-                generatedContent={generatedEmail} 
-                setTranslatedContent={setTranslatedEmail} 
-                setError={setError} 
+            <div className="mt-6 p-6 ">
+              <h2 className="text-2xl font-bold text-black mb-4">Generated Email:</h2>
+              <p className="whitespace-pre-line text-black">{generatedEmail}</p>
+              <button
+                onClick={handleDownload('generated')}
+                className="w-full p-3 bg-green-500 text-white font-bold rounded shadow-sm mt-4"
+              >
+                Download Generated Email
+              </button>
+              <TranslateComponent
+                generatedContent={generatedEmail}
+                setTranslatedContent={setTranslatedEmail}
+                setError={setError}
               />
             </div>
           )}
           {translatedEmail && (
-            <div className="mt-4 p-4 rounded">
-              <h2 className="text-2xl font-bold mb-2">Translated Email</h2>
-              <pre className="whitespace-pre-wrap">{translatedEmail}</pre>
+            <div className="mt-6 p-6">
+              <h2 className="text-2xl font-bold mb-4">Translated Content</h2>
+              <div dangerouslySetInnerHTML={{ __html: translatedEmail }} />
+              <button
+                onClick={handleDownload('translated')}
+                className="w-full p-3 bg-green-500 text-white font-bold rounded shadow-sm mt-4"
+              >
+                Download Translated Email
+              </button>
+            </div>
+          )}
+          {error && (
+            <div className="mt-6 p-6 border rounded bg-red-100 text-red-800 shadow-sm">
+              <p>{error}</p>
             </div>
           )}
         </div>
       </div>
+      <ToastContainer position="bottom-right" autoClose={5000} />
+
     </>
   );
 }
