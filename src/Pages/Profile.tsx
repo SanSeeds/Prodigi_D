@@ -26,6 +26,7 @@ const ProfileForm: React.FC = () => {
     });
 
     const [passwordError, setPasswordError] = useState('');
+    const [errors, setErrors] = useState<string[]>([]);
 
     useEffect(() => {
         if (user) {
@@ -33,8 +34,40 @@ const ProfileForm: React.FC = () => {
                 ...prevData,
                 email: user.email
             }));
+            fetchProfileData();
         }
     }, [user]);
+
+    const fetchProfileData = async () => {
+        try {
+            const response = await fetch('http://127.0.0.1:8000/profile/', {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            });
+    
+            if (response.ok) {
+                const data = await response.json();
+                setFormData({
+                    firstName: data.user.first_name,
+                    lastName: data.user.last_name,
+                    email: data.user.email,
+                    bio: data.profile.bio,
+                    location: data.profile.location,
+                    birthDate: data.profile.birth_date,
+                    currentPassword: '',
+                    newPassword: '',
+                    confirmNewPassword: ''
+                });
+            } else {
+                toast.error('Failed to fetch profile data');
+            }
+        } catch (error) {
+            console.error('Error fetching profile data:', error);
+            toast.error('Something went wrong. Please try again later.');
+        }
+    };
+    
 
     const handleChange = (e: { target: { name: any; value: any; }; }) => {
         const { name, value } = e.target;
@@ -44,10 +77,36 @@ const ProfileForm: React.FC = () => {
         });
     };
 
-    const handleProfileUpdate = (e: FormEvent) => {
+    const handleProfileUpdate = async (e: FormEvent) => {
         e.preventDefault();
-        // Handle profile update logic here
-        console.log('Profile Updated:', formData);
+        setErrors([]);
+        try {
+            const response = await fetch('http://127.0.0.1:8000/profile/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`
+                },
+                body: JSON.stringify({
+                    first_name: formData.firstName,
+                    last_name: formData.lastName,
+                    bio: formData.bio,
+                    location: formData.location,
+                    birth_date: formData.birthDate
+                })
+            });
+
+            if (response.ok) {
+                toast.success('Profile updated successfully');
+                fetchProfileData(); // Optionally refetch the profile data
+            } else {
+                const data = await response.json();
+                setErrors(data.errors || ['Failed to update profile']);
+            }
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            toast.error('Something went wrong. Please try again later.');
+        }
     };
 
     const handleChangePassword = async (e: FormEvent) => {
@@ -122,6 +181,7 @@ const ProfileForm: React.FC = () => {
                         onChange={handleChange}
                         placeholder="Email"
                         className="w-full px-3 py-2 border rounded-md"
+                        readOnly
                     />
                     <input
                         type="text"
@@ -153,6 +213,13 @@ const ProfileForm: React.FC = () => {
                         Update Profile
                     </button>
                 </form>
+                {errors.length > 0 && (
+                    <div className="text-red-500 mt-4">
+                        {errors.map((error, index) => (
+                            <p key={index}>{error}</p>
+                        ))}
+                    </div>
+                )}
                 <h2 className="mt-8 text-xl font-bold">Change Password</h2>
                 <form onSubmit={handleChangePassword} className="space-y-4 mt-4">
                     <input

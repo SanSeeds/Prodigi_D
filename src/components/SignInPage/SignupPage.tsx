@@ -1,6 +1,7 @@
-import React, { useState,  FormEvent } from 'react';
+import React, { useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Nav from "../Global/Nav";
+import toast, { Toaster } from 'react-hot-toast';  // Add this import
 
 const SignUpForm: React.FC = () => {
     const [username, setUsername] = useState('');
@@ -9,8 +10,6 @@ const SignUpForm: React.FC = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
-
-
 
     const handleSubmit = async (event: FormEvent) => {
         event.preventDefault();
@@ -32,8 +31,10 @@ const SignUpForm: React.FC = () => {
 
             const data = await response.json();
             if (response.ok) {
-                // Handle successful signup
-                navigate('/dashboard');
+                toast.success('User created successfully. Redirecting to sign in...');
+                setTimeout(() => {
+                    navigate('/signin');
+                }, 3000);  // Redirect after 3 seconds
             } else {
                 setError(data.error || 'Signup failed.');
             }
@@ -46,6 +47,7 @@ const SignUpForm: React.FC = () => {
     return (
         <>
             <Nav />
+            <Toaster />  {/* Add this line */}
             <section>
                 <div className="flex flex-col items-center justify-start mt-12 px-6 py-8 mx-auto md:h-screen lg:py-0">
                     <div className="w-full rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0">
