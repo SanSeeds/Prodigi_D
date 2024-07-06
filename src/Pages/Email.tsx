@@ -8,7 +8,6 @@ import { saveAs } from 'file-saver';
 import { Document, Packer, Paragraph, TextRun } from 'docx';
 import { toast, ToastContainer } from 'react-toastify';
 
-
 // Constants for AES encryption
 const AES_IV = CryptoJS.enc.Base64.parse("3G1Nd0j0l5BdPmJh01NrYg==");
 const AES_SECRET_KEY = CryptoJS.enc.Base64.parse("XGp3hFq56Vdse3sLTtXyQQ==");
@@ -126,27 +125,35 @@ function EmailService() {
     }
   };
 
-  // Generating a .docx file
+  // Generating a .docx file with proper formatting
   const generateDocx = (content: string, fileName: string) => {
+    const lines = content.split('\n');
+    const docContent = lines.map(line => {
+      const parts = line.split('**');
+      const textRuns = parts.map((part, index) => {
+        if (index % 2 === 1) {
+          return new TextRun({ text: part, bold: true });
+        } else {
+          return new TextRun(part);
+        }
+      });
+      return new Paragraph({ children: textRuns });
+    });
+
     const doc = new Document({
       sections: [
         {
           properties: {},
-          children: [
-            new Paragraph({
-              children: [new TextRun(content)],
-            }),
-          ],
+          children: docContent,
         },
       ],
     });
 
-    Packer.toBlob(doc).then((blob) => {
+    Packer.toBlob(doc).then(blob => {
       saveAs(blob, `${fileName}.docx`);
     });
   };
-
-  //Download Generated and translated content
+  // Download Generated and translated content
   const handleDownload = (type: string) => () => {
     try {
       if (type === 'generated') {
@@ -166,7 +173,6 @@ function EmailService() {
       // setError(error.message);
     }
   };
-
   return (
     <>
       <Navbar />

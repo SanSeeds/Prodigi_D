@@ -5,7 +5,7 @@ import { AuthContext } from '../components/Global/AuthContext';
 import TranslateComponent from '../components/Global/TranslateContent';
 import CryptoJS from 'crypto-js';
 import { saveAs } from 'file-saver';
-import { Document, IRunOptions, Packer, Paragraph, TextRun } from 'docx';
+import { Document, Packer, Paragraph, TextRun } from 'docx';
 
 // AES encryption constants
 const ENCRYPTION_IV = CryptoJS.enc.Base64.parse("3G1Nd0j0l5BdPmJh01NrYg==");
@@ -113,22 +113,31 @@ function ContentGenerationService() {
     }
   };
 
-  // Generate a .docx file from content
-  const generateDocx = (content: string | IRunOptions, fileName: string) => {
+  // Generate a .docx file from content with proper formatting
+  const generateDocx = (content: string, fileName: string) => {
+    const lines = content.split('\n');
+    const docContent = lines.map(line => {
+      const parts = line.split('**');
+      const textRuns = parts.map((part, index) => {
+        if (index % 2 === 1) {
+          return new TextRun({ text: part, bold: true });
+        } else {
+          return new TextRun(part);
+        }
+      });
+      return new Paragraph({ children: textRuns });
+    });
+
     const doc = new Document({
       sections: [
         {
           properties: {},
-          children: [
-            new Paragraph({
-              children: [new TextRun(content)],
-            }),
-          ],
+          children: docContent,
         },
       ],
     });
 
-    Packer.toBlob(doc).then((blob) => {
+    Packer.toBlob(doc).then(blob => {
       saveAs(blob, `${fileName}.docx`);
     });
   };
@@ -150,6 +159,7 @@ function ContentGenerationService() {
         throw new Error('Invalid download type.');
       }
     } catch (error) {
+      console.error(error);
       // setError(error.message);
     }
   };

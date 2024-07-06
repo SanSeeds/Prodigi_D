@@ -109,19 +109,30 @@ function BusinessProposalService() {
 
   // Generate a .docx file from content
   const generateDocx = (content: string, fileName: string) => {
+    // Split the content into lines
     const lines = content.split('\n');
+    
+    // Map each line to a Paragraph object with TextRun children
     const docContent = lines.map(line => {
+      // Split the line into parts based on '**'
       const parts = line.split('**');
+      
+      // Map each part to a TextRun, alternating bold and regular text
       const textRuns = parts.map((part, index) => {
         if (index % 2 === 1) {
+          // Create a bold TextRun for odd indices
           return new TextRun({ text: part, bold: true });
         } else {
+          // Create a regular TextRun for even indices
           return new TextRun(part);
         }
       });
+      
+      // Return a Paragraph with the TextRun children
       return new Paragraph({ children: textRuns });
     });
   
+    // Create a new Document with the Paragraphs
     const doc = new Document({
       sections: [
         {
@@ -131,6 +142,7 @@ function BusinessProposalService() {
       ],
     });
   
+    // Generate a Blob from the Document and trigger a download
     Packer.toBlob(doc).then(blob => {
       saveAs(blob, `${fileName}.docx`);
     });
@@ -139,20 +151,27 @@ function BusinessProposalService() {
   // Handle download button clicks
   const handleDownload = (type: string) => () => {
     try {
+      // Check the type of download and generate the corresponding document
       if (type === 'generated') {
+        // Check if generated content is available
         if (!generatedContent) {
           throw new Error('No generated content available.');
         }
+        // Generate and download the document with the generated content
         generateDocx(generatedContent, 'Generated_Business_Proposal');
       } else if (type === 'translated') {
+        // Check if translated content is available
         if (!translatedContent) {
           throw new Error('No translated content available.');
         }
+        // Generate and download the document with the translated content
         generateDocx(translatedContent, 'Translated_Business_Proposal');
       } else {
+        // Handle invalid download type
         throw new Error('Invalid download type.');
       }
     } catch (error) {
+      // Log the error message (commented out)
       // console.error(error.message);
     }
   };
