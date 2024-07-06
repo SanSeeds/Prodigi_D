@@ -8,10 +8,13 @@ import { saveAs } from 'file-saver';
 import { Document, Packer, Paragraph, TextRun } from 'docx';
 import { toast, ToastContainer } from 'react-toastify';
 
+
+// Constants for AES encryption
 const AES_IV = CryptoJS.enc.Base64.parse("3G1Nd0j0l5BdPmJh01NrYg==");
 const AES_SECRET_KEY = CryptoJS.enc.Base64.parse("XGp3hFq56Vdse3sLTtXyQQ==");
 
 function EmailService() {
+  // State management for form data, loading state, error messages, generated email, and translated email
   const [formData, setFormData] = useState({
     purpose: '',
     otherPurpose: '',
@@ -39,6 +42,7 @@ function EmailService() {
   const [generatedEmail, setGeneratedEmail] = useState<string>('');
   const [translatedEmail, setTranslatedEmail] = useState<string>('');
 
+  // Accessing the authentication context
   const authContext = useContext(AuthContext);
 
   if (!authContext) {
@@ -47,6 +51,7 @@ function EmailService() {
 
   const { accessToken } = authContext;
 
+  // Handling input changes
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     if (type === 'checkbox' && e.target instanceof HTMLInputElement) {
@@ -56,17 +61,18 @@ function EmailService() {
     }
   };
 
+  // Handling form submission
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
     try {
-      // Encrypt the payload
+      // Encrypting the payload
       const payload = JSON.stringify(formData);
       const encryptedPayload = CryptoJS.AES.encrypt(payload, AES_SECRET_KEY, { iv: AES_IV }).toString();
 
-      // Send encrypted payload to backend
+      // Sending the encrypted payload to the backend
       const response = await axios.post(
         'http://localhost:8000/email_generator/',
         { encrypted_content: encryptedPayload },
@@ -79,7 +85,7 @@ function EmailService() {
         }
       );
 
-      // Decrypt the response
+      // Decrypting the response
       if (response.data && response.data.encrypted_content) {
         const decryptedBytes = CryptoJS.AES.decrypt(response.data.encrypted_content, AES_SECRET_KEY, { iv: AES_IV });
         const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8);
@@ -120,6 +126,7 @@ function EmailService() {
     }
   };
 
+  // Generating a .docx file
   const generateDocx = (content: string, fileName: string) => {
     const doc = new Document({
       sections: [
@@ -139,6 +146,7 @@ function EmailService() {
     });
   };
 
+  //Download Generated and translated content
   const handleDownload = (type: string) => () => {
     try {
       if (type === 'generated') {

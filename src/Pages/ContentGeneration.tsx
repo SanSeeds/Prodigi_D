@@ -7,11 +7,12 @@ import CryptoJS from 'crypto-js';
 import { saveAs } from 'file-saver';
 import { Document, IRunOptions, Packer, Paragraph, TextRun } from 'docx';
 
-// Encryption keys
+// AES encryption constants
 const ENCRYPTION_IV = CryptoJS.enc.Base64.parse("3G1Nd0j0l5BdPmJh01NrYg==");
 const ENCRYPTION_SECRET_KEY = CryptoJS.enc.Base64.parse("XGp3hFq56Vdse3sLTtXyQQ==");
 
 function ContentGenerationService() {
+  // State for form data
   const [formData, setFormData] = useState({
     companyInfo: '',
     purpose: 'Inform',
@@ -25,22 +26,25 @@ function ContentGenerationService() {
     references: ''
   });
 
+  // State for generated content, translated content, and errors
   const [generatedContent, setGeneratedContent] = useState('');
   const [translatedContent, setTranslatedContent] = useState('');
   const [error, setError] = useState('');
-  const authContext = useContext(AuthContext);
 
+  // Get the access token from AuthContext
+  const authContext = useContext(AuthContext);
   if (!authContext) {
     throw new Error("AuthContext must be used within an AuthProvider");
   }
-
   const { accessToken } = authContext;
 
+  // Handle form input changes
   const handleChange = (e: { target: { name: any; value: any; }; }) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
+  // Handle form submission
   const handleSubmit = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
     setError('');
@@ -66,6 +70,7 @@ function ContentGenerationService() {
 
       const encryptedPayload = CryptoJS.AES.encrypt(payload, ENCRYPTION_SECRET_KEY, { iv: ENCRYPTION_IV }).toString();
 
+      // Send encrypted payload to backend
       const response = await axios.post('http://localhost:8000/content_generator/', 
         { encrypted_content: encryptedPayload },
         {
@@ -78,7 +83,7 @@ function ContentGenerationService() {
 
       console.log('Response:', response.data);
       if (response.data && response.data.encrypted_content) {
-        // Decrypt the content
+        // Decrypt the content received from the backend
         const decryptedBytes = CryptoJS.AES.decrypt(response.data.encrypted_content, ENCRYPTION_SECRET_KEY, { iv: ENCRYPTION_IV });
         const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8);
         
@@ -108,6 +113,7 @@ function ContentGenerationService() {
     }
   };
 
+  // Generate a .docx file from content
   const generateDocx = (content: string | IRunOptions, fileName: string) => {
     const doc = new Document({
       sections: [
@@ -127,6 +133,7 @@ function ContentGenerationService() {
     });
   };
 
+  // Handle download button clicks
   const handleDownload = (type: string) => () => {
     try {
       if (type === 'generated') {

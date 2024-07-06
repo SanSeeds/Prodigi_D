@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../Global/AuthContext';
 import Nav from "../Global/Nav";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const ForgetPassword: React.FC = () => {
     const [email, setEmail] = useState('');
@@ -14,50 +16,87 @@ const ForgetPassword: React.FC = () => {
     const navigate = useNavigate();
     const authContext = useContext(AuthContext);
 
+    // Check if the authContext is not defined
     if (!authContext) {
+        // If authContext is not defined, throw an error
         throw new Error("AuthContext must be used within an AuthProvider");
     }
 
+    // Function to handle email submission for OTP
     const handleEmailSubmit = async (event: FormEvent) => {
+        // Prevent the default form submission behavior
         event.preventDefault();
+        
+        // Clear any previous error messages
         setError('');
 
         try {
+            // Make a POST request to send the OTP to the provided email
             const response = await axios.post('http://localhost:8000/send_otp/', {
+                // Include the email in the request body
                 email: email,
             });
 
+            // Check if the response status is 200 (success)
             if (response.status === 200) {
-                setStep(2); // Move to step 2 to enter OTP and new password
+                // Move to step 2 to enter OTP and new password
+                setStep(2);
             } else {
+                // If response is not successful, set an error message
                 setError(response.data.error);
+                toast.error(response.data.error);
             }
         } catch (error) {
+            // Log any errors that occur during the send OTP process
             console.error('Error during send OTP:', error);
+            
+            // Set a generic error message
             setError('Something went wrong. Please try again later.');
+            toast.error('Something went wrong. Please try again later.');
         }
     };
 
+    // Function to handle reset password form submission
     const handleResetPasswordSubmit = async (event: FormEvent) => {
+        // Prevent the default form submission behavior
         event.preventDefault();
+        
+        // Clear any previous error messages
         setError('');
 
+        // Check if the new password and confirm password match
+        if (newPassword !== confirmPassword) {
+            setError('Passwords do not match.');
+            toast.error('Passwords do not match.');
+            return;
+        }
+
         try {
+            // Make a POST request to reset the password
             const response = await axios.post('http://127.0.0.1:8000/reset_password/', {
+                // Include the email, OTP, new password, and confirm password in the request body
                 email: email,
                 otp: otp,
                 new_password: newPassword,
                 confirm_password: confirmPassword,
             });
 
+            // Check if the response status is 200 (success)
             if (response.status === 200) {
-                navigate('/signin'); // Redirect to sign-in page
+                // Redirect to the sign-in page
+                navigate('/signin');
             } else {
+                // If response is not successful, set an error message
                 setError(response.data.error);
+                toast.error(response.data.error);
             }
         } catch (error) {
+            // Log any errors that occur during the reset password process
             console.error('Error during reset password:', error);
+            
+            // Set a generic error message
             setError('Something went wrong. Please try again later.');
+            toast.error('Something went wrong. Please try again later.');
         }
     };
 
@@ -140,6 +179,8 @@ const ForgetPassword: React.FC = () => {
                     </div>
                 </div>
             </section>
+      <ToastContainer position="bottom-right" autoClose={5000} />
+
         </>
     );
 };

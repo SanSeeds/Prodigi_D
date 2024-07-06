@@ -7,119 +7,136 @@ import CryptoJS from 'crypto-js';
 import { saveAs } from 'file-saver';
 import { Document, Packer, Paragraph, TextRun } from 'docx';
 
-const AES_IV = CryptoJS.enc.Base64.parse("3G1Nd0j0l5BdPmJh01NrYg==");
-const AES_SECRET_KEY = CryptoJS.enc.Base64.parse("XGp3hFq56Vdse3sLTtXyQQ==");
+// AES encryption constants
+const AES_IV = CryptoJS.enc.Base64.parse("3G1Nd0j0l5BdPmJh01NrYg=="); // Initialize IV for AES encryption
+const AES_SECRET_KEY = CryptoJS.enc.Base64.parse("XGp3hFq56Vdse3sLTtXyQQ=="); // Initialize secret key for AES encryption
 
 function BusinessProposalService() {
+  // State for form data
   const [formData, setFormData] = useState({
-    businessIntroduction: '',
-    proposalObjective: 'New Project',
-    numberOfWords: '',
-    scopeOfWork: '',
-    projectPhases: '',
-    expectedOutcomes: '',
-    innovativeApproaches: '',
-    technologiesUsed: '',
-    targetAudience: '',
-    budgetInformation: '',
-    timeline: '',
-    benefitsToRecipient: '',
-    closingRemarks: '',
+    businessIntroduction: '', // Business introduction field
+    proposalObjective: 'New Project', // Proposal objective field
+    numberOfWords: '', // Number of words field
+    scopeOfWork: '', // Scope of work field
+    projectPhases: '', // Project phases field
+    expectedOutcomes: '', // Expected outcomes field
+    innovativeApproaches: '', // Innovative approaches field
+    technologiesUsed: '', // Technologies used field
+    targetAudience: '', // Target audience field
+    budgetInformation: '', // Budget information field
+    timeline: '', // Timeline field
+    benefitsToRecipient: '', // Benefits to recipient field
+    closingRemarks: '', // Closing remarks field
   });
 
-  const [error, setError] = useState<string | null>(null);
-  const [generatedContent, setGeneratedContent] = useState<string>('');
-  const [translatedContent, setTranslatedContent] = useState<string>('');
+  // State for handling errors, generated content, and translated content
+  const [error, setError] = useState<string | null>(null); // Error state
+  const [generatedContent, setGeneratedContent] = useState<string>(''); // Generated content state
+  const [translatedContent, setTranslatedContent] = useState<string>(''); // Translated content state
 
-  const authContext = useContext(AuthContext);
-
+  // Get the access token from AuthContext
+  const authContext = useContext(AuthContext); // Access authentication context
   if (!authContext) {
-    throw new Error('AuthContext must be used within an AuthProvider');
+    throw new Error('AuthContext must be used within an AuthProvider'); // Throw error if AuthContext is not available
   }
+  const { accessToken } = authContext; // Destructure access token from authContext
 
-  const { accessToken } = authContext;
-
+  // Handle form input changes
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    const { name, value } = e.target; // Destructure name and value from event target
+    setFormData({ ...formData, [name]: value }); // Update formData state with new value
   };
 
+  // Handle form submission
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError(null);
+    e.preventDefault(); // Prevent default form submission
+    setError(null); // Reset error state
 
     try {
-      // Encrypt the payload
-      const payload = JSON.stringify(formData);
-      const encryptedPayload = CryptoJS.AES.encrypt(payload, AES_SECRET_KEY, { iv: AES_IV }).toString();
+      // Encrypt the form data
+      const payload = JSON.stringify(formData); // Convert formData to JSON string
+      const encryptedPayload = CryptoJS.AES.encrypt(payload, AES_SECRET_KEY, { iv: AES_IV }).toString(); // Encrypt the payload
 
-      // Send encrypted payload to backend
+      // Send the encrypted payload to the backend
       const response = await axios.post<{ encrypted_content: string }>(
-        'http://localhost:8000/business_proposal_generator/',
-        { encrypted_content: encryptedPayload },
+        'http://localhost:8000/business_proposal_generator/', // API endpoint
+        { encrypted_content: encryptedPayload }, // Request payload
         {
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json', // Set content type header
+            'Authorization': `Bearer ${accessToken}`, // Set authorization header
           },
-          withCredentials: true,
+          withCredentials: true, // Include credentials in the request
         }
       );
 
       // Decrypt the response
       if (response.data && response.data.encrypted_content) {
-        const decryptedBytes = CryptoJS.AES.decrypt(response.data.encrypted_content, AES_SECRET_KEY, { iv: AES_IV });
-        const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8);
+        const decryptedBytes = CryptoJS.AES.decrypt(response.data.encrypted_content, AES_SECRET_KEY, { iv: AES_IV }); // Decrypt the response
+        const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8); // Convert decrypted bytes to UTF-8 string
 
         if (!decryptedText) {
-          throw new Error('Decryption failed');
+          throw new Error('Decryption failed'); // Throw error if decryption fails
         }
 
-        const parsedContent = JSON.parse(decryptedText);
-        const formattedContent = parsedContent.generated_content.replace(/\n/g, '\n');
+        // Parse the decrypted content
+        const parsedContent = JSON.parse(decryptedText); // Parse decrypted text to JSON
+        const formattedContent = parsedContent.generated_content.replace(/\n/g, '\n'); // Format content with newlines
 
-        setGeneratedContent(formattedContent);
+        setGeneratedContent(formattedContent); // Update generatedContent state
       } else {
-        setError('Failed to generate business proposal. No content received.');
+        setError('Failed to generate business proposal. No content received.'); // Set error if no content received
       }
     } catch (error) {
+      // Handle errors
       if (axios.isAxiosError(error)) {
-        const axiosError = error as AxiosError;
+        const axiosError = error as AxiosError; // Cast error to AxiosError
         if (axiosError.response) {
-          console.error('Error response data:', axiosError.response.data);
-          console.error('Error response status:', axiosError.response.status);
-          console.error('Error response headers:', axiosError.response.headers);
+          console.error('Error response data:', axiosError.response.data); // Log response data
+          console.error('Error response status:', axiosError.response.status); // Log response status
+          console.error('Error response headers:', axiosError.response.headers); // Log response headers
         } else if (axiosError.request) {
-          console.error('Error request:', axiosError.request);
+          console.error('Error request:', axiosError.request); // Log request error
         } else {
-          console.error('Error:', axiosError.message);
+          console.error('Error:', axiosError.message); // Log general error message
         }
       } else {
-        console.error('Error:', error);
+        console.error('Error:', error); // Log non-Axios error
       }
-      setError('Failed to generate business proposal. Please try again.');
+      setError('Failed to generate business proposal. Please try again.'); // Set error message
     }
   };
 
+  // Generate a .docx file from content
   const generateDocx = (content: string, fileName: string) => {
+    const lines = content.split('\n');
+    const docContent = lines.map(line => {
+      const parts = line.split('**');
+      const textRuns = parts.map((part, index) => {
+        if (index % 2 === 1) {
+          return new TextRun({ text: part, bold: true });
+        } else {
+          return new TextRun(part);
+        }
+      });
+      return new Paragraph({ children: textRuns });
+    });
+  
     const doc = new Document({
       sections: [
         {
           properties: {},
-          children: [
-            new Paragraph({
-              children: [new TextRun(content)],
-            }),
-          ],
+          children: docContent,
         },
       ],
     });
-
-    Packer.toBlob(doc).then((blob) => {
+  
+    Packer.toBlob(doc).then(blob => {
       saveAs(blob, `${fileName}.docx`);
     });
   };
-
+  
+  // Handle download button clicks
   const handleDownload = (type: string) => () => {
     try {
       if (type === 'generated') {
@@ -136,10 +153,9 @@ function BusinessProposalService() {
         throw new Error('Invalid download type.');
       }
     } catch (error) {
-      // setError(error.message);
+      // console.error(error.message);
     }
   };
-
 
   return (
     <>
@@ -283,59 +299,60 @@ function BusinessProposalService() {
             <div className="flex justify-center">
               <button
                 type="submit"
-                className="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                className="w-full p-3 bg-blue-500 text-white font-bold rounded shadow-sm"
               >
                 Generate
               </button>
             </div>
           </form>
-          {generatedContent && (
-            <div className="mt-6 p-6">
-              <h2 className="text-2xl font-bold mb-4">Generated Content</h2>
-               <p className="text-black whitespace-pre-line">
-            {generatedContent.split('**').map((part, index) => {
-              if (index % 2 === 1) {
-                return <strong key={index}>{part}</strong>;
-              } else {
-                return part;
-              }
-            })}
-          </p>
-          <button
-            onClick={handleDownload('generated')}
-            className="w-full p-3 bg-green-500 text-white font-bold rounded shadow-sm mt-4"
-          >
-            Download Generated Content
-          </button>
+          {generatedContent && ( // Check if generatedContent exists
+            <div className="mt-6 p-6"> 
+              <h2 className="text-2xl font-bold mb-4">Generated Content</h2> 
+              {/* Render generated content with bold formatting for parts between '**' */}
+              <p className="text-black whitespace-pre-line">
+                {generatedContent.split('**').map((part, index) => { // Split content by '**' and map over parts
+                  if (index % 2 === 1) { // Check if index is odd, indicating bold content
+                    return <strong key={index}>{part}</strong>; // Render part in bold
+                  } else {
+                    return part; // Render part as plain text
+                  }
+                })}
+              </p>
+              <button
+                onClick={handleDownload('generated')} // Call handleDownload for generated content on click
+                className="w-full p-3 bg-green-500 text-white font-bold rounded shadow-sm mt-4"
+              >
+                Download Generated Content
+              </button>
               {/* Translate component */}
               <TranslateComponent
-                generatedContent={generatedContent}
-                setTranslatedContent={setTranslatedContent}
-                setError={setError}
+                generatedContent={generatedContent} // Pass generatedContent to TranslateComponent
+                setTranslatedContent={setTranslatedContent} // Pass setTranslatedContent function to TranslateComponent
+                setError={setError} // Pass setError function to TranslateComponent
               />
             </div>
           )}
-          {translatedContent && (
+          {translatedContent && ( // Check if translatedContent exists
             <div className="mt-6 p-6">
               <h2 className="text-2xl font-bold mb-4">Translated Content</h2>
               <div dangerouslySetInnerHTML={{ __html: translatedContent }} />
               <button
-            onClick={handleDownload('translated')}
-            className="w-full p-3 bg-green-500 text-white font-bold rounded shadow-sm mt-4"
-          >
-            Download Translated Content
-          </button>
+                onClick={handleDownload('translated')} // Call handleDownload for translated content on click
+                className="w-full p-3 bg-green-500 text-white font-bold rounded shadow-sm mt-4"
+              >
+                Download Translated Content
+                    </button>
             </div>
           )}
-          {error && (
-            <div className="mt-6 p-6 border rounded bg-red-100 text-red-800 shadow-sm">
-              <p>{error}</p>
+          {error && ( // Check if error exists
+            <div className="mt-6 p-6 border rounded bg-red-100 text-red-800 shadow-sm"> 
+              <p>{error}</p> 
             </div>
           )}
-        </div>
-      </div>
-    </>
-  );
-}
+          </div>
+          </div>
+          </>
+      );
+    }
 
 export default BusinessProposalService;

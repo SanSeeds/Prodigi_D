@@ -1,53 +1,69 @@
 import React, { useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Nav from "../Global/Nav";
-import toast, { Toaster } from 'react-hot-toast';  // Add this import
+import toast, { Toaster } from 'react-hot-toast'; 
 
 const SignUpForm: React.FC = () => {
-    const [username, setUsername] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [error, setError] = useState('');
-    const navigate = useNavigate();
-
-    const handleSubmit = async (event: FormEvent) => {
-        event.preventDefault();
-        setError('');
-
-        if (password !== confirmPassword) {
-            setError('Passwords do not match.');
-            return;
+// State to store the username input value
+const [username, setUsername] = useState('');
+// State to store the email input value
+const [email, setEmail] = useState('');
+// State to store the password input value
+const [password, setPassword] = useState('');
+// State to store the confirm password input value
+const [confirmPassword, setConfirmPassword] = useState('');
+// State to store any error messages
+const [error, setError] = useState('');
+// Hook to navigate programmatically
+const navigate = useNavigate();
+// Function to handle form submission
+const handleSubmit = async (event: FormEvent) => {
+    // Prevent the default form submission behavior
+    event.preventDefault();
+    // Clear any previous error messages
+    setError('');
+    // Check if the password and confirm password match
+    if (password !== confirmPassword) {
+        // If passwords do not match, set an error message
+        setError('Passwords do not match.');
+        return;
+    }
+    try {
+        // Make a POST request to the server to add a new user
+        const response = await fetch('http://127.0.0.1:8000/add_user/', {
+            method: 'POST', // Set the request method to POST
+            headers: {
+                'Content-Type': 'application/json', // Set the request headers to indicate JSON data
+            },
+            body: JSON.stringify({ username, email, password, confirm_password: confirmPassword }), // Include the form data in the request body
+        });
+        // Parse the response data as JSON
+        const data = await response.json();
+        // If the response is successful (status code 200-299)
+        if (response.ok) {
+            // Show a success message and notify the user
+            toast.success('User created successfully. Redirecting to sign in...');
+            // Redirect to the sign-in page after a 3-second delay
+            setTimeout(() => {
+                navigate('/signin');
+            }, 3000); // 3000 milliseconds = 3 seconds
+        } else {
+            // If the response is not successful, set an error message
+            setError(data.error || 'Signup failed.');
         }
-
-        try {
-            const response = await fetch('http://127.0.0.1:8000/add_user/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ username, email, password, confirm_password: confirmPassword }),
-            });
-
-            const data = await response.json();
-            if (response.ok) {
-                toast.success('User created successfully. Redirecting to sign in...');
-                setTimeout(() => {
-                    navigate('/signin');
-                }, 3000);  // Redirect after 3 seconds
-            } else {
-                setError(data.error || 'Signup failed.');
-            }
-        } catch (error) {
-            console.error('Error during sign up:', error);
-            setError('Something went wrong. Please try again later.');
-        }
-    };
+    } catch (error) {
+        // Log any errors that occur during the sign-up process
+        console.error('Error during sign up:', error);
+        
+        // Set a generic error message
+        setError('Something went wrong. Please try again later.');
+    }
+};
 
     return (
         <>
             <Nav />
-            <Toaster />  {/* Add this line */}
+            <Toaster /> 
             <section>
                 <div className="flex flex-col items-center justify-start mt-12 px-6 py-8 mx-auto md:h-screen lg:py-0">
                     <div className="w-full rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0">
