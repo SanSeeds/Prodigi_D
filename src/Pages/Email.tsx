@@ -1,19 +1,19 @@
-import { useState, useContext, ChangeEvent, FormEvent } from 'react';
-import Navbar from '../components/Global/Navbar';
-import axios, { AxiosError } from 'axios';
-import { AuthContext } from '../components/Global/AuthContext';
-import TranslateComponent from '../components/Global/TranslateContent';
-import CryptoJS from 'crypto-js';
-import { saveAs } from 'file-saver';
-import { Document, Packer, Paragraph, TextRun } from 'docx';
-import { toast, ToastContainer } from 'react-toastify';
+import { useState, useContext, ChangeEvent, FormEvent } from 'react'; // Importing necessary hooks and types from React
+import Navbar from '../components/Global/Navbar'; // Importing the Navbar component
+import axios, { AxiosError } from 'axios'; // Importing axios for making HTTP requests and AxiosError for error handling
+import { AuthContext } from '../components/Global/AuthContext'; // Importing AuthContext for authentication
+import TranslateComponent from '../components/Global/TranslateContent'; // Importing a translation component
+import CryptoJS from 'crypto-js'; // Importing CryptoJS for encryption and decryption
+import { saveAs } from 'file-saver'; // Importing file-saver for saving files
+import { Document, Packer, Paragraph, TextRun } from 'docx'; // Importing docx for generating .docx files
+import { toast, ToastContainer } from 'react-toastify'; // Importing react-toastify for notifications
 
 // Constants for AES encryption
-const AES_IV = CryptoJS.enc.Base64.parse("3G1Nd0j0l5BdPmJh01NrYg==");
-const AES_SECRET_KEY = CryptoJS.enc.Base64.parse("XGp3hFq56Vdse3sLTtXyQQ==");
+const AES_IV = CryptoJS.enc.Base64.parse("3G1Nd0j0l5BdPmJh01NrYg=="); // Initialization vector for AES encryption
+const AES_SECRET_KEY = CryptoJS.enc.Base64.parse("XGp3hFq56Vdse3sLTtXyQQ=="); // Secret key for AES encryption
 
 function EmailService() {
-  // State management for form data, loading state, error messages, generated email, and translated email
+    // State management for form data, loading state, error messages, generated email, and translated email
   const [formData, setFormData] = useState({
     purpose: '',
     otherPurpose: '',
@@ -36,23 +36,24 @@ function EmailService() {
     closingRemarks: '',
   });
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [generatedEmail, setGeneratedEmail] = useState<string>('');
-  const [translatedEmail, setTranslatedEmail] = useState<string>('');
+  const [loading, setLoading] = useState(false); // Loading state
+  const [error, setError] = useState<string | null>(null); // Error state
+  const [generatedEmail, setGeneratedEmail] = useState<string>(''); // State for generated email content
+  const [translatedEmail, setTranslatedEmail] = useState<string>(''); // State for translated email content
 
   // Accessing the authentication context
-  const authContext = useContext(AuthContext);
+  const authContext = useContext(AuthContext); // Using useContext to get the authContext value
 
   if (!authContext) {
-    throw new Error('AuthContext must be used within an AuthProvider');
+    throw new Error('AuthContext must be used within an AuthProvider'); // Throwing an error if AuthContext is not provided
   }
 
-  const { accessToken } = authContext;
+  const { accessToken } = authContext; // Destructuring accessToken from authContext
 
   // Handling input changes
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
+    // Update formData based on input type
     if (type === 'checkbox' && e.target instanceof HTMLInputElement) {
       setFormData({ ...formData, [name]: e.target.checked });
     } else {
@@ -62,117 +63,122 @@ function EmailService() {
 
   // Handling form submission
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
+    e.preventDefault(); // Prevent default form submission
+    setLoading(true); // Set loading state to true
+    setError(null); // Clear any previous errors
 
     try {
       // Encrypting the payload
-      const payload = JSON.stringify(formData);
-      const encryptedPayload = CryptoJS.AES.encrypt(payload, AES_SECRET_KEY, { iv: AES_IV }).toString();
+      const payload = JSON.stringify(formData); // Convert form data to JSON string
+      const encryptedPayload = CryptoJS.AES.encrypt(payload, AES_SECRET_KEY, { iv: AES_IV }).toString(); // Encrypt payload using AES
 
       // Sending the encrypted payload to the backend
       const response = await axios.post(
         'http://localhost:8000/email_generator/',
-        { encrypted_content: encryptedPayload },
+        { encrypted_content: encryptedPayload }, // Send encrypted content in the request body
         {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`,
+            'Authorization': `Bearer ${accessToken}`, // Include access token in headers
           },
-          withCredentials: true,
+          withCredentials: true, // Send cookies with the request (if applicable)
         }
       );
 
       // Decrypting the response
       if (response.data && response.data.encrypted_content) {
-        const decryptedBytes = CryptoJS.AES.decrypt(response.data.encrypted_content, AES_SECRET_KEY, { iv: AES_IV });
-        const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8);
+        const decryptedBytes = CryptoJS.AES.decrypt(response.data.encrypted_content, AES_SECRET_KEY, { iv: AES_IV }); // Decrypt response
+        const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8); // Convert decrypted bytes to UTF-8 string
 
         if (!decryptedText) {
-          throw new Error('Decryption failed');
+          throw new Error('Decryption failed'); // Throw error if decryption fails
         }
 
-        const parsedContent = JSON.parse(decryptedText);
+        const parsedContent = JSON.parse(decryptedText); // Parse decrypted JSON content
 
         if (parsedContent.generated_content) {
-          setGeneratedEmail(parsedContent.generated_content);
-          toast.success('Email sent successfully!');
+          setGeneratedEmail(parsedContent.generated_content); // Set generated email content in state
+          toast.success('Email sent successfully!'); // Display success toast notification
         } else {
-          setError('Failed to generate email. No content received.');
+          setError('Failed to generate email. No content received.'); // Set error message if no content received
         }
       } else {
-        setError('Failed to generate email. No content received.');
+        setError('Failed to generate email. No content received.'); // Set error message if no content received
       }
     } catch (error) {
+      // Handle Axios errors
       if (axios.isAxiosError(error)) {
-        const axiosError = error as AxiosError;
+        const axiosError = error as AxiosError; // Cast error to AxiosError
         if (axiosError.response) {
-          console.error('Error response data:', axiosError.response.data);
-          console.error('Error response status:', axiosError.response.status);
-          console.error('Error response headers:', axiosError.response.headers);
+          console.error('Error response data:', axiosError.response.data); // Log error response data
+          console.error('Error response status:', axiosError.response.status); // Log error response status
+          console.error('Error response headers:', axiosError.response.headers); // Log error response headers
         } else if (axiosError.request) {
-          console.error('Error request:', axiosError.request);
+          console.error('Error request:', axiosError.request); // Log error request
         } else {
-          console.error('Error:', axiosError.message);
+          console.error('Error:', axiosError.message); // Log generic error message
         }
       } else {
-        console.error('Error:', error);
+        console.error('Error:', error); // Log generic error message
       }
-      setError('Failed to generate email. Please try again.');
+      setError('Failed to generate email. Please try again.'); // Set error message for user
     } finally {
-      setLoading(false);
+      setLoading(false); // Set loading state to false
     }
   };
 
   // Generating a .docx file with proper formatting
   const generateDocx = (content: string, fileName: string) => {
-    const lines = content.split('\n');
+    const lines = content.split('\n'); // Split content into lines
     const docContent = lines.map(line => {
-      const parts = line.split('**');
+      const parts = line.split('**'); // Split line into parts based on '**'
       const textRuns = parts.map((part, index) => {
         if (index % 2 === 1) {
-          return new TextRun({ text: part, bold: true });
+          return new TextRun({ text: part, bold: true }); // Create bold TextRun for odd-indexed parts
         } else {
-          return new TextRun(part);
+          return new TextRun(part); // Create regular TextRun for even-indexed parts
         }
       });
-      return new Paragraph({ children: textRuns });
+      return new Paragraph({ children: textRuns }); // Create paragraph with text runs
     });
 
     const doc = new Document({
       sections: [
         {
-          properties: {},
-          children: docContent,
+          properties: {}, // Section properties (none specified)
+          children: docContent, // Content of the document section
         },
       ],
     });
 
+    // Convert document to blob and save as .docx file
     Packer.toBlob(doc).then(blob => {
-      saveAs(blob, `${fileName}.docx`);
+      saveAs(blob, `${fileName}.docx`); // Save blob as .docx file with specified filename
     });
   };
-  // Download Generated and translated content
+
+  // Handle download of generated or translated content
   const handleDownload = (type: string) => () => {
     try {
       if (type === 'generated') {
         if (!generatedEmail) {
-          throw new Error('No generated content available.');
+          throw new Error('No generated content available.'); // Throw error if no generated content available
         }
-        generateDocx(generatedEmail, 'Generated_Email');
+        generateDocx(generatedEmail, 'Generated_Email'); // Generate .docx file for generated content
       } else if (type === 'translated') {
         if (!translatedEmail) {
-          throw new Error('No translated content available.');
+          throw new Error('No translated content available.'); // Throw error if no translated content available
         }
-        generateDocx(translatedEmail, 'Translated_Email');
+        generateDocx(translatedEmail, 'Translated_Email'); // Generate .docx file for translated content
       } else {
-        throw new Error('Invalid download type.');
+        throw new Error('Invalid download type.'); // Throw error for invalid download type
       }
     } catch (error) {
+      // Handle download errors (currently commented out)
       // setError(error.message);
     }
   };
+  
   return (
     <>
       <Navbar />

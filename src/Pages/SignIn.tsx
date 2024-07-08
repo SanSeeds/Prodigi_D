@@ -1,55 +1,60 @@
 import React, { useState, useContext, FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '../components/Global/AuthContext';
-import Nav from "../components/Global/Nav";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
+import { AuthContext } from '../components/Global/AuthContext'; // Import AuthContext for authentication
+import Nav from "../components/Global/Nav"; // Import Nav component
+import { ToastContainer, toast } from 'react-toastify'; // Import Toast components for notifications
+import 'react-toastify/dist/ReactToastify.css'; // Import Toast CSS
 
+// Define SignInForm component
 const SignInForm: React.FC = () => {
+    // Define state for email and password input fields
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [, setError] = useState('');
-    const navigate = useNavigate();
-    const authContext = useContext(AuthContext);
+    const [, setError] = useState(''); // Define state for error messages
+    const navigate = useNavigate(); // Initialize useNavigate for navigation
+    const authContext = useContext(AuthContext); // Access authentication context
 
+    // Ensure AuthContext is used within an AuthProvider
     if (!authContext) {
         throw new Error("AuthContext must be used within an AuthProvider");
     }
 
-    const { login } = authContext;
+    const { login } = authContext; // Destructure login function from authContext
 
+    // Handle form submission
     const handleSubmit = async (event: FormEvent) => {
-        event.preventDefault();
-        setError('');
+        event.preventDefault(); // Prevent default form submission
+        setError(''); // Reset error state
 
         try {
+            // Send POST request to sign-in endpoint
             const response = await fetch('http://127.0.0.1:8000/signin/', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/json', // Set content type to JSON
                 },
-                body: JSON.stringify({ email, password }),
+                body: JSON.stringify({ email, password }), // Send email and password in the request body
             });
 
-            const data = await response.json();
+            const data = await response.json(); // Parse the JSON response
             if (response.ok) {
-                const accessToken = data.access;
-                const refreshToken = data.refresh;
-                const expiry = 3600 * 3600; // 1 hour in seconds
+                const accessToken = data.access; // Extract access token from response
+                const refreshToken = data.refresh; // Extract refresh token from response
+                const expiry = 3600 * 3600; // Set token expiry time to 1 hour in seconds
                 login({ email }, accessToken, refreshToken, expiry); // Save user info and tokens to context
-                toast.success('Logged in successfully');
-                navigate('/dashboard');
+                toast.success('Logged in successfully'); // Show success toast
+                navigate('/dashboard'); // Navigate to dashboard
             } else {
-                toast.error(data.error);
-                setError(data.error);
+                toast.error(data.error); // Show error toast with response error message
+                setError(data.error); // Set error state with response error message
             }
         } catch (error) {
             console.error('Error during sign in:', error);
-            toast.error('Something went wrong. Please try again later.');
-            setError('Something went wrong. Please try again later.');
+            toast.error('Something went wrong. Please try again later.'); // Show error toast for generic error
+            setError('Something went wrong. Please try again later.'); // Set error state for generic error
         }
     };
-
+    
     return (
         <>
             <Nav />

@@ -7,14 +7,15 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const ForgetPassword: React.FC = () => {
-    const [email, setEmail] = useState('');
-    const [otp, setOtp] = useState('');
-    const [newPassword, setNewPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [error, setError] = useState('');
-    const [step, setStep] = useState(1); 
-    const navigate = useNavigate();
-    const authContext = useContext(AuthContext);
+    // State variables using useState hook
+    const [email, setEmail] = useState('');  // State for email input
+    const [otp, setOtp] = useState('');  // State for OTP input
+    const [newPassword, setNewPassword] = useState('');  // State for new password input
+    const [confirmPassword, setConfirmPassword] = useState('');  // State for confirm password input
+    const [, setError] = useState('');  // State for error messages
+    const [step, setStep] = useState(1);  // State for current step in password reset process
+    const navigate = useNavigate();  // Navigation hook for redirecting to different routes
+    const authContext = useContext(AuthContext);  // Accessing authentication context
 
     // Check if the authContext is not defined
     if (!authContext) {
@@ -110,7 +111,6 @@ const ForgetPassword: React.FC = () => {
                             <h1 className="text-xl font-bold leading-tight tracking-tight text-center md:text-2xl dark:text-black">
                                 {step === 1 ? 'Forgot Password?' : 'Reset Password'}
                             </h1>
-                            {error && <div className="text-red-500 text-center">{error}</div>}
                             <form className="space-y-4 md:space-y-6" onSubmit={step === 1 ? handleEmailSubmit : handleResetPasswordSubmit}>
                                 {step === 1 && (
                                     <div>

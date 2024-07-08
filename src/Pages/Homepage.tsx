@@ -4,12 +4,13 @@ import HeroSection from "../components/Homepage/Jumbotron ";
 import Services from "../components/Homepage/ServicesOffered";
 
 function Homepage() {
-  const scrollToServices = () => {
-    const servicesSection = document.getElementById('services-section');
-    if (servicesSection) {
-      servicesSection.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
+ // Function to scroll to services section
+ const scrollToServices = () => {
+  const servicesSection = document.getElementById('services-section'); // Get services section element by ID
+  if (servicesSection) {
+    servicesSection.scrollIntoView({ behavior: 'smooth' }); // Scroll to services section with smooth behavior
+  }
+};
 
   return (
     <>

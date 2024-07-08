@@ -1,17 +1,17 @@
-import { AuthContext } from './AuthContext';
-import Logo from '../../assets/logo.png';
-import '../../App.css';
-import { useContext } from 'react';
-import { Link } from 'react-router-dom'; // Import Link from react-router-dom
+import { AuthContext } from './AuthContext'; // Importing AuthContext from the AuthContext file
+import Logo from '../../assets/logo.png'; // Importing the logo image
+import '../../App.css'; // Importing global CSS file
+import { useContext } from 'react'; // Importing useContext hook from React
+import { Link } from 'react-router-dom'; // Import Link component from react-router-dom for navigation
 
 const Navbar = () => {
-  const authContext = useContext(AuthContext);
+  const authContext = useContext(AuthContext); // Using useContext to get the authContext value
 
   if (!authContext) {
-    throw new Error("AuthContext must be used within an AuthProvider");
+    throw new Error("AuthContext must be used within an AuthProvider"); // Throwing an error if AuthContext is not provided
   }
 
-  const { user, logout } = authContext;
+  const { user, logout } = authContext; // Destructuring user and logout from authContext
 
   return (
     <nav className='pl-7 pr-7'>

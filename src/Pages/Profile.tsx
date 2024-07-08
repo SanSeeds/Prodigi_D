@@ -1,18 +1,24 @@
+// Import necessary dependencies
 import React, { useContext, useEffect, useState, FormEvent } from 'react';
-import Navbar from '../components/Global/Navbar';
-import { AuthContext } from '../components/Global/AuthContext';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import Navbar from '../components/Global/Navbar'; // Import Navbar component
+import { AuthContext } from '../components/Global/AuthContext'; // Import AuthContext for authentication
+import { ToastContainer, toast } from 'react-toastify'; // Import Toast components for notifications
+import 'react-toastify/dist/ReactToastify.css'; // Import Toast CSS
 
+// Define ProfileForm component
 const ProfileForm: React.FC = () => {
+    // Access authentication context
     const authContext = useContext(AuthContext);
 
+    // Ensure AuthContext is used within an AuthProvider
     if (!authContext) {
         throw new Error("AuthContext must be used within an AuthProvider");
     }
 
+    // Destructure user and accessToken from authContext
     const { user, accessToken } = authContext;
 
+    // Define state for form data, password error, and general errors
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -25,27 +31,29 @@ const ProfileForm: React.FC = () => {
         confirmNewPassword: ''
     });
 
-    const [passwordError, setPasswordError] = useState('');
-    const [errors, setErrors] = useState<string[]>([]);
+    const [passwordError, setPasswordError] = useState(''); // State for password error
+    const [errors, setErrors] = useState<string[]>([]); // State for general errors
 
+    // Fetch profile data when user changes
     useEffect(() => {
         if (user) {
             setFormData((prevData) => ({
                 ...prevData,
-                email: user.email
+                email: user.email // Set email in form data
             }));
-            fetchProfileData();
+            fetchProfileData(); // Fetch profile data
         }
     }, [user]);
 
+    // Function to fetch profile data from the backend
     const fetchProfileData = async () => {
         try {
             const response = await fetch('http://127.0.0.1:8000/profile/', {
                 headers: {
-                    'Authorization': `Bearer ${accessToken}`
+                    'Authorization': `Bearer ${accessToken}` // Set authorization header
                 }
             });
-    
+
             if (response.ok) {
                 const data = await response.json();
                 setFormData({
@@ -60,15 +68,15 @@ const ProfileForm: React.FC = () => {
                     confirmNewPassword: ''
                 });
             } else {
-                toast.error('Failed to fetch profile data');
+                toast.error('Failed to fetch profile data'); // Show error toast
             }
         } catch (error) {
             console.error('Error fetching profile data:', error);
-            toast.error('Something went wrong. Please try again later.');
+            toast.error('Something went wrong. Please try again later.'); // Show error toast
         }
     };
-    
 
+    // Handle changes in input fields
     const handleChange = (e: { target: { name: any; value: any; }; }) => {
         const { name, value } = e.target;
         setFormData({
@@ -77,15 +85,16 @@ const ProfileForm: React.FC = () => {
         });
     };
 
+    // Handle profile update form submission
     const handleProfileUpdate = async (e: FormEvent) => {
         e.preventDefault();
-        setErrors([]);
+        setErrors([]); // Reset errors
         try {
             const response = await fetch('http://127.0.0.1:8000/profile/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${accessToken}`
+                    'Authorization': `Bearer ${accessToken}` // Set authorization header
                 },
                 body: JSON.stringify({
                     first_name: formData.firstName,
@@ -97,22 +106,24 @@ const ProfileForm: React.FC = () => {
             });
 
             if (response.ok) {
-                toast.success('Profile updated successfully');
+                toast.success('Profile updated successfully'); // Show success toast
                 fetchProfileData(); // Optionally refetch the profile data
             } else {
                 const data = await response.json();
-                setErrors(data.errors || ['Failed to update profile']);
+                setErrors(data.errors || ['Failed to update profile']); // Set errors from response
             }
         } catch (error) {
             console.error('Error updating profile:', error);
-            toast.error('Something went wrong. Please try again later.');
+            toast.error('Something went wrong. Please try again later.'); // Show error toast
         }
     };
 
+    // Handle password change form submission
     const handleChangePassword = async (e: FormEvent) => {
         e.preventDefault();
-        setPasswordError('');
+        setPasswordError(''); // Reset password error
 
+        // Check if new passwords match
         if (formData.newPassword !== formData.confirmNewPassword) {
             setPasswordError('New passwords do not match.');
             return;
@@ -123,7 +134,7 @@ const ProfileForm: React.FC = () => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${accessToken}`
+                    'Authorization': `Bearer ${accessToken}` // Set authorization header
                 },
                 body: JSON.stringify({
                     current_password: formData.currentPassword,
@@ -133,7 +144,7 @@ const ProfileForm: React.FC = () => {
             });
 
             if (response.ok) {
-                toast.success('Password changed successfully');
+                toast.success('Password changed successfully'); // Show success toast
                 setFormData((prevData) => ({
                     ...prevData,
                     currentPassword: '',
@@ -142,19 +153,21 @@ const ProfileForm: React.FC = () => {
                 }));
             } else {
                 const data = await response.json();
-                setPasswordError(data.error);
+                setPasswordError(data.error); // Set password error from response
             }
         } catch (error) {
             console.error('Error changing password:', error);
-            setPasswordError('Something went wrong. Please try again later.');
+            setPasswordError('Something went wrong. Please try again later.'); // Show error toast
         }
     };
 
+    // Render ProfileForm component
     return (
         <>
-            <Navbar />
+            <Navbar /> {/* Render Navbar component */}
             <div className="max-w-lg mx-auto p-6">
                 <h1 className="text-center text-3xl mb-6 text-black">Profile</h1>
+                {/* Form to update profile */}
                 <form onSubmit={handleProfileUpdate} className="space-y-4">
                     <div className="flex space-x-4">
                         <input
@@ -213,6 +226,7 @@ const ProfileForm: React.FC = () => {
                         Update Profile
                     </button>
                 </form>
+                {/* Display errors */}
                 {errors.length > 0 && (
                     <div className="text-red-500 mt-4">
                         {errors.map((error, index) => (
@@ -221,6 +235,7 @@ const ProfileForm: React.FC = () => {
                     </div>
                 )}
                 <h2 className="mt-8 text-xl font-bold">Change Password</h2>
+                {/* Form to change password */}
                 <form onSubmit={handleChangePassword} className="space-y-4 mt-4">
                     <input
                         type="password"
@@ -255,7 +270,7 @@ const ProfileForm: React.FC = () => {
                     </button>
                 </form>
             </div>
-            <ToastContainer position="bottom-right" autoClose={5000} />
+            <ToastContainer position="bottom-right" autoClose={5000} /> {/* Toast container for notifications */}
         </>
     );
 };

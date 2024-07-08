@@ -1,16 +1,20 @@
+// Import necessary dependencies
 import { useState, useContext } from 'react';
 import axios from 'axios';
-import Navbar from '../components/Global/Navbar';
-import { AuthContext } from '../components/Global/AuthContext';
-import CryptoJS from 'crypto-js';
-import { saveAs } from 'file-saver';
-import { Document, Packer, Paragraph, TextRun } from 'docx';
-import TranslateComponent from '../components/Global/TranslateContent';
+import Navbar from '../components/Global/Navbar'; // Import Navbar component
+import { AuthContext } from '../components/Global/AuthContext'; // Import AuthContext component
+import CryptoJS from 'crypto-js'; // Import CryptoJS library
+import { saveAs } from 'file-saver'; // Import saveAs function from file-saver
+import { Document, Packer, Paragraph, TextRun } from 'docx'; // Import Document, Packer, Paragraph, and TextRun from docx
+import TranslateComponent from '../components/Global/TranslateContent'; // Import TranslateComponent
 
-const AES_IV = CryptoJS.enc.Base64.parse('3G1Nd0j0l5BdPmJh01NrYg==');
-const AES_SECRET_KEY = CryptoJS.enc.Base64.parse('XGp3hFq56Vdse3sLTtXyQQ==');
+// Constants for AES encryption
+const AES_IV = CryptoJS.enc.Base64.parse('3G1Nd0j0l5BdPmJh01NrYg=='); // AES IV in Base64 format
+const AES_SECRET_KEY = CryptoJS.enc.Base64.parse('XGp3hFq56Vdse3sLTtXyQQ=='); // AES secret key in Base64 format
 
+// Define OfferLetterService component
 function OfferLetterService() {
+  // State management for form data, generated content, translated content, and error handling
   const [formData, setFormData] = useState({
     companyDetails: '',
     numberOfWords: '',
@@ -32,115 +36,120 @@ function OfferLetterService() {
     closingRemarks: '',
   });
 
-  const [generatedContent, setGeneratedContent] = useState('');
-  const [translatedContent, setTranslatedContent] = useState('');
-  const [error, setError] = useState('');
-  const authContext = useContext(AuthContext);
+  const [generatedContent, setGeneratedContent] = useState(''); // State for generated offer letter content
+  const [translatedContent, setTranslatedContent] = useState(''); // State for translated offer letter content
+  const [error, setError] = useState(''); // State for error message
+  const authContext = useContext(AuthContext); // Access authentication context
 
+  // Ensure AuthContext is available
   if (!authContext) {
     throw new Error('AuthContext must be used within an AuthProvider');
   }
 
-  const { accessToken } = authContext;
+  const { accessToken } = authContext; // Destructure access token from authContext
 
-  const handleChange = (e: { target: { name: any; value: any; }; }) => {
+  // Handle input changes in form fields
+  const handleChange = (e: { target: { name: any; value: any } }) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = async (e: { preventDefault: () => void; }) => {
+  // Handle form submission
+  const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
-    setError('');
-    setGeneratedContent('');
-    setTranslatedContent('');
+    setError(''); // Clear previous errors
+    setGeneratedContent(''); // Clear previous generated content
+    setTranslatedContent(''); // Clear previous translated content
 
     try {
+      // Encrypt form data payload
       const payload = JSON.stringify(formData);
       const encryptedPayload = CryptoJS.AES.encrypt(payload, AES_SECRET_KEY, { iv: AES_IV }).toString();
 
+      // Send encrypted payload to backend
       const response = await axios.post(
         'http://127.0.0.1:8000/offer_letter_generator/',
         { encrypted_content: encryptedPayload },
         {
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${accessToken}`,
+            Authorization: `Bearer ${accessToken}`, // Include authorization token in headers
           },
         }
       );
 
-      const data = response.data;
+      const data = response.data; // Get response data
       if (response.status === 200) {
-        const encryptedContent = data.encrypted_content;
-        const decryptedBytes = CryptoJS.AES.decrypt(encryptedContent, AES_SECRET_KEY, { iv: AES_IV });
-        const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8);
+        const encryptedContent = data.encrypted_content; // Extract encrypted content from response
+        const decryptedBytes = CryptoJS.AES.decrypt(encryptedContent, AES_SECRET_KEY, { iv: AES_IV }); // Decrypt content
+        const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8); // Convert decrypted bytes to text
 
         if (!decryptedText) {
           throw new Error('Decryption failed');
         }
 
-        const parsedContent = JSON.parse(decryptedText);
-        const formattedContent = parsedContent.generated_content.replace(/\\n/g, '\n');
+        const parsedContent = JSON.parse(decryptedText); // Parse decrypted JSON content
+        const formattedContent = parsedContent.generated_content.replace(/\\n/g, '\n'); // Format generated content
 
-        setGeneratedContent(formattedContent);
+        setGeneratedContent(formattedContent); // Set generated content state
       } else {
-        setError(data.error || 'An error occurred');
+        setError(data.error || 'An error occurred'); // Set error message from response
       }
     } catch (error) {
-      console.error('Error generating offer letter:', error);
-      setError('An error occurred');
+      console.error('Error generating offer letter:', error); // Log error to console
+      setError('An error occurred'); // Set generic error message
     }
   };
 
+  // Generate .docx file with formatted content
   const generateDocx = (content: string, fileName: string) => {
-    const lines = content.split('\n');
+    const lines = content.split('\n'); // Split content into lines
     const docContent = lines.map(line => {
-      const parts = line.split('**');
+      const parts = line.split('**'); // Split line into parts using '**' delimiter
       const textRuns = parts.map((part, index) => {
         if (index % 2 === 1) {
-          return new TextRun({ text: part, bold: true });
+          return new TextRun({ text: part, bold: true }); // Create bold TextRun for odd-indexed parts
         } else {
-          return new TextRun(part);
+          return new TextRun(part); // Create normal TextRun for even-indexed parts
         }
       });
-      return new Paragraph({ children: textRuns });
+      return new Paragraph({ children: textRuns }); // Create Paragraph with TextRuns
     });
 
     const doc = new Document({
       sections: [
         {
           properties: {},
-          children: docContent,
+          children: docContent, // Set document content
         },
       ],
     });
 
     Packer.toBlob(doc).then(blob => {
-      saveAs(blob, `${fileName}.docx`);
+      saveAs(blob, `${fileName}.docx`); // Save document blob as .docx file with specified fileName
     });
   };
 
+  // Handle download button click for generated or translated content
   const handleDownload = (type: string) => () => {
     try {
       if (type === 'generated') {
         if (!generatedContent) {
-          throw new Error('No generated content available.');
+          throw new Error('No generated content available.'); // Throw error if no generated content
         }
-        generateDocx(generatedContent, 'Generated_Offer_Letter');
+        generateDocx(generatedContent, 'Generated_Offer_Letter'); // Generate .docx for generated content
       } else if (type === 'translated') {
         if (!translatedContent) {
-          throw new Error('No translated content available.');
+          throw new Error('No translated content available.'); // Throw error if no translated content
         }
-        generateDocx(translatedContent, 'Translated_Offer_Letter');
+        generateDocx(translatedContent, 'Translated_Offer_Letter'); // Generate .docx for translated content
       } else {
-        throw new Error('Invalid download type.');
+        throw new Error('Invalid download type.'); // Throw error for invalid download type
       }
     } catch (error) {
-      // setError(error.message);
+      // setError(error.message); // Set error message state (currently commented out)
     }
   };
-
-
 
   return (
     <>

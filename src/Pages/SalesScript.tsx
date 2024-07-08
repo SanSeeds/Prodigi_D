@@ -301,7 +301,7 @@ function SalesScriptService() {
         </p>
 
           <button
-            onClick={handleDownload('generated')}
+            onClick={handleDownload('generated')} //Donwload 'generated' type document
             className="w-full bg-green-500 text-white font-bold py-3 px-6 rounded shadow-md hover:bg-green-600 mt-4"
           >
             Download Generated Sales Script
@@ -320,7 +320,7 @@ function SalesScriptService() {
           <p className="whitespace-pre-line text-black">{translatedScript}</p>
 
           <button
-            onClick={handleDownload('translated')}
+            onClick={handleDownload('translated')}  //Donwload 'translated' type document
             className="w-full bg-green-500 text-white font-bold py-3 px-6 rounded shadow-md hover:bg-green-600 mt-4"
           >
             Download Translated Sales Script
