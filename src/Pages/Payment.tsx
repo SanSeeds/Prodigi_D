@@ -18,10 +18,10 @@ const Payment = () => {
     setFormData((prevData) => ({ ...prevData, price }));
   }, [location]);
 
-  const handleChange = (e: { target: { name: any; value: any; }; }) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
+  // const handleChange = (e: { target: { name: any; value: any; }; }) => {
+  //   const { name, value } = e.target;
+  //   setFormData({ ...formData, [name]: value });
+  // };
 
   const handleSubmit = (e: { preventDefault: () => void; }) => {
     e.preventDefault();

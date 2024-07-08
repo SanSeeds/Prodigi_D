@@ -64,7 +64,10 @@ const TranslateComponent: React.FC<TranslateComponentProps> = ({ generatedConten
         <option value="Hindi">Hindi</option>
         <option value="Telugu">Telugu</option>
         <option value="Marathi">Marathi</option>
+        <option value="Kannada">Kannada</option>
+        <option value="Bengali">Bengali</option>
 
+      
         {/* <option value="Marathi">Kannada</option>
 
         <option value="Marathi">Bengali</option> */}

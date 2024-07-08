@@ -128,8 +128,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             setAccessToken(null);
             setRefreshToken(null);
             
-            // Redirect to home page or login page
-            window.location.href = '/';
+           
         }
     };
 

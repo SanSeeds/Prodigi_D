@@ -54,6 +54,8 @@ function Translate() {
               <option value="Hindi">Hindi</option>
               <option value="Telugu">Telugu</option>
               <option value="Marathi">Marathi</option>
+              <option value="Kannada">Kannada</option>
+              <option value="Bengali">Bengali</option>  
               {/* Add more languages as needed */}
             </select>
             <textarea
@@ -74,6 +76,8 @@ function Translate() {
               <option value="Hindi">Hindi</option>
               <option value="Telugu">Telugu</option>
               <option value="Marathi">Marathi</option>
+              <option value="Kannada">Kannada</option>
+              <option value="Bengali">Bengali</option>
               {/* Add more languages as needed */}
             </select>
             <textarea

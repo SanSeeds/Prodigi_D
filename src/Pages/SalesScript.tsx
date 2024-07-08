@@ -1,60 +1,64 @@
-import { useState, useContext, ChangeEvent, FormEvent } from 'react';
-import axios from 'axios';
-import Navbar from '../components/Global/Navbar';
-import { AuthContext } from '../components/Global/AuthContext';
-import TranslateComponent from '../components/Global/TranslateContent';
-import CryptoJS from 'crypto-js';
-import { saveAs } from 'file-saver';
-import { Document, Packer, Paragraph, TextRun } from 'docx';
+import { useState, useContext, ChangeEvent, FormEvent } from 'react'; // Importing necessary hooks and types from React
+import axios from 'axios'; // Importing axios for making HTTP requests
+import Navbar from '../components/Global/Navbar'; // Importing Navbar component
+import { AuthContext } from '../components/Global/AuthContext'; // Importing AuthContext for authentication context
+import TranslateComponent from '../components/Global/TranslateContent'; // Importing TranslateComponent for translation
+import CryptoJS from 'crypto-js'; // Importing CryptoJS for encryption
+import { saveAs } from 'file-saver'; // Importing file-saver for saving files
+import { Document, Packer, Paragraph, TextRun } from 'docx'; // Importing docx for creating Word documents
 
 // Encryption keys
-const ENCRYPTION_IV = CryptoJS.enc.Base64.parse("3G1Nd0j0l5BdPmJh01NrYg==");
-const ENCRYPTION_SECRET_KEY = CryptoJS.enc.Base64.parse("XGp3hFq56Vdse3sLTtXyQQ==");
+const ENCRYPTION_IV = CryptoJS.enc.Base64.parse("3G1Nd0j0l5BdPmJh01NrYg=="); // Defining the initialization vector for AES encryption
+const ENCRYPTION_SECRET_KEY = CryptoJS.enc.Base64.parse("XGp3hFq56Vdse3sLTtXyQQ=="); // Defining the secret key for AES encryption
 
 function SalesScriptService() {
+  // State for form data
   const [formData, setFormData] = useState({
-    num_words: '',
-    company_details: '',
-    product_descriptions: '',
-    features_benefits: '',
-    pricing_info: '',
-    promotions: '',
-    target_audience: '',
-    sales_objectives: '',
-    tone_style: '',
-    competitive_advantage: '',
-    testimonials: '',
-    compliance: '',
-    tech_integration: '',
+    num_words: '', // State for number of words
+    company_details: '', // State for company details
+    product_descriptions: '', // State for product descriptions
+    features_benefits: '', // State for features and benefits
+    pricing_info: '', // State for pricing information
+    promotions: '', // State for promotions
+    target_audience: '', // State for target audience
+    sales_objectives: '', // State for sales objectives
+    tone_style: '', // State for tone and style
+    competitive_advantage: '', // State for competitive advantage
+    testimonials: '', // State for testimonials
+    compliance: '', // State for compliance
+    tech_integration: '', // State for technical integration
   });
 
-  const [generatedScript, setGeneratedScript] = useState('');
-  const [translatedScript, setTranslatedScript] = useState('');
-  const [error, setError] = useState('');
-  const authContext = useContext(AuthContext);
+  const [generatedScript, setGeneratedScript] = useState(''); // State for generated sales script
+  const [translatedScript, setTranslatedScript] = useState(''); // State for translated sales script
+  const [error, setError] = useState(''); // State for error messages
+  const authContext = useContext(AuthContext); // Accessing the authentication context
 
   if (!authContext) {
-    throw new Error("AuthContext must be used within an AuthProvider");
+    throw new Error("AuthContext must be used within an AuthProvider"); // Throwing an error if AuthContext is not available
   }
 
-  const { accessToken } = authContext;
+  const { accessToken } = authContext; // Destructuring accessToken from AuthContext
 
+  // Handle form input changes
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    const { name, value } = e.target; // Extracting name and value from the input event
+    setFormData({ ...formData, [name]: value }); // Updating formData state with the new input value
   };
 
+  // Handle form submission
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError('');
-    setGeneratedScript('');
-    setTranslatedScript('');
+    e.preventDefault(); // Preventing default form submission behavior
+    setError(''); // Resetting error state
+    setGeneratedScript(''); // Resetting generated script state
+    setTranslatedScript(''); // Resetting translated script state
 
     try {
       // Encrypt the payload
-      const payload = JSON.stringify(formData);
-      const encryptedPayload = CryptoJS.AES.encrypt(payload, ENCRYPTION_SECRET_KEY, { iv: ENCRYPTION_IV }).toString();
+      const payload = JSON.stringify(formData); // Converting formData to JSON string
+      const encryptedPayload = CryptoJS.AES.encrypt(payload, ENCRYPTION_SECRET_KEY, { iv: ENCRYPTION_IV }).toString(); // Encrypting the payload
 
+      // Sending POST request with the encrypted payload
       const response = await axios.post('http://localhost:8000/sales_script_generator/', 
         { encrypted_content: encryptedPayload },
         {
@@ -71,67 +75,69 @@ function SalesScriptService() {
         const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8);
 
         if (!decryptedText) {
-          throw new Error('Decryption failed');
+          throw new Error('Decryption failed'); // Throwing error if decryption fails
         }
 
-        const parsedContent = JSON.parse(decryptedText);
-        const formattedContent = parsedContent.generated_content.replace(/\[|\]/g, '').replace(/\n/g, '\n');
+        const parsedContent = JSON.parse(decryptedText); // Parsing decrypted text as JSON
+        const formattedContent = parsedContent.generated_content.replace(/\[|\]/g, '').replace(/\n/g, '\n'); // Formatting the content
 
-        setGeneratedScript(formattedContent);
+        setGeneratedScript(formattedContent); // Setting the generated script
       } else {
-        setError('Failed to generate sales script. No content received.');
+        setError('Failed to generate sales script. No content received.'); // Setting error if no content is received
       }
     } catch (error) {
-      console.error('Error generating sales script:', error);
-      setError('Failed to generate sales script. Please try again.');
+      console.error('Error generating sales script:', error); // Logging error
+      setError('Failed to generate sales script. Please try again.'); // Setting error message for UI
     }
   };
 
+  // Generate a .docx file from content with proper formatting
   const generateDocx = (content: string, fileName: string) => {
-    const lines = content.split('\n');
+    const lines = content.split('\n'); // Splitting content into lines
     const docContent = lines.map(line => {
-      const parts = line.split('**');
+      const parts = line.split('**'); // Splitting line by '**' for bold formatting
       const textRuns = parts.map((part, index) => {
         if (index % 2 === 1) {
-          return new TextRun({ text: part, bold: true });
+          return new TextRun({ text: part, bold: true }); // Creating bold text run
         } else {
-          return new TextRun(part);
+          return new TextRun(part); // Creating regular text run
         }
       });
-      return new Paragraph({ children: textRuns });
+      return new Paragraph({ children: textRuns }); // Creating paragraph with text runs
     });
 
     const doc = new Document({
       sections: [
         {
           properties: {},
-          children: docContent,
+          children: docContent, // Adding content to the document
         },
       ],
     });
 
     Packer.toBlob(doc).then(blob => {
-      saveAs(blob, `${fileName}.docx`);
+      saveAs(blob, `${fileName}.docx`); // Saving the document as a .docx file
     });
   };
 
+  // Handle download button clicks
   const handleDownload = (type: string) => () => {
     try {
       if (type === 'generated') {
         if (!generatedScript) {
-          throw new Error('No generated script available.');
+          throw new Error('No generated script available.'); // Throwing error if no generated script is available
         }
-        generateDocx(generatedScript, 'Generated_Sales_Script');
+        generateDocx(generatedScript, 'Generated_Sales_Script'); // Generating .docx file for generated script
       } else if (type === 'translated') {
         if (!translatedScript) {
-          throw new Error('No translated script available.');
+          throw new Error('No translated script available.'); // Throwing error if no translated script is available
         }
-        generateDocx(translatedScript, 'Translated_Sales_Script');
+        generateDocx(translatedScript, 'Translated_Sales_Script'); // Generating .docx file for translated script
       } else {
-        throw new Error('Invalid download type.');
+        throw new Error('Invalid download type.'); // Throwing error for invalid download type
       }
     } catch (error) {
-      // setError(error.message);
+      // setError(error.message); // Setting error message for UI (commented out)
     }
   };
 
@@ -312,7 +318,7 @@ function SalesScriptService() {
         <div className="w-full max-w-3xl mx-auto p-8  rounded">
           <h2 className="text-xl font-bold mb-4 text-black">Translated Sales Script</h2>
           <p className="whitespace-pre-line text-black">{translatedScript}</p>
-          {/* Download button for translated script */}
+
           <button
             onClick={handleDownload('translated')}
             className="w-full bg-green-500 text-white font-bold py-3 px-6 rounded shadow-md hover:bg-green-600 mt-4"
