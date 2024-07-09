@@ -296,41 +296,64 @@ function ContentGenerationService() {
           Generate Content
         </button>
       </form>
-      {error && <div className="text-red-500 text-center mt-4">{error}</div>}
+      {error && (
+        // Check if there is an error
+        <div className="text-red-500 text-center mt-4">{error}</div>
+        // If there is an error, display it in a red-colored div with some margin on top
+      )}
       {generatedContent && (
-         <div className="w-full max-w-3xl mx-auto p-8 mt-6 rounded">
+        // Check if there is generated content
+        <div className="w-full max-w-3xl mx-auto p-8 mt-6 rounded">
           <h2 className="text-xl font-bold mb-4">Generated Content:</h2>
           <p className="text-black whitespace-pre-line">
             {generatedContent.split('**').map((part, index) => {
+              // Split the content by '**' to differentiate between bold and normal text
               if (index % 2 === 1) {
+                // If the index is odd, it indicates bold content
                 return <strong key={index}>{part}</strong>;
+                // Return the part as bold text
               } else {
+                // If the index is even, it indicates normal text
                 return part;
+                // Return the part as normal text
               }
             })}
           </p>
           <button
             onClick={handleDownload('generated')}
+            // Set the click handler to trigger the download of the generated content
             className="w-full p-3 bg-green-500 text-white font-bold rounded shadow-sm mt-4"
+            // Style the button with full width, padding, green background, white text, bold font, rounded corners, shadow, and margin on top
           >
             Download Generated Content
+    
           </button>
           <TranslateComponent 
             generatedContent={generatedContent} 
+            // Pass the generated content to the TranslateComponent
             setTranslatedContent={setTranslatedContent} 
+            // Pass the function to set translated content to the TranslateComponent
             setError={setError}
+            // Pass the function to set error to the TranslateComponent
           />
         </div>
       )}
       {translatedContent && (
-         <div className="w-full max-w-3xl mx-auto p-8 mt-6 rounded">
+        // Check if there is translated content
+        <div className="w-full max-w-3xl mx-auto p-8 mt-6 rounded">
+ 
           <h2 className="text-xl font-bold mb-4">Translated Content:</h2>
+         
           <p className="whitespace-pre-line">{translatedContent}</p>
+       
           <button
             onClick={handleDownload('translated')}
+            // Set the click handler to trigger the download of the translated content
             className="w-full p-3 bg-green-500 text-white font-bold rounded shadow-sm mt-4"
+            // Style the button with full width, padding, green background, white text, bold font, rounded corners, shadow, and margin on top
           >
             Download Translated Content
+       
           </button>
         </div>
       )}
