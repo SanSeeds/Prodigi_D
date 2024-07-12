@@ -12,6 +12,9 @@ import { toast, ToastContainer } from 'react-toastify'; // Importing react-toast
 const AES_IV = CryptoJS.enc.Base64.parse("3G1Nd0j0l5BdPmJh01NrYg=="); // Initialization vector for AES encryption
 const AES_SECRET_KEY = CryptoJS.enc.Base64.parse("XGp3hFq56Vdse3sLTtXyQQ=="); // Secret key for AES encryption
 
+// TODO: if no email is there 'Email Sent' toast should not come
+// TODO: Fix that on inappropiate keyword a toast should come
+
 function EmailService() {
     // State management for form data, loading state, error messages, generated email, and translated email
   const [formData, setFormData] = useState({
@@ -74,7 +77,7 @@ function EmailService() {
 
       // Sending the encrypted payload to the backend
       const response = await axios.post(
-        'http://localhost:8000/email_generator/',
+        'http://43.205.83.83/email_generator/',
         { encrypted_content: encryptedPayload }, // Send encrypted content in the request body
         {
           headers: {

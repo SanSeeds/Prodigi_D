@@ -68,7 +68,7 @@ function OfferLetterService() {
 
       // Send encrypted payload to backend
       const response = await axios.post(
-        'http://127.0.0.1:8000/offer_letter_generator/',
+        'http://43.205.83.83/offer_letter_generator/',
         { encrypted_content: encryptedPayload },
         {
           headers: {

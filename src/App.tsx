@@ -18,6 +18,7 @@ import SignUpForm from './components/SignInPage/SignupPage';
 import PrivateRoute from './components/Global/PrivateRoute'; // Import PrivateRoute
 import Subscription from './Pages/Subscription';
 import Payment from './Pages/Payment';
+import PresentationGenerationService from './Pages/PPTGenerator';
 
 function App() {
   return (
@@ -43,6 +44,8 @@ function App() {
               <Route path="/summarize" element={<SummarizeService />} />
               <Route path="/contentgeneration" element={<ContentGenerationService />} />
               <Route path="/profile" element={<ProfileForm />} />
+              <Route path="/pptGeneration" element={<PresentationGenerationService />} />
+
             </Route>
           </Routes>
         </BrowserRouter>

@@ -71,7 +71,7 @@ function ContentGenerationService() {
       const encryptedPayload = CryptoJS.AES.encrypt(payload, ENCRYPTION_SECRET_KEY, { iv: ENCRYPTION_IV }).toString(); // Encrypting the payload
 
       // Send encrypted payload to backend
-      const response = await axios.post('http://localhost:8000/content_generator/', 
+      const response = await axios.post('http://l43.205.83.83/content_generator/', 
         { encrypted_content: encryptedPayload },
         {
           headers: {

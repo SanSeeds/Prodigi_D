@@ -59,7 +59,7 @@ function BusinessProposalService() {
 
       // Send the encrypted payload to the backend
       const response = await axios.post<{ encrypted_content: string }>(
-        'http://localhost:8000/business_proposal_generator/', // API endpoint
+        'http://43.205.83.83/business_proposal_generator/', // API endpoint
         { encrypted_content: encryptedPayload }, // Request payload
         {
           headers: {

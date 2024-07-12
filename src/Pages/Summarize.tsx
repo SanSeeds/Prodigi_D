@@ -78,7 +78,7 @@ function SummarizeService() {
                 form.append('document', formData.uploadFile); // Appending the uploaded file to the form
             }
     
-            const response = await axios.post('http://localhost:8000/summarize_document/', form, {
+            const response = await axios.post('http://43.205.83.83/summarize_document/', form, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     'Authorization': `Bearer ${accessToken}`,

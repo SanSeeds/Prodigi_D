@@ -130,7 +130,7 @@ const ProfileForm: React.FC = () => {
         }
 
         try {
-            const response = await fetch('http://127.0.0.1:8000/change_password/', {
+            const response = await fetch('http://43.205.83.83/change_password/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

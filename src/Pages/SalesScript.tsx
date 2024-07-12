@@ -59,7 +59,7 @@ function SalesScriptService() {
       const encryptedPayload = CryptoJS.AES.encrypt(payload, ENCRYPTION_SECRET_KEY, { iv: ENCRYPTION_IV }).toString(); // Encrypting the payload
 
       // Sending POST request with the encrypted payload
-      const response = await axios.post('http://localhost:8000/sales_script_generator/', 
+      const response = await axios.post('http://43.205.83.83/sales_script_generator/', 
         { encrypted_content: encryptedPayload },
         {
           headers: {

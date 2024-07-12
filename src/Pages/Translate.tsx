@@ -11,7 +11,7 @@ function Translate() {
 
   const handleTranslate = async () => {
     try {
-      const response = await axios.post('http://localhost:8000/translate/', {
+      const response = await axios.post('http://43.205.83.83/translate/', {
         input_text: inputText,
         from_language: inputLanguage,
         to_language: translatedLanguage

@@ -28,7 +28,7 @@ const SignInForm: React.FC = () => {
 
         try {
             // Send POST request to sign-in endpoint
-            const response = await fetch('http://127.0.0.1:8000/signin/', {
+            const response = await fetch('http://43.205.83.83/signin/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json', // Set content type to JSON
