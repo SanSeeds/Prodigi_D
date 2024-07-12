@@ -30,7 +30,7 @@ const handleSubmit = async (event: FormEvent) => {
     }
     try {
         // Make a POST request to the server to add a new user
-        const response = await fetch('http://127.0.0.1:8000/add_user/', {
+        const response = await fetch('http://43.205.83.83/add_user/', {
             method: 'POST', // Set the request method to POST
             headers: {
                 'Content-Type': 'application/json', // Set the request headers to indicate JSON data

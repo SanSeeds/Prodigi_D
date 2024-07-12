@@ -33,7 +33,7 @@ const ForgetPassword: React.FC = () => {
 
         try {
             // Make a POST request to send the OTP to the provided email
-            const response = await axios.post('http://localhost:8000/send_otp/', {
+            const response = await axios.post('http://43.205.83.83/send_otp/', {
                 // Include the email in the request body
                 email: email,
             });
