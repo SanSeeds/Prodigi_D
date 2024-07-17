@@ -7,6 +7,10 @@ import CryptoJS from 'crypto-js'; // Importing CryptoJS for encryption
 import { saveAs } from 'file-saver'; // Importing file-saver for saving files
 import { Document, Packer, Paragraph, TextRun } from 'docx'; // Importing docx for creating Word documents
 
+import config from '../config';
+
+const apiUrl = config.apiUrl;
+
 // Encryption keys
 const ENCRYPTION_IV = CryptoJS.enc.Base64.parse("3G1Nd0j0l5BdPmJh01NrYg=="); // Defining the initialization vector for AES encryption
 const ENCRYPTION_SECRET_KEY = CryptoJS.enc.Base64.parse("XGp3hFq56Vdse3sLTtXyQQ=="); // Defining the secret key for AES encryption
@@ -59,7 +63,7 @@ function SalesScriptService() {
       const encryptedPayload = CryptoJS.AES.encrypt(payload, ENCRYPTION_SECRET_KEY, { iv: ENCRYPTION_IV }).toString(); // Encrypting the payload
 
       // Sending POST request with the encrypted payload
-      const response = await axios.post('http://43.205.83.83/sales_script_generator/', 
+      const response = await axios.post(`${apiUrl}/sales_script_generator/`, 
         { encrypted_content: encryptedPayload },
         {
           headers: {

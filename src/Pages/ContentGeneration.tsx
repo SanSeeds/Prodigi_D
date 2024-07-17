@@ -6,6 +6,9 @@ import TranslateComponent from '../components/Global/TranslateContent'; // Impor
 import CryptoJS from 'crypto-js'; // Importing CryptoJS for encryption
 import { saveAs } from 'file-saver'; // Importing file-saver for saving files
 import { Document, Packer, Paragraph, TextRun } from 'docx'; // Importing docx for creating Word documents
+import config from '../config';
+
+const apiUrl = config.apiUrl;
 
 // AES encryption constants
 const ENCRYPTION_IV = CryptoJS.enc.Base64.parse("3G1Nd0j0l5BdPmJh01NrYg=="); // Initialization vector for encryption
@@ -69,9 +72,9 @@ function ContentGenerationService() {
       });
 
       const encryptedPayload = CryptoJS.AES.encrypt(payload, ENCRYPTION_SECRET_KEY, { iv: ENCRYPTION_IV }).toString(); // Encrypting the payload
-
+      
       // Send encrypted payload to backend
-      const response = await axios.post('http://l43.205.83.83/content_generator/', 
+      const response = await axios.post(`${apiUrl}/content_generator/`, 
         { encrypted_content: encryptedPayload },
         {
           headers: {
@@ -81,7 +84,6 @@ function ContentGenerationService() {
         }
       );
 
-      console.log('Response:', response.data); // Logging the response for debugging
       if (response.data && response.data.encrypted_content) {
         // Decrypt the content received from the backend
         const decryptedBytes = CryptoJS.AES.decrypt(response.data.encrypted_content, ENCRYPTION_SECRET_KEY, { iv: ENCRYPTION_IV });

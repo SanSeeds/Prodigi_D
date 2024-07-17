@@ -1,6 +1,9 @@
 // Import necessary modules from React and axios
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import axios from 'axios';
+import config from './../../config';
+ 
+const apiUrl = config.apiUrl;
 
 // Define an interface for a User object
 interface User {
@@ -107,7 +110,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const logout = async () => {
         try {
             // Send a request to the server to log out the user
-            await axios.post('http:localhost:8000/logout/', {}, {
+            await axios.post(`${apiUrl}/logout/`, {}, {
                 headers: {
                     // Include the access token in the request headers for authentication
                     Authorization: `Bearer ${accessToken}`

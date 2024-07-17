@@ -2,6 +2,9 @@ import { useState } from "react"; // Import useState hook from React
 import axios, { AxiosError } from 'axios'; // Import axios and AxiosError from axios
 import { useContext } from 'react'; // Import useContext hook from React
 import { AuthContext } from './AuthContext'; // Import AuthContext from AuthContext file
+import config from './../../config';
+
+const apiUrl = config.apiUrl;
 
 interface TranslateComponentProps { // Define interface for component props
   generatedContent: string; // String prop for generated content
@@ -23,7 +26,7 @@ const TranslateComponent: React.FC<TranslateComponentProps> = ({ generatedConten
 
   const handleTranslate = async () => { // Define asynchronous function to handle translation
     try {
-      const response = await axios.post<{ translated_content: string }>('http://127.0.0.1:8000/translate_content/', {
+      const response = await axios.post<{ translated_content: string }>(`${apiUrl}/translate_content/`, {
         // Send POST request to translation API endpoint
         generated_content: generatedContent, // Include generated content in request body
         language: selectedLanguage, // Include selected language in request body

@@ -1,60 +1,78 @@
 import React, { useState, useContext, FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
-import { AuthContext } from '../components/Global/AuthContext'; // Import AuthContext for authentication
-import Nav from "../components/Global/Nav"; // Import Nav component
-import { ToastContainer, toast } from 'react-toastify'; // Import Toast components for notifications
-import 'react-toastify/dist/ReactToastify.css'; // Import Toast CSS
+import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../components/Global/AuthContext';
+import Nav from "../components/Global/Nav";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import axios from 'axios';
+import CryptoJS from 'crypto-js';
+import config from '../config';
 
-// Define SignInForm component
+const apiUrl = config.apiUrl
+
+const AES_IV = CryptoJS.enc.Base64.parse("3G1Nd0j0l5BdPmJh01NrYg==");
+const AES_SECRET_KEY = CryptoJS.enc.Base64.parse("XGp3hFq56Vdse3sLTtXyQQ==");
+
 const SignInForm: React.FC = () => {
-    // Define state for email and password input fields
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [, setError] = useState(''); // Define state for error messages
-    const navigate = useNavigate(); // Initialize useNavigate for navigation
-    const authContext = useContext(AuthContext); // Access authentication context
+    const [, setError] = useState('');
+    const navigate = useNavigate();
+    const authContext = useContext(AuthContext);
 
-    // Ensure AuthContext is used within an AuthProvider
     if (!authContext) {
         throw new Error("AuthContext must be used within an AuthProvider");
     }
 
-    const { login } = authContext; // Destructure login function from authContext
+    const { login } = authContext;
 
-    // Handle form submission
     const handleSubmit = async (event: FormEvent) => {
-        event.preventDefault(); // Prevent default form submission
-        setError(''); // Reset error state
+        event.preventDefault();
+        setError('');
 
         try {
-            // Send POST request to sign-in endpoint
-            const response = await fetch('http://43.205.83.83/signin/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json', // Set content type to JSON
-                },
-                body: JSON.stringify({ email, password }), // Send email and password in the request body
-            });
+            const payload = JSON.stringify({ email, password });
+            const encryptedPayload = CryptoJS.AES.encrypt(payload, AES_SECRET_KEY, { iv: AES_IV }).toString();
 
-            const data = await response.json(); // Parse the JSON response
-            if (response.ok) {
-                const accessToken = data.access; // Extract access token from response
-                const refreshToken = data.refresh; // Extract refresh token from response
-                const expiry = 3600 * 3600; // Set token expiry time to 1 hour in seconds
-                login({ email }, accessToken, refreshToken, expiry); // Save user info and tokens to context
-                toast.success('Logged in successfully'); // Show success toast
-                navigate('/dashboard'); // Navigate to dashboard
+            const response = await axios.post<{ encrypted_content: string }>(
+                `${apiUrl}/signin/`,
+
+                { encrypted_content: encryptedPayload },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                }
+            );
+
+            if (response.data && response.data.encrypted_content) {
+                const decryptedBytes = CryptoJS.AES.decrypt(response.data.encrypted_content, AES_SECRET_KEY, { iv: AES_IV });
+                const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8);
+
+                if (!decryptedText) {
+                    throw new Error('Decryption failed');
+                }
+              
+                
+
+                const data = JSON.parse(decryptedText);
+                const accessToken = data.access;
+                const refreshToken = data.refresh;
+                const expiry = 3600 * 3600;
+                login({ email }, accessToken, refreshToken, expiry);
+                toast.success('Logged in successfully');
+                navigate('/dashboard');
             } else {
-                toast.error(data.error); // Show error toast with response error message
-                setError(data.error); // Set error state with response error message
+                toast.error('Failed to sign in. No content received.');
+                setError('Failed to sign in. No content received.');
             }
         } catch (error) {
             console.error('Error during sign in:', error);
-            toast.error('Something went wrong. Please try again later.'); // Show error toast for generic error
-            setError('Something went wrong. Please try again later.'); // Set error state for generic error
+            toast.error('Something went wrong. Please try again later.');
+            setError('Something went wrong. Please try again later.');
         }
     };
-    
+
     return (
         <>
             <Nav />

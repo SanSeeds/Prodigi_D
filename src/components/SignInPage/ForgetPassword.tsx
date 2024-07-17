@@ -5,6 +5,9 @@ import { AuthContext } from '../Global/AuthContext';
 import Nav from "../Global/Nav";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import config from './../../config';
+
+const apiUrl = config.apiUrl;
 
 const ForgetPassword: React.FC = () => {
     // State variables using useState hook
@@ -33,7 +36,7 @@ const ForgetPassword: React.FC = () => {
 
         try {
             // Make a POST request to send the OTP to the provided email
-            const response = await axios.post('http://43.205.83.83/send_otp/', {
+            const response = await axios.post(`${apiUrl}/send_otp/`, {
                 // Include the email in the request body
                 email: email,
             });
@@ -74,7 +77,7 @@ const ForgetPassword: React.FC = () => {
 
         try {
             // Make a POST request to reset the password
-            const response = await axios.post('http://127.0.0.1:8000/reset_password/', {
+            const response = await axios.post(`${apiUrl}/reset_password/`, {
                 // Include the email, OTP, new password, and confirm password in the request body
                 email: email,
                 otp: otp,

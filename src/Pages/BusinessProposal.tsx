@@ -6,6 +6,9 @@ import TranslateComponent from '../components/Global/TranslateContent';
 import CryptoJS from 'crypto-js';
 import { saveAs } from 'file-saver';
 import { Document, Packer, Paragraph, TextRun } from 'docx';
+import config from '../config';
+
+const apiUrl = config.apiUrl;
 
 // AES encryption constants
 const AES_IV = CryptoJS.enc.Base64.parse("3G1Nd0j0l5BdPmJh01NrYg=="); // Initialize IV for AES encryption
@@ -59,7 +62,7 @@ function BusinessProposalService() {
 
       // Send the encrypted payload to the backend
       const response = await axios.post<{ encrypted_content: string }>(
-        'http://43.205.83.83/business_proposal_generator/', // API endpoint
+        `${apiUrl}/business_proposal_generator/`, // API endpoint
         { encrypted_content: encryptedPayload }, // Request payload
         {
           headers: {

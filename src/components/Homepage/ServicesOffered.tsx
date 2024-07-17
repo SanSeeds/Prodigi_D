@@ -51,11 +51,16 @@ const Services: React.FC = () => {
             description: 'Create engaging content for your audience.',
             link: '/contentgeneration'
         },
-        {
-            title: 'PPT Generator',
-            description: 'Create engaging PPT for your audience.',
-            link: '/pptGeneration'
-        },
+        // {
+        //     title: 'PPT Generator',
+        //     description: 'Create engaging PPT for your audience.',
+        //     link: '/pptGeneration'
+        // },
+        // {
+        //     title: 'Add Slide ',
+        //     description: 'Create engaging slides for your audience.',
+        //     link: '/addsite'
+        // },
     ];
 
     return (

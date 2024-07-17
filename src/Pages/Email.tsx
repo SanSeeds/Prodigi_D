@@ -7,13 +7,15 @@ import CryptoJS from 'crypto-js'; // Importing CryptoJS for encryption and decry
 import { saveAs } from 'file-saver'; // Importing file-saver for saving files
 import { Document, Packer, Paragraph, TextRun } from 'docx'; // Importing docx for generating .docx files
 import { toast, ToastContainer } from 'react-toastify'; // Importing react-toastify for notifications
+import config from '../config';
+
+const apiUrl = config.apiUrl;
 
 // Constants for AES encryption
 const AES_IV = CryptoJS.enc.Base64.parse("3G1Nd0j0l5BdPmJh01NrYg=="); // Initialization vector for AES encryption
 const AES_SECRET_KEY = CryptoJS.enc.Base64.parse("XGp3hFq56Vdse3sLTtXyQQ=="); // Secret key for AES encryption
 
-// TODO: if no email is there 'Email Sent' toast should not come
-// TODO: Fix that on inappropiate keyword a toast should come
+
 
 function EmailService() {
     // State management for form data, loading state, error messages, generated email, and translated email
@@ -77,7 +79,7 @@ function EmailService() {
 
       // Sending the encrypted payload to the backend
       const response = await axios.post(
-        'http://43.205.83.83/email_generator/',
+        `${apiUrl}/email_generator/`,
         { encrypted_content: encryptedPayload }, // Send encrypted content in the request body
         {
           headers: {
@@ -330,7 +332,7 @@ function EmailService() {
             <div className="mb-6 text-center">
               <button
                 type="submit"
-                className="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                className="w-full p-3 bg-blue-500 text-white font-bold rounded shadow-sm"
                 disabled={loading}
               >
                 {loading ? 'Generating...' : 'Generate Email'}

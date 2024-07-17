@@ -1,6 +1,10 @@
 import { useState } from "react";
 import Nav from "../components/Global/Nav";
 import axios from 'axios'; // Import Axios
+import config from '../config';
+
+const apiUrl = config.apiUrl;
+
 
 function Translate() {
   const [inputLanguage, setInputLanguage] = useState('English');
@@ -11,7 +15,7 @@ function Translate() {
 
   const handleTranslate = async () => {
     try {
-      const response = await axios.post('http://43.205.83.83/translate/', {
+      const response = await axios.post(`${apiUrl}/translate/`, {
         input_text: inputText,
         from_language: inputLanguage,
         to_language: translatedLanguage

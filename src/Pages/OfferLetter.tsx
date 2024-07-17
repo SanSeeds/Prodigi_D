@@ -7,6 +7,10 @@ import CryptoJS from 'crypto-js'; // Import CryptoJS library
 import { saveAs } from 'file-saver'; // Import saveAs function from file-saver
 import { Document, Packer, Paragraph, TextRun } from 'docx'; // Import Document, Packer, Paragraph, and TextRun from docx
 import TranslateComponent from '../components/Global/TranslateContent'; // Import TranslateComponent
+import config from '../config';
+
+const apiUrl = config.apiUrl;
+
 
 // Constants for AES encryption
 const AES_IV = CryptoJS.enc.Base64.parse('3G1Nd0j0l5BdPmJh01NrYg=='); // AES IV in Base64 format
@@ -68,7 +72,7 @@ function OfferLetterService() {
 
       // Send encrypted payload to backend
       const response = await axios.post(
-        'http://43.205.83.83/offer_letter_generator/',
+        `${apiUrl}/offer_letter_generator/`,
         { encrypted_content: encryptedPayload },
         {
           headers: {
@@ -355,7 +359,9 @@ function OfferLetterService() {
         </div>
 
         <div className="text-center">
-          <button type="submit" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Generate Offer Letter</button>
+          <button type="submit" 
+          className="w-full p-3 bg-blue-500 text-white font-bold rounded shadow-sm">
+            Generate Offer Letter</button>
         </div>
       </form>
 

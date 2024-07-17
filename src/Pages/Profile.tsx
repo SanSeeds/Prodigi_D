@@ -4,7 +4,9 @@ import Navbar from '../components/Global/Navbar'; // Import Navbar component
 import { AuthContext } from '../components/Global/AuthContext'; // Import AuthContext for authentication
 import { ToastContainer, toast } from 'react-toastify'; // Import Toast components for notifications
 import 'react-toastify/dist/ReactToastify.css'; // Import Toast CSS
+import config from '../config';
 
+const apiUrl = config.apiUrl;
 // Define ProfileForm component
 const ProfileForm: React.FC = () => {
     // Access authentication context
@@ -48,7 +50,7 @@ const ProfileForm: React.FC = () => {
     // Function to fetch profile data from the backend
     const fetchProfileData = async () => {
         try {
-            const response = await fetch('http://127.0.0.1:8000/profile/', {
+            const response = await fetch(`${apiUrl}/profile/`, {
                 headers: {
                     'Authorization': `Bearer ${accessToken}` // Set authorization header
                 }
@@ -90,7 +92,7 @@ const ProfileForm: React.FC = () => {
         e.preventDefault();
         setErrors([]); // Reset errors
         try {
-            const response = await fetch('http://127.0.0.1:8000/profile/', {
+            const response = await fetch(`${apiUrl}/profile/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -130,7 +132,7 @@ const ProfileForm: React.FC = () => {
         }
 
         try {
-            const response = await fetch('http://43.205.83.83/change_password/', {
+            const response = await fetch(`${apiUrl}/change_password/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

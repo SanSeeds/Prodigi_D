@@ -19,11 +19,13 @@ import PrivateRoute from './components/Global/PrivateRoute'; // Import PrivateRo
 import Subscription from './Pages/Subscription';
 import Payment from './Pages/Payment';
 import PresentationGenerationService from './Pages/PPTGenerator';
+import AddSlide from './Pages/AddSlide';
 
 function App() {
   return (
     <AuthProvider>
       <div className="flex flex-col min-h-screen">
+        
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<WelcomePage />} />
@@ -45,6 +47,8 @@ function App() {
               <Route path="/contentgeneration" element={<ContentGenerationService />} />
               <Route path="/profile" element={<ProfileForm />} />
               <Route path="/pptGeneration" element={<PresentationGenerationService />} />
+              <Route path="/addslide" element={<AddSlide />} />
+
 
             </Route>
           </Routes>
