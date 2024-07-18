@@ -3,17 +3,15 @@ import axios from 'axios';
 import Navbar from '../components/Global/Navbar';
 import { AuthContext } from '../components/Global/AuthContext';
 import CryptoJS from 'crypto-js';
-import { saveAs } from 'file-saver';
 
 const ENCRYPTION_IV = CryptoJS.enc.Base64.parse("3G1Nd0j0l5BdPmJh01NrYg==");
 const ENCRYPTION_SECRET_KEY = CryptoJS.enc.Base64.parse("XGp3hFq56Vdse3sLTtXyQQ==");
 
-function PresentationGenerationService() {
+function AddSlide() {
     const [formData, setFormData] = useState({
         title: '',
-        numSlides: 0,
-        specialInstructions: '',
-        bg_image_path: null as File | null
+        content: '',
+        bgImage: null as File | null
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -32,7 +30,7 @@ function PresentationGenerationService() {
 
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files.length > 0) {
-            setFormData({ ...formData, bg_image_path: e.target.files[0] });
+            setFormData({ ...formData, bgImage: e.target.files[0] });
         }
     };
 
@@ -44,41 +42,33 @@ function PresentationGenerationService() {
         try {
             const payload = JSON.stringify({
                 title: formData.title,
-                num_slides: formData.numSlides,
-                special_instructions: formData.specialInstructions,
-                bg_image_path: formData.bg_image_path ? formData.bg_image_path.name : null
+                content: formData.content,
+                bgImagePath: formData.bgImage ? formData.bgImage.name : null
             });
 
             const encryptedPayload = CryptoJS.AES.encrypt(payload, ENCRYPTION_SECRET_KEY, { iv: ENCRYPTION_IV }).toString();
 
             const form = new FormData();
             form.append('encrypted_content', encryptedPayload);
-            if (formData.bg_image_path) {
-                form.append('bg_image', formData.bg_image_path);
+            if (formData.bgImage) {
+                form.append('bg_image', formData.bgImage);
             }
-            console.log(payload);
-            
-            const response = await axios.post('http://localhost:8000/create_presentation/', form, {
+
+            const response = await axios.post('http://localhost:8000/add_slide_api/', form, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     'Authorization': `Bearer ${accessToken}`,
                 },
-                responseType: 'blob'
             });
 
             if (response.data) {
-                const encryptedContent = response.data;
-                const decryptedBytes = CryptoJS.AES.decrypt(encryptedContent, ENCRYPTION_SECRET_KEY, { iv: ENCRYPTION_IV });
-                const decryptedBuffer = new Uint8Array(decryptedBytes.words.map(word => word & 0xff));
-
-                const blob = new Blob([decryptedBuffer], { type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' });
-                saveAs(blob, 'SmartOffice_Assistant_Presentation.pptx');
+                alert('Slide added successfully');
             } else {
-                setError('Failed to generate presentation. No content received.');
+                setError('Failed to add slide. No content received.');
             }
         } catch (error) {
-            console.error('Error generating presentation:', error);
-            setError('Failed to generate presentation. Please try again.');
+            console.error('Error adding slide:', error);
+            setError('Failed to add slide. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -87,35 +77,23 @@ function PresentationGenerationService() {
     return (
         <>
             <Navbar />
-            <h1 className="text-center text-3xl mt-5 font-bold" style={{ fontFamily: "'Poppins', sans-serif" }}>Presentation Generator</h1>
+            <h1 className="text-center text-3xl mt-5 font-bold" style={{ fontFamily: "'Poppins', sans-serif" }}>Add Slide</h1>
             <form className="w-full max-w-3xl mx-auto p-8" onSubmit={handleSubmit}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div className="flex flex-col">
-                        <label className="mb-2 font-bold text-black">Title</label>
-                        <input
-                            type="text"
-                            name="title"
-                            value={formData.title}
-                            onChange={handleChange}
-                            className="p-3 border rounded shadow-sm text-black"
-                        />
-                    </div>
-                    <div className="flex flex-col">
-                        <label className="mb-2 font-bold">Number of Slides</label>
-                        <input
-                            type="number"
-                            name="numSlides"
-                            value={formData.numSlides}
-                            onChange={handleChange}
-                            className="p-3 border rounded shadow-sm text-black"
-                        />
-                    </div>
+                <div className="flex flex-col mb-6">
+                    <label className="mb-2 font-bold text-black">Title</label>
+                    <input
+                        type="text"
+                        name="title"
+                        value={formData.title}
+                        onChange={handleChange}
+                        className="p-3 border rounded shadow-sm text-black"
+                    />
                 </div>
                 <div className="flex flex-col mb-6">
-                    <label className="mb-2 font-bold text-black">Special Instructions</label>
+                    <label className="mb-2 font-bold text-black">Content</label>
                     <textarea
-                        name="specialInstructions"
-                        value={formData.specialInstructions}
+                        name="content"
+                        value={formData.content}
                         onChange={handleChange}
                         className="p-3 border rounded shadow-sm text-black"
                     />
@@ -134,7 +112,7 @@ function PresentationGenerationService() {
                     className="w-full p-3 bg-blue-500 text-white font-bold rounded shadow-sm"
                     disabled={loading}
                 >
-                    {loading ? "Generating..." : "Generate Presentation"}
+                    {loading ? "Adding..." : "Add Slide"}
                 </button>
                 {error && <div className="mt-4 text-red-500">{error}</div>}
             </form>
@@ -142,4 +120,4 @@ function PresentationGenerationService() {
     );
 }
 
-export default PresentationGenerationService;
+export default AddSlide;

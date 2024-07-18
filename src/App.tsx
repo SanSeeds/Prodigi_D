@@ -34,7 +34,6 @@ function App() {
             <Route path="/translate" element={<Translate />} />
             <Route path="/subscription" element={<Subscription />} />
             <Route path="/payment" element={<Payment />} />
-
             <Route path="/forgotPassword" element={<ForgetPassword />} />
             {/* Protected Routes */}
             <Route element={<PrivateRoute />}>

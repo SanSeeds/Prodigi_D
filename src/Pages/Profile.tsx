@@ -5,6 +5,7 @@ import { AuthContext } from '../components/Global/AuthContext'; // Import AuthCo
 import { ToastContainer, toast } from 'react-toastify'; // Import Toast components for notifications
 import 'react-toastify/dist/ReactToastify.css'; // Import Toast CSS
 import config from '../config';
+import { Link } from 'react-router-dom';
 
 const apiUrl = config.apiUrl;
 // Define ProfileForm component
@@ -221,13 +222,33 @@ const ProfileForm: React.FC = () => {
                         placeholder="dd-mm-yyyy"
                         className="w-full px-3 py-2 border rounded-md"
                     />
+                    <input
+                        type="text"
+                        name="birthDate"
+                        // value={formData.birthDate}
+                        onChange={handleChange}
+                        placeholder="subscription"
+                        className="w-full px-3 py-2 border rounded-md"
+                        disabled
+                    />
+                    <div>
                     <button
                         type="submit"
                         className="px-4 py-2 bg-blue-500 text-white rounded-md"
                     >
                         Update Profile
+                    </button> &nbsp;    
+                    <Link to='/subscription'>
+                    <button
+                        type="submit"
+                        className="px-4 py-2 bg-blue-500 text-white rounded-md"
+                    >
+                        Update Subscription
                     </button>
+                    </Link>
+                    </div>
                 </form>
+                
                 {/* Display errors */}
                 {errors.length > 0 && (
                     <div className="text-red-500 mt-4">
