@@ -17,8 +17,13 @@ const PrivateRoute = () => {
         throw new Error("AuthContext must be used within an AuthProvider");
     }
 
-    // Destructure the user object from the authContext
-    const { user } = authContext;
+    // Destructure the user and loading state from the authContext
+    const { user, loading } = authContext;
+
+    // If still loading, render null or a loading spinner
+    if (loading) {
+        return null; // or a loading spinner component
+    }
 
     // If the user is authenticated, render the child components using Outlet
     // Otherwise, navigate to the sign-in page

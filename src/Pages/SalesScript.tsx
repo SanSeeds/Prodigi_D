@@ -1,4 +1,4 @@
-import { useState, useContext, ChangeEvent, FormEvent } from 'react'; // Importing necessary hooks and types from React
+import { useState, useContext, ChangeEvent, FormEvent, useEffect } from 'react'; // Importing necessary hooks and types from React
 import axios from 'axios'; // Importing axios for making HTTP requests
 import Navbar from '../components/Global/Navbar'; // Importing Navbar component
 import { AuthContext } from '../components/Global/AuthContext'; // Importing AuthContext for authentication context
@@ -6,6 +6,8 @@ import TranslateComponent from '../components/Global/TranslateContent'; // Impor
 import CryptoJS from 'crypto-js'; // Importing CryptoJS for encryption
 import { saveAs } from 'file-saver'; // Importing file-saver for saving files
 import { Document, Packer, Paragraph, TextRun } from 'docx'; // Importing docx for creating Word documents
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import config from '../config';
 
@@ -16,6 +18,10 @@ const ENCRYPTION_IV = CryptoJS.enc.Base64.parse("3G1Nd0j0l5BdPmJh01NrYg=="); // 
 const ENCRYPTION_SECRET_KEY = CryptoJS.enc.Base64.parse("XGp3hFq56Vdse3sLTtXyQQ=="); // Defining the secret key for AES encryption
 
 function SalesScriptService() {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+  
   // State for form data
   const [formData, setFormData] = useState({
     num_words: '', // State for number of words
@@ -37,6 +43,7 @@ function SalesScriptService() {
   const [translatedScript, setTranslatedScript] = useState(''); // State for translated sales script
   const [error, setError] = useState(''); // State for error messages
   const authContext = useContext(AuthContext); // Accessing the authentication context
+  const [loading, setLoading] = useState(false);
 
   if (!authContext) {
     throw new Error("AuthContext must be used within an AuthProvider"); // Throwing an error if AuthContext is not available
@@ -56,12 +63,15 @@ function SalesScriptService() {
     setError(''); // Resetting error state
     setGeneratedScript(''); // Resetting generated script state
     setTranslatedScript(''); // Resetting translated script state
+    setLoading(true);
+
 
     try {
       // Encrypt the payload
       const payload = JSON.stringify(formData); // Converting formData to JSON string
       const encryptedPayload = CryptoJS.AES.encrypt(payload, ENCRYPTION_SECRET_KEY, { iv: ENCRYPTION_IV }).toString(); // Encrypting the payload
 
+      
       // Sending POST request with the encrypted payload
       const response = await axios.post(`${apiUrl}/sales_script_generator/`, 
         { encrypted_content: encryptedPayload },
@@ -84,6 +94,7 @@ function SalesScriptService() {
 
         const parsedContent = JSON.parse(decryptedText); // Parsing decrypted text as JSON
         const formattedContent = parsedContent.generated_content.replace(/\[|\]/g, '').replace(/\n/g, '\n'); // Formatting the content
+        toast.success('Sales Scripts generated successfully!');
 
         setGeneratedScript(formattedContent); // Setting the generated script
       } else {
@@ -92,6 +103,9 @@ function SalesScriptService() {
     } catch (error) {
       console.error('Error generating sales script:', error); // Logging error
       setError('Failed to generate sales script. Please try again.'); // Setting error message for UI
+    }
+    finally {
+      setLoading(false);
     }
   };
 
@@ -149,6 +163,8 @@ function SalesScriptService() {
   return (
     <>
       <Navbar />
+      <div className="min-h-screen flex items-center justify-center">
+      <div className="w-full max-w-3xl mx-auto p-8 rounded">
       <h1 className="text-center text-3xl mt-5 font-bold" style={{ fontFamily: "'Poppins', sans-serif" }}>
         Sales Script Generator
       </h1>
@@ -285,9 +301,11 @@ function SalesScriptService() {
         </div>
         <button
           type="submit"
+          disabled={loading}
           className="w-full bg-blue-500 text-white font-bold py-3 px-6 rounded shadow-md hover:bg-blue-600"
-        >
-          Generate Sales Script
+        >     
+        {loading ? 'Generating...' : 'Generate Sales Script'}
+          
         </button>
       </form>
       {error && <div className="text-red-500 text-center mt-4">{error}</div>}
@@ -331,6 +349,10 @@ function SalesScriptService() {
           </button>
         </div>
       )}
+      <ToastContainer   position="bottom-right" autoClose={5000} />
+
+      </div>
+      </div>
     </>
   );
 }

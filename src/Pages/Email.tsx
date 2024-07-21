@@ -1,28 +1,54 @@
-import { useState, useContext, ChangeEvent, FormEvent } from 'react'; // Importing necessary hooks and types from React
-import Navbar from '../components/Global/Navbar'; // Importing the Navbar component
-import axios, { AxiosError } from 'axios'; // Importing axios for making HTTP requests and AxiosError for error handling
-import { AuthContext } from '../components/Global/AuthContext'; // Importing AuthContext for authentication
-import TranslateComponent from '../components/Global/TranslateContent'; // Importing a translation component
-import CryptoJS from 'crypto-js'; // Importing CryptoJS for encryption and decryption
-import { saveAs } from 'file-saver'; // Importing file-saver for saving files
-import { Document, Packer, Paragraph, TextRun } from 'docx'; // Importing docx for generating .docx files
-import { toast, ToastContainer } from 'react-toastify'; // Importing react-toastify for notifications
+import React, { useState, useContext, ChangeEvent, FormEvent, useEffect } from 'react';
+import Navbar from '../components/Global/Navbar';
+import axios, { AxiosError } from 'axios';
+import { AuthContext } from '../components/Global/AuthContext';
+import CryptoJS from 'crypto-js';
+import { saveAs } from 'file-saver';
+import { Document, Packer, Paragraph, TextRun } from 'docx';
+import { toast, ToastContainer } from 'react-toastify';
 import config from '../config';
+import TranslateComponent from '../components/Global/TranslateContent';
 
 const apiUrl = config.apiUrl;
 
 // Constants for AES encryption
-const AES_IV = CryptoJS.enc.Base64.parse("3G1Nd0j0l5BdPmJh01NrYg=="); // Initialization vector for AES encryption
-const AES_SECRET_KEY = CryptoJS.enc.Base64.parse("XGp3hFq56Vdse3sLTtXyQQ=="); // Secret key for AES encryption
+const AES_IV = CryptoJS.enc.Base64.parse("3G1Nd0j0l5BdPmJh01NrYg==");
+const AES_SECRET_KEY = CryptoJS.enc.Base64.parse("XGp3hFq56Vdse3sLTtXyQQ==");
 
+interface FormData {
+  purpose: string;
+  otherPurpose: string;
+  subject: string;
+  rephraseSubject: boolean;
+  to: string;
+  tone: string;
+  num_words: string;
+  keyword_1: string;
+  keyword_2: string;
+  keyword_3: string;
+  keyword_4: string;
+  keyword_5: string;
+  keyword_6: string;
+  keyword_7: string;
+  keyword_8: string;
+  contextualBackground: string;
+  callToAction: string;
+  additionalDetails: string;
+  priorityLevel: string;
+  closingRemarks: string;
+  [key: string]: any;
+}
 
-
-function EmailService() {
-    // State management for form data, loading state, error messages, generated email, and translated email
-  const [formData, setFormData] = useState({
+const EmailService: React.FC = () => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+  
+  const [formData, setFormData] = useState<FormData>({
     purpose: '',
     otherPurpose: '',
     subject: '',
+    num_words: '',
     rephraseSubject: false,
     to: '',
     tone: 'Formal',
@@ -41,24 +67,21 @@ function EmailService() {
     closingRemarks: '',
   });
 
-  const [loading, setLoading] = useState(false); // Loading state
-  const [error, setError] = useState<string | null>(null); // Error state
-  const [generatedEmail, setGeneratedEmail] = useState<string>(''); // State for generated email content
-  const [translatedEmail, setTranslatedEmail] = useState<string>(''); // State for translated email content
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [generatedEmail, setGeneratedEmail] = useState<string>('');
+  const [translatedEmail, setTranslatedEmail] = useState<string>('');
 
-  // Accessing the authentication context
-  const authContext = useContext(AuthContext); // Using useContext to get the authContext value
+  const authContext = useContext(AuthContext);
 
   if (!authContext) {
-    throw new Error('AuthContext must be used within an AuthProvider'); // Throwing an error if AuthContext is not provided
+    throw new Error('AuthContext must be used within an AuthProvider');
   }
 
-  const { accessToken } = authContext; // Destructuring accessToken from authContext
+  const { accessToken } = authContext;
 
-  // Handling input changes
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    // Update formData based on input type
     if (type === 'checkbox' && e.target instanceof HTMLInputElement) {
       setFormData({ ...formData, [name]: e.target.checked });
     } else {
@@ -66,124 +89,109 @@ function EmailService() {
     }
   };
 
-  // Handling form submission
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); // Prevent default form submission
-    setLoading(true); // Set loading state to true
-    setError(null); // Clear any previous errors
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
 
     try {
-      // Encrypting the payload
-      const payload = JSON.stringify(formData); // Convert form data to JSON string
-      const encryptedPayload = CryptoJS.AES.encrypt(payload, AES_SECRET_KEY, { iv: AES_IV }).toString(); // Encrypt payload using AES
-
-      // Sending the encrypted payload to the backend
+      const payload = JSON.stringify(formData);
+      const encryptedPayload = CryptoJS.AES.encrypt(payload, AES_SECRET_KEY, { iv: AES_IV }).toString();
       const response = await axios.post(
         `${apiUrl}/email_generator/`,
-        { encrypted_content: encryptedPayload }, // Send encrypted content in the request body
+        { encrypted_content: encryptedPayload },
         {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`, // Include access token in headers
+            'Authorization': `Bearer ${accessToken}`,
           },
-          withCredentials: true, // Send cookies with the request (if applicable)
+          withCredentials: true,
         }
       );
 
-      // Decrypting the response
       if (response.data && response.data.encrypted_content) {
-        const decryptedBytes = CryptoJS.AES.decrypt(response.data.encrypted_content, AES_SECRET_KEY, { iv: AES_IV }); // Decrypt response
-        const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8); // Convert decrypted bytes to UTF-8 string
+        const decryptedBytes = CryptoJS.AES.decrypt(response.data.encrypted_content, AES_SECRET_KEY, { iv: AES_IV });
+        const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8);
 
         if (!decryptedText) {
-          throw new Error('Decryption failed'); // Throw error if decryption fails
+          throw new Error('Decryption failed');
         }
 
-        const parsedContent = JSON.parse(decryptedText); // Parse decrypted JSON content
+        const parsedContent = JSON.parse(decryptedText);
 
         if (parsedContent.generated_content) {
-          setGeneratedEmail(parsedContent.generated_content); // Set generated email content in state
-          toast.success('Email sent successfully!'); // Display success toast notification
+          setGeneratedEmail(parsedContent.generated_content);
+          toast.success('Email generated successfully!');
         } else {
-          setError('Failed to generate email. No content received.'); // Set error message if no content received
+          setError('Failed to generate email. No content received.');
         }
       } else {
-        setError('Failed to generate email. No content received.'); // Set error message if no content received
+        setError('Failed to generate email. No content received.');
       }
     } catch (error) {
-      // Handle Axios errors
       if (axios.isAxiosError(error)) {
-        const axiosError = error as AxiosError; // Cast error to AxiosError
+        const axiosError = error as AxiosError;
         if (axiosError.response) {
-          console.error('Error response data:', axiosError.response.data); // Log error response data
-          console.error('Error response status:', axiosError.response.status); // Log error response status
-          console.error('Error response headers:', axiosError.response.headers); // Log error response headers
+          console.error('Error response data:', axiosError.response.data);
+          console.error('Error response status:', axiosError.response.status);
+          console.error('Error response headers:', axiosError.response.headers);
         } else if (axiosError.request) {
-          console.error('Error request:', axiosError.request); // Log error request
+          console.error('Error request:', axiosError.request);
         } else {
-          console.error('Error:', axiosError.message); // Log generic error message
+          console.error('Error:', axiosError.message);
         }
       } else {
-        console.error('Error:', error); // Log generic error message
+        console.error('Error:', error);
       }
-      setError('Failed to generate email. Please try again.'); // Set error message for user
+      setError('Failed to generate email. Please try again.');
     } finally {
-      setLoading(false); // Set loading state to false
+      setLoading(false);
     }
   };
 
-  // Generating a .docx file with proper formatting
   const generateDocx = (content: string, fileName: string) => {
-    const lines = content.split('\n'); // Split content into lines
-    const docContent = lines.map(line => {
-      const parts = line.split('**'); // Split line into parts based on '**'
-      const textRuns = parts.map((part, index) => {
-        if (index % 2 === 1) {
-          return new TextRun({ text: part, bold: true }); // Create bold TextRun for odd-indexed parts
-        } else {
-          return new TextRun(part); // Create regular TextRun for even-indexed parts
-        }
-      });
-      return new Paragraph({ children: textRuns }); // Create paragraph with text runs
-    });
+    const lines = content.split('\n');
+    const docContent = lines.map(line => new Paragraph({ children: [new TextRun(line)] }));
 
     const doc = new Document({
       sections: [
         {
-          properties: {}, // Section properties (none specified)
-          children: docContent, // Content of the document section
+          properties: {},
+          children: docContent,
         },
       ],
     });
 
-    // Convert document to blob and save as .docx file
     Packer.toBlob(doc).then(blob => {
-      saveAs(blob, `${fileName}.docx`); // Save blob as .docx file with specified filename
+      saveAs(blob, fileName);
+    }).catch(error => {
+      console.error('Error generating DOCX:', error);
+      toast.error('Failed to generate DOCX file.');
     });
   };
 
-  // Handle download of generated or translated content
   const handleDownload = (type: string) => () => {
     try {
       if (type === 'generated') {
         if (!generatedEmail) {
-          throw new Error('No generated content available.'); // Throw error if no generated content available
+          throw new Error('No generated content available.');
         }
-        generateDocx(generatedEmail, 'Generated_Email'); // Generate .docx file for generated content
+        generateDocx(generatedEmail, 'Generated_Email.docx');
       } else if (type === 'translated') {
         if (!translatedEmail) {
-          throw new Error('No translated content available.'); // Throw error if no translated content available
+          throw new Error('No translated content available.');
         }
-        generateDocx(translatedEmail, 'Translated_Email'); // Generate .docx file for translated content
+        generateDocx(translatedEmail, 'Translated_Email.docx');
       } else {
-        throw new Error('Invalid download type.'); // Throw error for invalid download type
+        throw new Error('Invalid download type.');
       }
     } catch (error) {
-      // Handle download errors (currently commented out)
-      // setError(error.message);
+      console.error('Download error:', error);
+      // toast.error(error.message);
     }
   };
-  
+
   return (
     <>
       <Navbar />
@@ -237,8 +245,9 @@ function EmailService() {
                 <label className="font-bold text-black">Rephrase Subject</label>
               </div>
             </div>
-            <div className="mb-6">
-              <label className="block mb-2 font-bold text-black">To (Required)</label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div className="flex flex-col">
+              <label className="block mb-2 font-bold text-black">To</label>
               <input
                 type="text"
                 name="to"
@@ -246,9 +255,20 @@ function EmailService() {
                 onChange={handleChange}
                 className="w-full p-3 border rounded shadow-sm text-gray-700"
               />
+              </div>
+              <div className="flex flex-col">
+                <label className="mb-2 font-bold text-black">Number of words</label>
+                <input
+                  type="text"
+                  name="num_words"
+                  value={formData.numberOfWords}
+                  onChange={handleChange}
+                  className="p-3 border rounded shadow-sm text-black"
+                />
+              </div>
             </div>
             <div className="mb-6">
-              <label className="block mb-2 font-bold text-black">Tone (Required)</label>
+              <label className="block mb-2 font-bold text-black">Tone</label>
               <select
                 name="tone"
                 value={formData.tone}
@@ -258,21 +278,21 @@ function EmailService() {
                 <option value="Formal">Formal</option>
                 <option value="Informal">Informal</option>
                 <option value="Persuasive">Persuasive</option>
-                <option value="Friendly">Friendly</option>
+                <option value="Urgent">Urgent</option>
               </select>
             </div>
-            <div className="mb-6 grid grid-cols-2 gap-6">
+            <div className="mb-6">
+              <label className="block mb-2 font-bold text-black">Keywords (Optional, add up to 8)</label>
               {[...Array(8)].map((_, index) => (
-                <div key={index} className="flex flex-col">
-                  <label className="block mb-2 font-bold text-black">Keyword {index + 1}</label>
-                  <input
-                    type="text"
-                    name={`keyword_${index + 1}`}
-                    value={(formData as any)[`keyword_${index + 1}`]}
-                    onChange={handleChange}
-                    className="p-3 border rounded shadow-sm text-gray-700"
-                  />
-                </div>
+                <input
+                  key={index}
+                  type="text"
+                  name={`keyword_${index + 1}`}
+                  placeholder={`Keyword ${index + 1}`}
+                  value={formData[`keyword_${index + 1}`]}
+                  onChange={handleChange}
+                  className="w-full p-3 mb-3 border rounded shadow-sm text-gray-700"
+                />
               ))}
             </div>
             <div className="mb-6">
@@ -285,7 +305,7 @@ function EmailService() {
               />
             </div>
             <div className="mb-6">
-              <label className="block mb-2 font-bold text-black">Call to Action (Optional)</label>
+              <label className="block mb-2 font-bold text-black">Call to Action (Required)</label>
               <select
                 name="callToAction"
                 value={formData.callToAction}
@@ -293,10 +313,20 @@ function EmailService() {
                 className="w-full p-3 border rounded shadow-sm text-gray-700"
               >
                 <option value="Reply">Reply</option>
-                <option value="A Meeting">A Meeting</option>
-                <option value="A Phone Call">A Phone Call</option>
-                <option value="A Confirmation">A Confirmation</option>
+                <option value="Schedule a Meeting">Schedule a Meeting</option>
+                <option value="Provide Feedback">Provide Feedback</option>
+                <option value="Other">Other</option>
               </select>
+              {formData.callToAction === "Other" && (
+                <input
+                  type="text"
+                  name="otherCallToAction"
+                  placeholder="If others, please specify"
+                  value={formData.otherCallToAction}
+                  onChange={handleChange}
+                  className="w-full p-3 border rounded shadow-sm text-gray-700"
+                />
+              )}
             </div>
             <div className="mb-6">
               <label className="block mb-2 font-bold text-black">Additional Details (Optional)</label>
@@ -308,7 +338,7 @@ function EmailService() {
               />
             </div>
             <div className="mb-6">
-              <label className="block mb-2 font-bold text-black">Priority Level (Optional)</label>
+              <label className="block mb-2 font-bold text-black">Priority Level (Required)</label>
               <select
                 name="priorityLevel"
                 value={formData.priorityLevel}
@@ -329,58 +359,65 @@ function EmailService() {
                 className="w-full p-3 border rounded shadow-sm text-gray-700"
               />
             </div>
-            <div className="mb-6 text-center">
-              <button
-                type="submit"
-                className="w-full p-3 bg-blue-500 text-white font-bold rounded shadow-sm"
-                disabled={loading}
-              >
-                {loading ? 'Generating...' : 'Generate Email'}
-              </button>
-            </div>
+            {error && <p className="text-red-500 mb-4">{error}</p>}
+            <button
+              type="submit"
+              className={'w-full p-3 bg-blue-500 text-white font-bold rounded shadow-sm'}
+              disabled={loading}
+            >
+              {loading ? 'Generating Email...' : 'Generate Email'}
+            </button>
           </form>
-        
-          {error && <p className="text-center text-red-500">{error}</p>}
           {generatedEmail && (
-            <div className="mt-6 p-6 ">
-              <h2 className="text-2xl font-bold text-black mb-4">Generated Email:</h2>
-              <p className="whitespace-pre-line text-black">{generatedEmail}</p>
+            <div className="mt-6 p-6">
+              <h2 className="text-2xl mb-4 text-black font-bold">Generated Email:</h2>
+              <p className="text-black whitespace-pre-line">
+                {generatedEmail.split('**').map((part, index) => { // Split content by '**' and map over parts
+                  if (index % 2 === 1) { // Check if index is odd, indicating bold content
+                    return <strong key={index}>{part}</strong>; // Render part in bold
+                  } else {
+                    return part; // Render part as plain text
+                  }
+                })}
+              </p>
               <button
+                className=" w-full p-3 bg-green-500 text-white font-bold rounded shadow-sm mt-4 hover:bg-green-600"
                 onClick={handleDownload('generated')}
-                className="w-full p-3 bg-green-500 text-white font-bold rounded shadow-sm mt-4"
               >
                 Download Generated Email
               </button>
               <TranslateComponent
-                generatedContent={generatedEmail}
-                setTranslatedContent={setTranslatedEmail}
-                setError={setError}
+                generatedContent={generatedEmail} // Pass generatedContent to TranslateComponent
+                setTranslatedContent={setTranslatedEmail} // Pass setTranslatedContent function to TranslateComponent
+                setError={setError} // Pass setError function to TranslateComponent
               />
+
             </div>
           )}
-          {translatedEmail && (
-            <div className="mt-6 p-6">
+          {translatedEmail && ( // Check if translatedContent exists
+            <div className="mt- p-6">
               <h2 className="text-2xl font-bold mb-4">Translated Content</h2>
               <div dangerouslySetInnerHTML={{ __html: translatedEmail }} />
               <button
-                onClick={handleDownload('translated')}
-                className="w-full p-3 bg-green-500 text-white font-bold rounded shadow-sm mt-4"
+                onClick={handleDownload('translated')} // Call handleDownload for translated content on click
+                className=" w-full p-3 bg-green-500 text-white font-bold rounded shadow-sm mt-4 hover:bg-green-600"
               >
-                Download Translated Email
-              </button>
+                Download Translated Content
+                    </button>
             </div>
           )}
-          {error && (
-            <div className="mt-6 p-6 border rounded bg-red-100 text-red-800 shadow-sm">
-              <p>{error}</p>
+          {error && ( // Check if error exists
+            <div className="mt-6 p-6 border rounded bg-red-100 text-red-800 shadow-sm"> 
+              <p>{error}</p> 
             </div>
           )}
+          
+          <ToastContainer   position="bottom-right" autoClose={5000} />
+        
         </div>
       </div>
-      <ToastContainer position="bottom-right" autoClose={5000} />
-
     </>
   );
-}
+};
 
 export default EmailService;

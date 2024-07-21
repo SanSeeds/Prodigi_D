@@ -2,7 +2,7 @@
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import axios from 'axios';
 import config from './../../config';
- 
+
 const apiUrl = config.apiUrl;
 
 // Define an interface for a User object
@@ -27,6 +27,9 @@ interface AuthContextType {
     
     // Function to log out the current user
     logout: () => void;
+
+    // Loading state to indicate if the authentication data is being restored
+    loading: boolean;
 }
 
 // Create a context for authentication, initially undefined
@@ -49,6 +52,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // State to store the refresh token, initially null
     const [refreshToken, setRefreshToken] = useState<string | null>(null);
 
+    // State to store the loading state, initially true
+    const [loading, setLoading] = useState(true);
+
     // useEffect hook to load stored authentication data from local storage when the component mounts
     useEffect(() => {
         // Retrieve stored user data from local storage
@@ -66,7 +72,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         // Check if all necessary data is available in local storage
         if (storedUser && storedAccessToken && storedRefreshToken && tokenExpiry) {
             // Check if the stored token has expired
-            const isExpired = new Date().getTime() > parseInt(tokenExpiry, 10);
+            const isExpired = new Date().getTime() > parseInt(tokenExpiry, 100);
             
             // If the token has not expired, update state with stored values
             if (!isExpired) {
@@ -81,6 +87,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 localStorage.removeItem('tokenExpiry');
             }
         }
+        // Set loading to false once the authentication data has been processed
+        setLoading(false);
     }, []);
 
     // Function to log in a user, updates state and local storage with user data and tokens
@@ -130,14 +138,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             setUser(null);
             setAccessToken(null);
             setRefreshToken(null);
-            
-           
         }
     };
 
     // Return the AuthContext provider with the current state and functions as its value
     return (
-        <AuthContext.Provider value={{ user, accessToken, refreshToken, login, logout }}>
+        <AuthContext.Provider value={{ user, accessToken, refreshToken, login, logout, loading }}>
             {children}
         </AuthContext.Provider>
     );
