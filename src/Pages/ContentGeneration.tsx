@@ -303,7 +303,7 @@ function ContentGenerationService() {
         </div>
         <button
           type="submit"
-          className="w-full p-3 bg-blue-500 text-white font-bold rounded shadow-sm"
+          className="w-full bg-blue-500 text-white font-bold py-3 px-6 rounded shadow-md hover:bg-blue-600"
           disabled={loading}
 
         >

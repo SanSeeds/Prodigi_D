@@ -35,7 +35,6 @@ function Translate() {
         setError('');
       }
     } catch (error) {
-      console.log('Error:', error);
       setError('Error during translation. Please try again.');
       setTranslatedText('');
     }
