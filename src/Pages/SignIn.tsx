@@ -36,7 +36,6 @@ const SignInForm: React.FC = () => {
 
             const response = await axios.post<{ encrypted_content: string }>(
                 `${apiUrl}/signin/`,
-
                 { encrypted_content: encryptedPayload },
                 {
                     headers: {
@@ -52,8 +51,6 @@ const SignInForm: React.FC = () => {
                 if (!decryptedText) {
                     throw new Error('Decryption failed');
                 }
-              
-                
 
                 const data = JSON.parse(decryptedText);
                 const accessToken = data.access;
@@ -66,10 +63,15 @@ const SignInForm: React.FC = () => {
                 toast.error('Failed to sign in. No content received.');
                 setError('Failed to sign in. No content received.');
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error during sign in:', error);
-            toast.error('Something went wrong. Please try again later.');
-            setError('Something went wrong. Please try again later.');
+            if (error.response && error.response.data && error.response.data.error) {
+                toast.error(error.response.data.error);
+                setError(error.response.data.error);
+            } else {
+                toast.error('Something went wrong. Please try again later.');
+                setError('Something went wrong. Please try again later.');
+            }
         }
     };
 

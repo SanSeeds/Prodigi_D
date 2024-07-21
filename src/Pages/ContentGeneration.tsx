@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react'; // Importing hooks for state management and context API
+import { useState, useContext, useEffect } from 'react'; // Importing hooks for state management and context API
 import axios from 'axios'; // Importing axios for making HTTP requests
 import Navbar from '../components/Global/Navbar'; // Importing Navbar component
 import { AuthContext } from '../components/Global/AuthContext'; // Importing AuthContext for authentication
@@ -7,7 +7,8 @@ import CryptoJS from 'crypto-js'; // Importing CryptoJS for encryption
 import { saveAs } from 'file-saver'; // Importing file-saver for saving files
 import { Document, Packer, Paragraph, TextRun } from 'docx'; // Importing docx for creating Word documents
 import config from '../config';
-
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 const apiUrl = config.apiUrl;
 
 // AES encryption constants
@@ -15,6 +16,10 @@ const ENCRYPTION_IV = CryptoJS.enc.Base64.parse("3G1Nd0j0l5BdPmJh01NrYg=="); // 
 const ENCRYPTION_SECRET_KEY = CryptoJS.enc.Base64.parse("XGp3hFq56Vdse3sLTtXyQQ=="); // Secret key for encryption
 
 function ContentGenerationService() {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+  
   // State for form data
   const [formData, setFormData] = useState({
     companyInfo: '',
@@ -33,6 +38,7 @@ function ContentGenerationService() {
   const [generatedContent, setGeneratedContent] = useState('');
   const [translatedContent, setTranslatedContent] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   // Get the access token from AuthContext
   const authContext = useContext(AuthContext); // Accessing authentication context
@@ -53,10 +59,9 @@ function ContentGenerationService() {
     setError(''); // Resetting error state
     setGeneratedContent(''); // Resetting generatedContent state
     setTranslatedContent(''); // Resetting translatedContent state
+    setLoading(true);
 
     try {
-      console.log('Form data:', formData); // Logging form data for debugging
-      
       // Encrypt the payload
       const payload = JSON.stringify({
         company_info: formData.companyInfo,
@@ -71,8 +76,7 @@ function ContentGenerationService() {
         references: formData.references,
       });
 
-      const encryptedPayload = CryptoJS.AES.encrypt(payload, ENCRYPTION_SECRET_KEY, { iv: ENCRYPTION_IV }).toString(); // Encrypting the payload
-      
+      const encryptedPayload = CryptoJS.AES.encrypt(payload, ENCRYPTION_SECRET_KEY, { iv: ENCRYPTION_IV }).toString(); // Encrypting the payload      
       // Send encrypted payload to backend
       const response = await axios.post(`${apiUrl}/content_generator/`, 
         { encrypted_content: encryptedPayload },
@@ -95,6 +99,8 @@ function ContentGenerationService() {
 
         const parsedContent = JSON.parse(decryptedText); // Parsing decrypted text as JSON
         setGeneratedContent(parsedContent.generated_content); // Setting the generated content
+        toast.success('Content Generated successfully!');
+
       } else {
         setError('Failed to generate content. No content received.'); // Setting error if no content is received
       }
@@ -112,7 +118,9 @@ function ContentGenerationService() {
         console.error(error); // Logging generic error
       }
       setError('Failed to generate content. Please try again.'); // Setting error message for UI
-    }
+    }finally {
+      setLoading(false);
+  }
   };
 
   // Generate a .docx file from content with proper formatting
@@ -169,6 +177,8 @@ function ContentGenerationService() {
   return (
     <>
       <Navbar />
+      <div className="min-h-screen flex items-center justify-center">
+      <div className="w-full max-w-3xl mx-auto p-8 rounded-lg">
       <h1 className="text-center text-3xl mt-5 font-bold" style={{ fontFamily: "'Poppins', sans-serif" }}>Content Generator</h1>
       <form className="w-full max-w-3xl mx-auto p-8" onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -294,8 +304,11 @@ function ContentGenerationService() {
         <button
           type="submit"
           className="w-full p-3 bg-blue-500 text-white font-bold rounded shadow-sm"
+          disabled={loading}
+
         >
-          Generate Content
+               {loading ? 'Generating...' : 'Generate Content'}
+          
         </button>
       </form>
       {error && (
@@ -359,6 +372,10 @@ function ContentGenerationService() {
           </button>
         </div>
       )}
+            <ToastContainer   position="bottom-right" autoClose={5000} />
+
+      </div>
+      </div>
     </>
   );
 }

@@ -21,12 +21,14 @@ import Payment from './Pages/Payment';
 import PresentationGenerationService from './Pages/PPTGenerator';
 import AddSlide from './Pages/AddSlide';
 
+
 function App() {
   return (
     <AuthProvider>
       <div className="flex flex-col min-h-screen">
         
         <BrowserRouter>
+ 
           <Routes>
             <Route path="/" element={<WelcomePage />} />
             <Route path="/signin" element={<SignInForm />} />

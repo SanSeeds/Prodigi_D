@@ -1,5 +1,5 @@
 // Import necessary dependencies
-import { useState, useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import axios from 'axios';
 import Navbar from '../components/Global/Navbar'; // Import Navbar component
 import { AuthContext } from '../components/Global/AuthContext'; // Import AuthContext component
@@ -8,9 +8,10 @@ import { saveAs } from 'file-saver'; // Import saveAs function from file-saver
 import { Document, Packer, Paragraph, TextRun } from 'docx'; // Import Document, Packer, Paragraph, and TextRun from docx
 import TranslateComponent from '../components/Global/TranslateContent'; // Import TranslateComponent
 import config from '../config';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const apiUrl = config.apiUrl;
-
 
 // Constants for AES encryption
 const AES_IV = CryptoJS.enc.Base64.parse('3G1Nd0j0l5BdPmJh01NrYg=='); // AES IV in Base64 format
@@ -18,6 +19,10 @@ const AES_SECRET_KEY = CryptoJS.enc.Base64.parse('XGp3hFq56Vdse3sLTtXyQQ=='); //
 
 // Define OfferLetterService component
 function OfferLetterService() {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // State management for form data, generated content, translated content, and error handling
   const [formData, setFormData] = useState({
     companyDetails: '',
@@ -42,8 +47,9 @@ function OfferLetterService() {
 
   const [generatedContent, setGeneratedContent] = useState(''); // State for generated offer letter content
   const [translatedContent, setTranslatedContent] = useState(''); // State for translated offer letter content
-  const [error, setError] = useState(''); // State for error message
+  const [,setError] = useState(''); // State for error message
   const authContext = useContext(AuthContext); // Access authentication context
+  const [loading, setLoading] = useState(false);
 
   // Ensure AuthContext is available
   if (!authContext) {
@@ -64,7 +70,7 @@ function OfferLetterService() {
     setError(''); // Clear previous errors
     setGeneratedContent(''); // Clear previous generated content
     setTranslatedContent(''); // Clear previous translated content
-
+    setLoading(true);
     try {
       // Encrypt form data payload
       const payload = JSON.stringify(formData);
@@ -87,7 +93,8 @@ function OfferLetterService() {
         const encryptedContent = data.encrypted_content; // Extract encrypted content from response
         const decryptedBytes = CryptoJS.AES.decrypt(encryptedContent, AES_SECRET_KEY, { iv: AES_IV }); // Decrypt content
         const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8); // Convert decrypted bytes to text
-
+       console.log(payload);
+        
         if (!decryptedText) {
           throw new Error('Decryption failed');
         }
@@ -96,19 +103,22 @@ function OfferLetterService() {
         const formattedContent = parsedContent.generated_content.replace(/\\n/g, '\n'); // Format generated content
 
         setGeneratedContent(formattedContent); // Set generated content state
+        toast.success('Offer Letter generated successfully!');
       } else {
         setError(data.error || 'An error occurred'); // Set error message from response
       }
     } catch (error) {
       console.error('Error generating offer letter:', error); // Log error to console
       setError('An error occurred'); // Set generic error message
+    } finally {
+      setLoading(false);
     }
   };
 
   // Generate .docx file with formatted content
   const generateDocx = (content: string, fileName: string) => {
     const lines = content.split('\n'); // Split content into lines
-    const docContent = lines.map(line => {
+    const docContent = lines.map((line) => {
       const parts = line.split('**'); // Split line into parts using '**' delimiter
       const textRuns = parts.map((part, index) => {
         if (index % 2 === 1) {
@@ -129,7 +139,7 @@ function OfferLetterService() {
       ],
     });
 
-    Packer.toBlob(doc).then(blob => {
+    Packer.toBlob(doc).then((blob) => {
       saveAs(blob, `${fileName}.docx`); // Save document blob as .docx file with specified fileName
     });
   };
@@ -158,6 +168,8 @@ function OfferLetterService() {
   return (
     <>
       <Navbar />
+      <div className="min-h-screen flex items-center justify-center">
+      <div className="w-full max-w-3xl mx-auto p-8 rounded">
       <h1 className="text-center text-3xl mt-5 text-black font-bold" style={{ fontFamily: "'Poppins', sans-serif" }}>Offer Letter Generation</h1>
       <form className="w-full max-w-3xl mx-auto p-8 rounded" onSubmit={handleSubmit}>
         <div className="mb-6">
@@ -218,6 +230,7 @@ function OfferLetterService() {
             />
           </div>
         </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div className="flex flex-col">
             <label className="mb-2 font-bold text-black">Department</label>
@@ -240,6 +253,7 @@ function OfferLetterService() {
             />
           </div>
         </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div className="flex flex-col">
             <label className="mb-2 font-bold text-black">Location</label>
@@ -264,18 +278,17 @@ function OfferLetterService() {
         </div>
 
         <div className="mb-6">
-          <label className="block mb-2 font-bold text-black">Offer Details</label>
+          <label className="block mb-2 font-bold text-black">Compensation Package</label>
           <textarea
             name="compensationPackage"
             value={formData.compensationPackage}
             onChange={handleChange}
             className="p-3 border rounded shadow-sm text-black w-full"
-            placeholder="Compensation Package"
           ></textarea>
         </div>
 
         <div className="mb-6">
-          <label className="block mb-2 font-bold text-black">Benefits (Health insurance, retirement plans, etc.)</label>
+          <label className="block mb-2 font-bold text-black">Benefits</label>
           <textarea
             name="benefits"
             value={formData.benefits}
@@ -284,27 +297,24 @@ function OfferLetterService() {
           ></textarea>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <div className="flex flex-col">
-            <label className="mb-2 font-bold text-black">Work Hours and Schedule</label>
-            <input
-              type="text"
-              name="workHours"
-              value={formData.workHours}
-              onChange={handleChange}
-              className="p-3 border rounded shadow-sm text-black"
-            />
-          </div>
-          <div className="flex flex-col">
-            <label className="mb-2 font-bold text-black">Duration of Employment</label>
-            <input
-              type="text"
-              name="duration"
-              value={formData.duration}
-              onChange={handleChange}
-              className="p-3 border rounded shadow-sm text-black"
-            />
-          </div>
+        <div className="mb-6">
+          <label className="block mb-2 font-bold text-black">Work Hours</label>
+          <textarea
+            name="workHours"
+            value={formData.workHours}
+            onChange={handleChange}
+            className="p-3 border rounded shadow-sm text-black w-full"
+          ></textarea>
+        </div>
+
+        <div className="mb-6">
+          <label className="block mb-2 font-bold text-black">Duration</label>
+          <textarea
+            name="duration"
+            value={formData.duration}
+            onChange={handleChange}
+            className="p-3 border rounded shadow-sm text-black w-full"
+          ></textarea>
         </div>
 
         <div className="mb-6">
@@ -318,14 +328,13 @@ function OfferLetterService() {
         </div>
 
         <div className="mb-6">
-          <label className="block mb-2 font-bold text-black">Acceptance Deadline</label>
-          <input
-            type="date"
+          <label className="block mb-2 font-bold text-black">Deadline</label>
+          <textarea
             name="deadline"
             value={formData.deadline}
             onChange={handleChange}
             className="p-3 border rounded shadow-sm text-black w-full"
-          />
+          ></textarea>
         </div>
 
         <div className="mb-6">
@@ -339,7 +348,7 @@ function OfferLetterService() {
         </div>
 
         <div className="mb-6">
-          <label className="block mb-2 font-bold text-black">Documents Needed for Onboarding</label>
+          <label className="block mb-2 font-bold text-black">Documents Needed</label>
           <textarea
             name="documentsNeeded"
             value={formData.documentsNeeded}
@@ -358,54 +367,62 @@ function OfferLetterService() {
           ></textarea>
         </div>
 
-        <div className="text-center">
-          <button type="submit" 
-          className="w-full p-3 bg-blue-500 text-white font-bold rounded shadow-sm">
-            Generate Offer Letter</button>
-        </div>
+      
+
+        <button
+          type="submit"
+          className="w-full p-3 bg-blue-500 text-white font-bold rounded shadow-sm"
+          disabled={loading}
+        >
+          {loading ? 'Generating...' : 'Generate Offer Letter'}
+        </button>
       </form>
 
-      {error && <p className="text-red-500 text-center">{error}</p>}
       {generatedContent && (
-        <div className="w-full max-w-3xl mx-auto p-8 mt-6 rounded">
-          <h2 className="text-xl font-bold mb-4">Generated Offer Letter</h2>
+        <div className="mt-6 p-6">
+          <h2 className="text-2xl font-bold mb-4">Generated Offer Letter:</h2>
           <p className="text-black whitespace-pre-line">
-            {generatedContent.split('**').map((part, index) => {
-              if (index % 2 === 1) {
-                return <strong key={index}>{part}</strong>;
-              } else {
-                return part;
-              }
-            })}
-          </p>
-          <button
-            onClick={handleDownload('generated')}
-            className="w-full p-3 bg-green-500 text-white font-bold rounded shadow-sm mt-4"
+                {generatedContent.split('**').map((part, index) => { // Split content by '**' and map over parts
+                  if (index % 2 === 1) { // Check if index is odd, indicating bold content
+                    return <strong key={index}>{part}</strong>; // Render part in bold
+                  } else {
+                    return part; // Render part as plain text
+                  }
+                })}
+              </p>          
+              <button
+                className="w-full p-3 bg-green-500 text-white font-bold rounded shadow-sm mt-4"
+                onClick={handleDownload('generated')}
           >
-            Download Generated Content
+            Download Offer Letter
           </button>
           <TranslateComponent
-              generatedContent={generatedContent}
-              setTranslatedContent={setTranslatedContent}
-              setError={setError}
-            />
-      
+          generatedContent={generatedContent}
+          setTranslatedContent={setTranslatedContent}
+          setError={setError} // Pass setError function to TranslateComponent
+
+        />
         </div>
       )}
+
       {translatedContent && (
-        <div className="w-full max-w-3xl mx-auto p-8 mt-6 rounded">
-          <h2 className="text-xl font-bold mb-4">Translated Offer Letter</h2>
-          <pre className="whitespace-pre-wrap">{translatedContent}</pre>
-          <div className="flex justify-center mt-4">
+        <div className="w-full max-w-3xl mx-auto p-8">
+          <h2 className="text-xl font-bold mb-4">Translated Offer Letter:</h2>
+          <pre className="whitespace-pre-wrap text-black">{translatedContent}</pre>
           <button
-            onClick={handleDownload('translated')}
-            className="w-full p-3 bg-green-500 text-white font-bold rounded shadow-sm mt-4"
+                className="w-full p-3 bg-green-500 text-white font-bold rounded shadow-sm mt-4"
+                onClick={handleDownload('translated')}
           >
-            Download Translated Content
+            Download Translated Offer Letter
           </button>
-          </div>
         </div>
       )}
+
+      <ToastContainer   position="bottom-right" autoClose={5000} />
+
+      
+      </div>
+      </div>
     </>
   );
 }

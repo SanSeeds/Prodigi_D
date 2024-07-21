@@ -1,4 +1,4 @@
-import { useState, useContext, ChangeEvent, FormEvent } from 'react';
+import { useState, useContext, ChangeEvent, FormEvent, useEffect } from 'react';
 import Navbar from '../components/Global/Navbar';
 import axios, { AxiosError } from 'axios';
 import { AuthContext } from '../components/Global/AuthContext';
@@ -7,6 +7,7 @@ import CryptoJS from 'crypto-js';
 import { saveAs } from 'file-saver';
 import { Document, Packer, Paragraph, TextRun } from 'docx';
 import config from '../config';
+import { toast, ToastContainer } from 'react-toastify';
 
 const apiUrl = config.apiUrl;
 
@@ -15,6 +16,9 @@ const AES_IV = CryptoJS.enc.Base64.parse("3G1Nd0j0l5BdPmJh01NrYg=="); // Initial
 const AES_SECRET_KEY = CryptoJS.enc.Base64.parse("XGp3hFq56Vdse3sLTtXyQQ=="); // Initialize secret key for AES encryption
 
 function BusinessProposalService() {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   // State for form data
   const [formData, setFormData] = useState({
     businessIntroduction: '', // Business introduction field
@@ -36,6 +40,7 @@ function BusinessProposalService() {
   const [error, setError] = useState<string | null>(null); // Error state
   const [generatedContent, setGeneratedContent] = useState<string>(''); // Generated content state
   const [translatedContent, setTranslatedContent] = useState<string>(''); // Translated content state
+  const [loading, setLoading] = useState(false);
 
   // Get the access token from AuthContext
   const authContext = useContext(AuthContext); // Access authentication context
@@ -54,12 +59,13 @@ function BusinessProposalService() {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault(); // Prevent default form submission
     setError(null); // Reset error state
-
+    setLoading(true);
     try {
       // Encrypt the form data
       const payload = JSON.stringify(formData); // Convert formData to JSON string
       const encryptedPayload = CryptoJS.AES.encrypt(payload, AES_SECRET_KEY, { iv: AES_IV }).toString(); // Encrypt the payload
-
+      console.log(payload);
+      
       // Send the encrypted payload to the backend
       const response = await axios.post<{ encrypted_content: string }>(
         `${apiUrl}/business_proposal_generator/`, // API endpoint
@@ -87,6 +93,7 @@ function BusinessProposalService() {
         const formattedContent = parsedContent.generated_content.replace(/\n/g, '\n'); // Format content with newlines
 
         setGeneratedContent(formattedContent); // Update generatedContent state
+        toast.success('Content generated successfully!');
       } else {
         setError('Failed to generate business proposal. No content received.'); // Set error if no content received
       }
@@ -107,6 +114,8 @@ function BusinessProposalService() {
         console.error('Error:', error); // Log non-Axios error
       }
       setError('Failed to generate business proposal. Please try again.'); // Set error message
+    }finally {
+      setLoading(false);
     }
   };
 
@@ -322,8 +331,11 @@ function BusinessProposalService() {
               <button
                 type="submit"
                 className="w-full p-3 bg-blue-500 text-white font-bold rounded shadow-sm"
+                disabled={loading}
+
               >
-                Generate
+              {loading ? 'Generating...' : 'Generate'}
+
               </button>
             </div>
           </form>
@@ -371,6 +383,9 @@ function BusinessProposalService() {
               <p>{error}</p> 
             </div>
           )}
+
+      <ToastContainer   position="bottom-right" autoClose={5000} />
+
           </div>
           </div>
           </>
