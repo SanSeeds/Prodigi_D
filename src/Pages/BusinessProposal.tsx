@@ -64,8 +64,7 @@ function BusinessProposalService() {
       // Encrypt the form data
       const payload = JSON.stringify(formData); // Convert formData to JSON string
       const encryptedPayload = CryptoJS.AES.encrypt(payload, AES_SECRET_KEY, { iv: AES_IV }).toString(); // Encrypt the payload
-      console.log(payload);
-      
+
       // Send the encrypted payload to the backend
       const response = await axios.post<{ encrypted_content: string }>(
         `${apiUrl}/business_proposal_generator/`, // API endpoint
@@ -330,7 +329,8 @@ function BusinessProposalService() {
             <div className="flex justify-center">
               <button
                 type="submit"
-                className="w-full p-3 bg-blue-500 text-white font-bold rounded shadow-sm"
+                className="w-full bg-blue-500 text-white font-bold py-3 px-6 rounded shadow-md hover:bg-blue-600"
+
                 disabled={loading}
 
               >

@@ -93,7 +93,7 @@ function OfferLetterService() {
         const encryptedContent = data.encrypted_content; // Extract encrypted content from response
         const decryptedBytes = CryptoJS.AES.decrypt(encryptedContent, AES_SECRET_KEY, { iv: AES_IV }); // Decrypt content
         const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8); // Convert decrypted bytes to text
-       console.log(payload);
+   
         
         if (!decryptedText) {
           throw new Error('Decryption failed');
@@ -371,7 +371,8 @@ function OfferLetterService() {
 
         <button
           type="submit"
-          className="w-full p-3 bg-blue-500 text-white font-bold rounded shadow-sm"
+          className="w-full bg-blue-500 text-white font-bold py-3 px-6 rounded shadow-md hover:bg-blue-600"
+
           disabled={loading}
         >
           {loading ? 'Generating...' : 'Generate Offer Letter'}

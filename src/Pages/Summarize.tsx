@@ -298,7 +298,8 @@ function SummarizeService() {
                                 </div>
                             </div>
                             <div className="flex justify-center">
-                                <button type="submit" className="w-full p-3 bg-blue-500 text-white font-bold rounded shadow-sm" disabled={loading}>
+                                <button type="submit"           className="w-full bg-blue-500 text-white font-bold py-3 px-6 rounded shadow-md hover:bg-blue-600"
+ disabled={loading}>
                                     {loading ? "Generating..." : "Summarize"}
                                 </button>
                             </div>
