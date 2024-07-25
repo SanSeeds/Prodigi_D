@@ -11,6 +11,8 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 const apiUrl = config.apiUrl;
 
+
+
 // AES encryption constants
 const ENCRYPTION_IV = CryptoJS.enc.Base64.parse("3G1Nd0j0l5BdPmJh01NrYg=="); // Initialization vector for encryption
 const ENCRYPTION_SECRET_KEY = CryptoJS.enc.Base64.parse("XGp3hFq56Vdse3sLTtXyQQ=="); // Secret key for encryption
@@ -19,6 +21,7 @@ function ContentGenerationService() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+  
   
   // State for form data
   const [formData, setFormData] = useState({
@@ -177,22 +180,23 @@ function ContentGenerationService() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center  justify-center">
       <div className="w-full max-w-3xl mx-auto p-8 rounded-lg">
-      <h1 className="text-center text-3xl mt-5 font-bold" style={{ fontFamily: "'Poppins', sans-serif" }}>Content Generator</h1>
+      <h1 className="text-center text-3xl" style={{ fontFamily: "'Poppins', sans-serif" }}>Content Generator</h1>
       <form className="w-full max-w-3xl mx-auto p-8" onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div className="flex flex-col">
-            <label className="mb-2 font-bold text-black">Company Information</label>
+            <label className="mb-2 text-black">Company Information</label>
             <textarea
               name="companyInfo"
               value={formData.companyInfo}
               onChange={handleChange}
               className="p-3 border rounded shadow-sm text-black"
+              placeholder='Enter Company Information'
             />
           </div>
           <div className="flex flex-col">
-            <label className="mb-2 font-bold">Content Purpose and Goals</label>
+            <label className="mb-2 text-black">Content Purpose and Goals</label>
             <select
               name="purpose"
               value={formData.purpose}
@@ -209,7 +213,7 @@ function ContentGenerationService() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div className="flex flex-col">
-            <label className="mb-2 font-bold text-black">Desired Action from Audience</label>
+            <label className="mb-2 text-black">Desired Action from Audience</label>
             <select
               name="action"
               value={formData.action}
@@ -222,40 +226,44 @@ function ContentGenerationService() {
             </select>
           </div>
           <div className="flex flex-col">
-            <label className="mb-2 font-bold text-black">Topic Details</label>
+            <label className="mb-2 text-black">Topic Details</label>
             <textarea
               name="topicDetails"
               value={formData.topicDetails}
               onChange={handleChange}
               className="p-3 border rounded shadow-sm text-black"
+              placeholder='Enter Topic Details'
+
             />
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div className="flex flex-col">
-            <label className="mb-2 font-bold text-black">Keywords</label>
+            <label className="mb-2 text-black">Keywords</label>
             <input
               type="text"
               name="keywords"
               value={formData.keywords}
               onChange={handleChange}
               className="p-3 border rounded shadow-sm text-black"
+              placeholder='Enter Keywords'             
             />
           </div>
           <div className="flex flex-col">
-            <label className="mb-2 font-bold text-black">Audience Profile</label>
+            <label className="mb-2 text-black">Audience Profile</label>
             <input
               type="text"
               name="audienceProfile"
               value={formData.audienceProfile}
               onChange={handleChange}
               className="p-3 border rounded shadow-sm text-black"
+              placeholder='Enter your audience'
             />
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div className="flex flex-col">
-            <label className="mb-2 font-bold text-black">Format and Structure</label>
+            <label className="mb-2 text-black">Format and Structure</label>
             <select
               name="format"
               value={formData.format}
@@ -269,41 +277,47 @@ function ContentGenerationService() {
             </select>
           </div>
           <div className="flex flex-col">
-            <label className="mb-2 font-bold text-black">Number of Words</label>
+            <label className="mb-2 text-black">Number of Words</label>
             <input
               type="number"
               name="numberOfWords"
               value={formData.numberOfWords}
               onChange={handleChange}
               className="p-3 border rounded shadow-sm text-black"
+              placeholder='Enter Number of Words'
+
             />
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div className="flex flex-col">
-            <label className="mb-2 font-bold text-black">SEO Keywords</label>
+            <label className="mb-2 text-black">SEO Keywords</label>
             <input
               type="text"
               name="seoKeywords"
               value={formData.seoKeywords}
               onChange={handleChange}
               className="p-3 border rounded shadow-sm text-black"
+              placeholder='Enter SEO Keywords'
+
             />
           </div>
           <div className="flex flex-col">
-            <label className="mb-2 font-bold text-black">References and Resources</label>
+            <label className="mb-2 text-black">References and Resources</label>
             <input
               type="text"
               name="references"
               value={formData.references}
               onChange={handleChange}
               className="p-3 border rounded shadow-sm text-black"
+              placeholder='Enter References and Resource'
+
             />
           </div>
         </div>
         <button
           type="submit"
-          className="w-full bg-blue-500 text-white font-bold py-3 px-6 rounded shadow-md hover:bg-blue-600"
+          className="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
           disabled={loading}
 
         >
@@ -319,7 +333,7 @@ function ContentGenerationService() {
       {generatedContent && (
         // Check if there is generated content
         <div className="w-full max-w-3xl mx-auto p-8 mt-6 rounded">
-          <h2 className="text-xl font-bold mb-4">Generated Content:</h2>
+          <h2 className="text-xl mb-4">Generated Content:</h2>
           <p className="text-black whitespace-pre-line">
             {generatedContent.split('**').map((part, index) => {
               // Split the content by '**' to differentiate between bold and normal text
@@ -337,7 +351,7 @@ function ContentGenerationService() {
           <button
             onClick={handleDownload('generated')}
             // Set the click handler to trigger the download of the generated content
-            className="w-full p-3 bg-green-500 text-white font-bold rounded shadow-sm mt-4"
+            className="w-full p-3 bg-green-500 text-white rounded shadow-sm mt-4"
             // Style the button with full width, padding, green background, white text, bold font, rounded corners, shadow, and margin on top
           >
             Download Generated Content
@@ -357,14 +371,14 @@ function ContentGenerationService() {
         // Check if there is translated content
         <div className="w-full max-w-3xl mx-auto p-8 mt-6 rounded">
  
-          <h2 className="text-xl font-bold mb-4">Translated Content:</h2>
+          <h2 className="text-xl mb-4">Translated Content:</h2>
          
           <p className="whitespace-pre-line">{translatedContent}</p>
        
           <button
             onClick={handleDownload('translated')}
             // Set the click handler to trigger the download of the translated content
-            className="w-full p-3 bg-green-500 text-white font-bold rounded shadow-sm mt-4"
+            className="w-full p-3 bg-green-500 text-white rounded shadow-sm mt-4"
             // Style the button with full width, padding, green background, white text, bold font, rounded corners, shadow, and margin on top
           >
             Download Translated Content
@@ -372,7 +386,7 @@ function ContentGenerationService() {
           </button>
         </div>
       )}
-            <ToastContainer   position="bottom-right" autoClose={5000} />
+      <ToastContainer   position="bottom-right" autoClose={5000} />
 
       </div>
       </div>

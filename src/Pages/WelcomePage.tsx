@@ -18,8 +18,8 @@ const WelcomePage = () => {
             <Nav/>
             <div className={` max-h-screen flex flex-col items-center justify-start ${isModalOpen ? 'blur-sm' : ''}`}>
                 <h1 className="text-center text-4xl m-8">Welcome To ProdigiDesk</h1>
-                <h1 className="text-3xl font-bold mb-4 text-center">Revolutionize Your Workflow with ProdigiDesk</h1>
-                <h2 className="text-xl font-semibold mb-6 mt-4 text-center">Unlock opportunities Like Never Before!</h2>
+                <h1 className="text-3xl mb-4 text-center">Revolutionize Your Workflow with ProdigiDesk</h1>
+                <h2 className="text-xl mb-6 mt-4 text-center">Unlock opportunities Like Never Before!</h2>
                 <ul className="list-disc list-inside space-y-2 text-left mb-6">
                     <li>Mail Generator for crafting precise email correspondence</li>
                     <li>Summarization tool that condenses uploaded documents</li>

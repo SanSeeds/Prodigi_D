@@ -171,11 +171,11 @@ function SummarizeService() {
             <Navbar />
             <div className="min-h-screen flex items-center justify-center">
                 <div className="w-full max-w-3xl mx-auto p-8 rounded-lg">
-                    <h1 className="text-center text-3xl mt-5 font-bold" style={{ fontFamily: "'Poppins', sans-serif" }}>Summarize Document</h1>
+                    <h1 className="text-center text-3xl" style={{ fontFamily: "'Poppins', sans-serif" }}>Summarize Document</h1>
                     <form className="w-full max-w-3xl mx-auto p-8" onSubmit={handleSubmit}>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                             <div className="flex flex-col">
-                                <label className="mb-2 font-bold text-black">Document Context</label>
+                                <label className="mb-2 text-black">Document Context</label>
                                 <select
                                     name="documentContext"
                                     value={formData.documentContext}
@@ -189,7 +189,7 @@ function SummarizeService() {
                                 </select>
                             </div>
                             <div className="flex flex-col">
-                                <label className="mb-2 font-bold text-black">Main Subject</label>
+                                <label className="mb-2 text-black">Main Subject</label>
                                 <select
                                     name="mainSubject"
                                     value={formData.mainSubject}
@@ -206,7 +206,7 @@ function SummarizeService() {
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                             <div className="flex flex-col">
-                                <label className="mb-2 font-bold text-black">Purpose of the Summary</label>
+                                <label className="mb-2 text-black">Purpose of the Summary</label>
                                 <select
                                     name="purpose"
                                     value={formData.purpose}
@@ -219,7 +219,7 @@ function SummarizeService() {
                                 </select>
                             </div>
                             <div className="flex flex-col">
-                                <label className="mb-2 font-bold text-black">Length and Detail</label>
+                                <label className="mb-2 text-black">Length and Detail</label>
                                 <select
                                     name="lengthDetail"
                                     value={formData.lengthDetail}
@@ -234,61 +234,71 @@ function SummarizeService() {
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                             <div className="flex flex-col">
-                                <label className="mb-2 font-bold text-black">Important Elements to Include</label>
+                                <label className="mb-2 text-black">Important Elements to Include</label>
                                 <textarea
                                     name="importantElements"
                                     value={formData.importantElements}
                                     onChange={handleChange}
                                     className="p-3 border rounded shadow-sm text-black"
+                                    placeholder='Enter impornant elements to include'
+
                                     />
                                 </div>
                                 <div className="flex flex-col">
-                                    <label className="mb-2 font-bold text-black">Audience</label>
+                                    <label className="mb-2 text-black">Audience</label>
                                     <input
                                         type="text"
                                         name="audience"
                                         value={formData.audience}
                                         onChange={handleChange}
                                         className="p-3 border rounded shadow-sm text-black"
+                                        placeholder='Enter your audience'
+
                                     />
                                 </div>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                                 <div className="flex flex-col">
-                                    <label className="mb-2 font-bold text-black">Tone</label>
+                                    <label className="mb-2 text-black">Tone</label>
                                     <input
                                         type="text"
                                         name="tone"
                                         value={formData.tone}
                                         onChange={handleChange}
                                         className="p-3 border rounded shadow-sm text-black"
+                                        placeholder='Enter Tone'
+
                                     />
                                 </div>
                                 <div className="flex flex-col">
-                                    <label className="mb-2 font-bold text-black">Format</label>
+                                    <label className="mb-2 text-black">Format</label>
                                     <input
                                         type="text"
                                         name="format"
                                         value={formData.format}
                                         onChange={handleChange}
                                         className="p-3 border rounded shadow-sm text-black"
+                                        placeholder='Enter Format'
+
                                     />
                                 </div>
                             </div>
                             <div className="grid grid-cols-1 gap-6 mb-6">
                                 <div className="flex flex-col">
-                                    <label className="mb-2 font-bold text-black">Additional Instructions</label>
+                                    <label className="mb-2 text-black">Additional Instructions</label>
                                     <textarea
                                         name="additionalInstructions"
                                         value={formData.additionalInstructions}
                                         onChange={handleChange}
                                         className="p-3 border rounded shadow-sm text-black"
+                                        placeholder='Enter Additional Instructions'
+
                                     />
                                 </div>
                             </div>
                             <div className="grid grid-cols-1 gap-6 mb-6">
                                 <div className="flex flex-col">
-                                    <label className="mb-2 font-bold text-black">Upload Document</label>
+                                    <label className="mb-2 text-black">Upload Document</label>
                                     <input
                                         type="file"
                                         name="document"
@@ -298,8 +308,10 @@ function SummarizeService() {
                                 </div>
                             </div>
                             <div className="flex justify-center">
-                                <button type="submit"           className="w-full bg-blue-500 text-white font-bold py-3 px-6 rounded shadow-md hover:bg-blue-600"
- disabled={loading}>
+                                <button type="submit"           
+              className="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+
+                                    disabled={loading}>
                                     {loading ? "Generating..." : "Summarize"}
                                 </button>
                             </div>
@@ -307,7 +319,7 @@ function SummarizeService() {
                         {error && <div className="mt-4 text-red-500">{error}</div>}
                         {generatedContent && (
                             <div className="mt-4 p-4">
-                                <h2 className="text-2xl font-bold mb-2">Generated Content</h2>
+                                <h2 className="text-2xl mb-2">Generated Content</h2>
                                 <p className="text-black whitespace-pre-line">
                                     {generatedContent.split('**').map((part, index) => {
                                         if (index % 2 === 1) {
@@ -319,7 +331,7 @@ function SummarizeService() {
                                 </p>
                                 <button
                                     onClick={handleDownload('generated')}
-                                    className="w-full p-3 bg-green-500 text-white font-bold rounded shadow-sm mt-4"
+                                    className="w-full p-3 bg-green-500 text-white rounded shadow-sm mt-4"
                                 >
                                     Download Generated Content
                                 </button>
@@ -332,11 +344,11 @@ function SummarizeService() {
                         )}
                         {translatedContent && (
                             <div className="mt-4 p-4">
-                                <h2 className="text-2xl font-bold mb-2">Translated Content</h2>
+                                <h2 className="text-2xl mb-2">Translated Content</h2>
                                 <pre className="whitespace-pre-wrap">{translatedContent}</pre>
                                 <button
                                     onClick={handleDownload('translated')}
-                                    className="w-full p-3 bg-green-500 text-white font-bold rounded shadow-sm mt-4"
+                                    className="w-full p-3 bg-green-500 text-white rounded shadow-sm mt-4"
                                 >
                                     Download Translated Content
                                 </button>

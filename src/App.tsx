@@ -22,6 +22,7 @@ import PresentationGenerationService from './Pages/PPTGenerator';
 import AddSlide from './Pages/AddSlide';
 
 
+
 function App() {
   return (
     <AuthProvider>
@@ -49,7 +50,6 @@ function App() {
               <Route path="/profile" element={<ProfileForm />} />
               <Route path="/pptGeneration" element={<PresentationGenerationService />} />
               <Route path="/addslide" element={<AddSlide />} />
-
 
             </Route>
           </Routes>

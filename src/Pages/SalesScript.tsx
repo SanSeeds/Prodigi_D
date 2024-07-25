@@ -87,7 +87,7 @@ function SalesScriptService() {
         // Decrypt the content
         const decryptedBytes = CryptoJS.AES.decrypt(response.data.encrypted_content, ENCRYPTION_SECRET_KEY, { iv: ENCRYPTION_IV });
         const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8);
-
+      
         if (!decryptedText) {
           throw new Error('Decryption failed'); // Throwing error if decryption fails
         }
@@ -165,144 +165,137 @@ function SalesScriptService() {
       <Navbar />
       <div className="min-h-screen flex items-center justify-center">
       <div className="w-full max-w-3xl mx-auto p-8 rounded">
-      <h1 className="text-center text-3xl mt-5 font-bold" style={{ fontFamily: "'Poppins', sans-serif" }}>
+      <h1 className="text-center text-3xl" style={{ fontFamily: "'Poppins', sans-serif" }}>
         Sales Script Generator
       </h1>
       <form className="w-full max-w-3xl mx-auto p-8" onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div className="flex flex-col">
-            <label className="mb-2 font-bold text-black">Company Details</label>
+            <label className="mb-2 text-black">Company Details</label>
             <textarea
               name="company_details"
               value={formData.company_details}
               onChange={handleChange}
               className="p-3 border rounded shadow-sm text-black"
+              placeholder='Enter Company Details'
             />
           </div>
           <div className="flex flex-col">
-            <label className="mb-2 font-bold">Number of words</label>
+            <label className="mb-2 text-black">Number of words</label>
             <input
               type="number"
               name="num_words"
               value={formData.num_words}
               onChange={handleChange}
               className="p-3 border rounded shadow-sm text-black"
+              placeholder='Enter number of words'
+
             />
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div className="flex flex-col">
-            <label className="mb-2 font-bold text-black">Product Descriptions</label>
+            <label className="mb-2 text-black">Product Descriptions</label>
             <textarea
               name="product_descriptions"
               value={formData.product_descriptions}
               onChange={handleChange}
               className="p-3 border rounded shadow-sm text-black"
+              placeholder='Explain Product Description'
+
             />
           </div>
           <div className="flex flex-col">
-            <label className="mb-2 font-bold text-black">Features and Benefits</label>
+            <label className="mb-2 text-black">Features and Benefits</label>
             <textarea
               name="features_benefits"
               value={formData.features_benefits}
               onChange={handleChange}
               className="p-3 border rounded shadow-sm text-black"
+              placeholder='Explain Features and Benefits'
+
             />
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div className="flex flex-col">
-            <label className="mb-2 font-bold text-black">Pricing Information</label>
+            <label className="mb-2 text-black">Pricing Information</label>
             <textarea
               name="pricing_info"
               value={formData.pricing_info}
               onChange={handleChange}
               className="p-3 border rounded shadow-sm text-black"
+              placeholder='Enter Pricing Information'
+
             />
           </div>
           <div className="flex flex-col">
-            <label className="mb-2 font-bold text-black">Promotions</label>
+            <label className="mb-2 text-black">Promotions</label>
             <textarea
               name="promotions"
               value={formData.promotions}
               onChange={handleChange}
               className="p-3 border rounded shadow-sm text-black"
+              placeholder='Enter Promotions Details'
+
             />
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div className="flex flex-col">
-            <label className="mb-2 font-bold text-black">Target Audience</label>
+            <label className="mb-2 text-black">Target Audience</label>
             <textarea
               name="target_audience"
               value={formData.target_audience}
               onChange={handleChange}
               className="p-3 border rounded shadow-sm text-black"
+              placeholder='Enter Target Audience'
+
             />
           </div>
           <div className="flex flex-col">
-            <label className="mb-2 font-bold text-black">Sales Objectives</label>
+            <label className="mb-2 text-black">Sales Objectives</label>
             <textarea
               name="sales_objectives"
               value={formData.sales_objectives}
               onChange={handleChange}
               className="p-3 border rounded shadow-sm text-black"
+              placeholder='Enter Sales Objectives'
+
             />
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div className="flex flex-col">
-            <label className="mb-2 font-bold text-black">Tone and Style</label>
-            <textarea
-              name="tone_style"
-              value={formData.tone_style}
-              onChange={handleChange}
-              className="p-3 border rounded shadow-sm text-black"
-            />
-          </div>
-          <div className="flex flex-col">
-            <label className="mb-2 font-bold text-black">Competitive Advantage</label>
-            <textarea
-              name="competitive_advantage"
-              value={formData.competitive_advantage}
-              onChange={handleChange}
-              className="p-3 border rounded shadow-sm text-black"
-            />
-          </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <div className="flex flex-col">
-            <label className="mb-2 font-bold text-black">Testimonials</label>
-            <textarea
-              name="testimonials"
-              value={formData.testimonials}
-              onChange={handleChange}
-              className="p-3 border rounded shadow-sm text-black"
-            />
-          </div>
-          <div className="flex flex-col">
-            <label className="mb-2 font-bold text-black">Compliance</label>
+          <label className="mb-2 text-black">Compliance</label>
             <textarea
               name="compliance"
               value={formData.compliance}
               onChange={handleChange}
               className="p-3 border rounded shadow-sm text-black"
+              placeholder='Enter Compliance'
+
+            />
+          </div>
+          <div className="flex flex-col">
+            <label className="mb-2 text-black">Competitive Advantage</label>
+            <textarea
+              name="competitive_advantage"
+              value={formData.competitive_advantage}
+              onChange={handleChange}
+              className="p-3 border rounded shadow-sm text-black"
+              placeholder='Enter Competitive Advantage'
+
             />
           </div>
         </div>
-        <div className="flex flex-col mb-6">
-          <label className="mb-2 font-bold text-black">Technology Integration</label>
-          <textarea
-            name="tech_integration"
-            value={formData.tech_integration}
-            onChange={handleChange}
-            className="p-3 border rounded shadow-sm text-black"
-          />
-        </div>
+     
+
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-500 text-white font-bold py-3 px-6 rounded shadow-md hover:bg-blue-600"
+          className="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+
         >     
         {loading ? 'Generating...' : 'Generate Sales Script'}
           
@@ -311,7 +304,7 @@ function SalesScriptService() {
       {error && <div className="text-red-500 text-center mt-4">{error}</div>}
       {generatedScript && (
         <div className="w-full max-w-3xl mx-auto p-8 rounded mt-6">
-          <h2 className="text-xl font-bold mb-4 text-black">Generated Sales Script</h2>
+          <h2 className="text-xl mb-4 text-black">Generated Sales Script</h2>
           <p className="text-black whitespace-pre-line">
             {generatedScript.split('**').map((part, index) => {
             if (index % 2 === 1) {
@@ -324,7 +317,7 @@ function SalesScriptService() {
 
           <button
             onClick={handleDownload('generated')} //Donwload 'generated' type document
-            className="w-full bg-green-500 text-white font-bold py-3 px-6 rounded shadow-md hover:bg-green-600 mt-4"
+            className="w-full bg-green-500 text-white py-3 px-6 rounded shadow-md hover:bg-green-600 mt-4"
           >
             Download Generated Sales Script
           </button>
@@ -338,12 +331,12 @@ function SalesScriptService() {
       )}
       {translatedScript && (
         <div className="w-full max-w-3xl mx-auto p-8  rounded">
-          <h2 className="text-xl font-bold mb-4 text-black">Translated Sales Script</h2>
+          <h2 className="text-xl mb-4 text-black">Translated Sales Script</h2>
           <p className="whitespace-pre-line text-black">{translatedScript}</p>
 
           <button
             onClick={handleDownload('translated')}  //Donwload 'translated' type document
-            className="w-full bg-green-500 text-white font-bold py-3 px-6 rounded shadow-md hover:bg-green-600 mt-4"
+            className="w-full bg-green-500 text-white py-3 px-6 rounded shadow-md hover:bg-green-600 mt-4"
           >
             Download Translated Sales Script
           </button>

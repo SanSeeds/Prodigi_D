@@ -27,8 +27,7 @@ function BusinessProposalService() {
     scopeOfWork: '', // Scope of work field
     projectPhases: '', // Project phases field
     expectedOutcomes: '', // Expected outcomes field
-    innovativeApproaches: '', // Innovative approaches field
-    technologiesUsed: '', // Technologies used field
+    technologiesAndInnovations: '',
     targetAudience: '', // Target audience field
     budgetInformation: '', // Budget information field
     timeline: '', // Timeline field
@@ -64,7 +63,8 @@ function BusinessProposalService() {
       // Encrypt the form data
       const payload = JSON.stringify(formData); // Convert formData to JSON string
       const encryptedPayload = CryptoJS.AES.encrypt(payload, AES_SECRET_KEY, { iv: AES_IV }).toString(); // Encrypt the payload
-
+    
+      
       // Send the encrypted payload to the backend
       const response = await axios.post<{ encrypted_content: string }>(
         `${apiUrl}/business_proposal_generator/`, // API endpoint
@@ -192,20 +192,21 @@ function BusinessProposalService() {
       <Navbar />
       <div className="min-h-screen flex items-center justify-center">
         <div className="w-full max-w-3xl mx-auto p-8 rounded">
-          <h1 className="text-center text-3xl mb-6 font-bold" style={{ fontFamily: "'Poppins', sans-serif" }}>Business Proposal Generator</h1>
+          <h1 className="text-center text-3xl mb-6" style={{ fontFamily: "'Poppins', sans-serif" }}>Business Proposal Generator</h1>
           <form onSubmit={handleSubmit} className="mt-4">
             <div className="mb-6">
-              <label className="block mb-2 font-bold text-black">Introduction of Your Business</label>
+              <label className="block mb-2 text-black">Introduction of Your Business</label>
               <textarea
                 name="businessIntroduction"
                 value={formData.businessIntroduction}
                 onChange={handleChange}
                 className="w-full p-3 border rounded shadow-sm text-gray-700"
+                placeholder='Write About your business'
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div className="flex flex-col">
-                <label className="mb-2 font-bold text-black">Objective of Proposal</label>
+                <label className="mb-2 text-black">Objective of Proposal</label>
                 <select
                   name="proposalObjective"
                   value={formData.proposalObjective}
@@ -220,116 +221,144 @@ function BusinessProposalService() {
                 </select>
               </div>
               <div className="flex flex-col">
-                <label className="mb-2 font-bold text-black">Number of words</label>
+                <label className="mb-2 text-black">Number of words</label>
                 <input
                   type="text"
                   name="numberOfWords"
                   value={formData.numberOfWords}
                   onChange={handleChange}
                   className="p-3 border rounded shadow-sm text-black"
+                  placeholder='Enter Number of Words'
                 />
               </div>
             </div>
+
+
             <div className="mb-6">
-              <label className="block mb-2 font-bold text-black">Details of Proposal</label>
-              <input
-                type="text"
-                name="scopeOfWork"
-                placeholder="Scope of Work"
-                value={formData.scopeOfWork}
-                onChange={handleChange}
-                className="w-full p-3 mb-3 border rounded shadow-sm text-gray-700"
-              />
-              <input
-                type="text"
-                name="projectPhases"
-                placeholder="Project Phases"
-                value={formData.projectPhases}
-                onChange={handleChange}
-                className="w-full p-3 mb-3 border rounded shadow-sm text-gray-700"
-              />
-              <input
-                type="text"
-                name="expectedOutcomes"
-                placeholder="Expected Outcomes"
-                value={formData.expectedOutcomes}
-                onChange={handleChange}
-                className="w-full p-3 mb-3 border rounded shadow-sm text-gray-700"
-              />
-              <input
-                type="text"
-                name="innovativeApproaches"
-                placeholder="Innovative Approaches (Optional)"
-                value={formData.innovativeApproaches}
-                onChange={handleChange}
-                className="w-full p-3 mb-3 border rounded shadow-sm text-gray-700"
-              />
-              <input
-                type="text"
-                name="technologiesUsed"
-                placeholder="Technologies Used (Optional)"
-                value={formData.technologiesUsed}
-                onChange={handleChange}
-                className="w-full p-3 border rounded shadow-sm text-gray-700"
-              />
+              <label className="block mb-2 text-black">Details of Proposal</label>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+
+                  <div className="flex flex-col">
+                  <input
+                    type="text"
+                    name="scopeOfWork"
+                    placeholder="Scope of Work"
+                    value={formData.scopeOfWork}
+                    onChange={handleChange}
+                    className="w-full p-3 border rounded shadow-sm text-gray-700"
+                  />
+                  </div>
+
+                  <div className="flex flex-col">
+                    <input
+                      type="text"
+                      name="projectPhases"
+                      placeholder="Project Phases"
+                      value={formData.projectPhases}
+                      onChange={handleChange}
+                      className="w-full p-3 border rounded shadow-sm text-gray-700"
+                    />
+                  </div>
+
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  <div className="flex flex-col">              
+                    <input
+                      type="text"
+                      name="expectedOutcomes"
+                      placeholder="Expected Outcomes"
+                      value={formData.expectedOutcomes}
+                      onChange={handleChange}
+                      className="w-full p-3 border rounded shadow-sm text-gray-700"
+                    />
+                  </div>
+                  <div className="flex flex-col">              
+                  <input
+                  type='text'
+                  name="technologiesAndInnovations"
+                  value={formData.technologiesAndInnovations}
+                  onChange={handleChange}
+                  className="w-full p-3 border rounded shadow-sm text-gray-700"
+                  placeholder='Technologies Used and Innovative Approaches (Optional)'
+                />
+                  </div>
+
+                </div>
+              
+             
+               
             </div>
+
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div className="flex flex-col">
-                <label className="mb-2 font-bold text-black">Target Audience or Partner Information</label>
+                <label className="mb-2 text-black">Target Audience or Partner Information</label>
                 <input
                   type="text"
                   name="targetAudience"
                   value={formData.targetAudience}
                   onChange={handleChange}
                   className="p-3 border rounded shadow-sm text-gray-700"
+                  placeholder='Your target audience'
                 />
               </div>
               <div className="flex flex-col">
-                <label className="mb-2 font-bold text-black">Budget and Pricing Information (Optional)</label>
+                <label className="mb-2 text-black">Budget and Pricing Information (Optional)</label>
                 <input
                   type="text"
                   name="budgetInformation"
                   value={formData.budgetInformation}
                   onChange={handleChange}
                   className="p-3 border rounded shadow-sm text-gray-700"
+                  placeholder='Your Budget Information'
+
                 />
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div className="flex flex-col">
-                <label className="mb-2 font-bold text-black">Timeline</label>
+                <label className="mb-2 text-black">Timeline</label>
                 <input
                   type="text"
                   name="timeline"
                   value={formData.timeline}
                   onChange={handleChange}
                   className="p-3 border rounded shadow-sm text-gray-700"
+                  placeholder='Timeline'
+
                 />
               </div>
               <div className="flex flex-col">
-                <label className="mb-2 font-bold text-black">Benefits to the Recipient</label>
+                <label className="mb-2 text-black">Benefits to the Recipient</label>
                 <input
                   type="text"
                   name="benefitsToRecipient"
                   value={formData.benefitsToRecipient}
                   onChange={handleChange}
                   className="p-3 border rounded shadow-sm text-gray-700"
+                  placeholder='Your target audience'
+
                 />
               </div>
             </div>
             <div className="mb-6">
-              <label className="block mb-2 font-bold text-black">Closing Remarks (Optional)</label>
+              <label className="block mb-2 text-black">Closing Remarks (Optional)</label>
               <textarea
                 name="closingRemarks"
                 value={formData.closingRemarks}
                 onChange={handleChange}
                 className="w-full p-3 border rounded shadow-sm text-gray-700"
+                placeholder='Any Closing Remarks'
+
               />
             </div>
             <div className="flex justify-center">
               <button
                 type="submit"
-                className="w-full bg-blue-500 text-white font-bold py-3 px-6 rounded shadow-md hover:bg-blue-600"
+                className="w-full font-bold text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+
 
                 disabled={loading}
 
@@ -341,7 +370,7 @@ function BusinessProposalService() {
           </form>
           {generatedContent && ( // Check if generatedContent exists
             <div className="mt-6 p-6"> 
-              <h2 className="text-2xl font-bold mb-4">Generated Content</h2> 
+              <h2 className="text-2xl mb-4">Generated Content</h2> 
               {/* Render generated content with bold formatting for parts between '**' */}
               <p className="text-black whitespace-pre-line">
                 {generatedContent.split('**').map((part, index) => { // Split content by '**' and map over parts
@@ -354,7 +383,7 @@ function BusinessProposalService() {
               </p>
               <button
                 onClick={handleDownload('generated')} // Call handleDownload for generated content on click
-                className="w-full p-3 bg-green-500 text-white font-bold rounded shadow-sm mt-4"
+                className="w-full p-3 bg-green-500 text-white rounded shadow-sm mt-4"
               >
                 Download Generated Content
               </button>
@@ -368,11 +397,11 @@ function BusinessProposalService() {
           )}
           {translatedContent && ( // Check if translatedContent exists
             <div className="mt-6 p-6">
-              <h2 className="text-2xl font-bold mb-4">Translated Content</h2>
+              <h2 className="text-2xl mb-4">Translated Content</h2>
               <div dangerouslySetInnerHTML={{ __html: translatedContent }} />
               <button
                 onClick={handleDownload('translated')} // Call handleDownload for translated content on click
-                className="w-full p-3 bg-green-500 text-white font-bold rounded shadow-sm mt-4"
+                className="w-full p-3 bg-green-500 text-white rounded shadow-sm mt-4"
               >
                 Download Translated Content
                     </button>

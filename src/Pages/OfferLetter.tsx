@@ -26,18 +26,14 @@ function OfferLetterService() {
   // State management for form data, generated content, translated content, and error handling
   const [formData, setFormData] = useState({
     companyDetails: '',
-    numberOfWords: '',
     status: 'Full-time',
     candidateFullName: '',
     positionTitle: '',
     department: '',
-    supervisor: '',
     location: '',
     expectedStartDate: '',
-    compensationPackage: '',
-    benefits: '',
+    compensationBenefits: '', // Merged field
     workHours: '',
-    duration: '',
     termsConditions: '',
     deadline: '',
     contactInfo: '',
@@ -76,6 +72,8 @@ function OfferLetterService() {
       const payload = JSON.stringify(formData);
       const encryptedPayload = CryptoJS.AES.encrypt(payload, AES_SECRET_KEY, { iv: AES_IV }).toString();
 
+      console.log(payload);
+      
       // Send encrypted payload to backend
       const response = await axios.post(
         `${apiUrl}/offer_letter_generator/`,
@@ -170,32 +168,40 @@ function OfferLetterService() {
       <Navbar />
       <div className="min-h-screen flex items-center justify-center">
       <div className="w-full max-w-3xl mx-auto p-8 rounded">
-      <h1 className="text-center text-3xl mt-5 text-black font-bold" style={{ fontFamily: "'Poppins', sans-serif" }}>Offer Letter Generation</h1>
+      <h1 className="text-center text-3xl text-black" style={{ fontFamily: "'Poppins', sans-serif" }}>Offer Letter Generation</h1>
       <form className="w-full max-w-3xl mx-auto p-8 rounded" onSubmit={handleSubmit}>
+      
+        {/* Company Details */}
         <div className="mb-6">
-          <label className="block mb-2 font-bold text-black">Company Details</label>
+          <label className="block mb-2 text-black">Company Details</label>
           <input
             type="text"
             name="companyDetails"
             value={formData.companyDetails}
             onChange={handleChange}
             className="p-3 border rounded shadow-sm text-black w-full"
+            placeholder='Enter Company Details'
+
           />
         </div>
 
+        {/* Candidate Full Name + Status */}
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div className="flex flex-col">
-            <label className="mb-2 font-bold text-black">Number of Words</label>
+          <label className="mb-2 text-black">Candidate's Full Name</label>
             <input
               type="text"
-              name="numberOfWords"
-              value={formData.numberOfWords}
+              name="candidateFullName"
+              value={formData.candidateFullName}
               onChange={handleChange}
               className="p-3 border rounded shadow-sm text-black"
+              placeholder='Enter Full Name'
+
             />
           </div>
           <div className="flex flex-col">
-            <label className="mb-2 font-bold text-black">Status</label>
+            <label className="mb-2 text-black">Status</label>
             <select
               name="status"
               value={formData.status}
@@ -204,174 +210,172 @@ function OfferLetterService() {
             >
               <option value="Full-time">Full-time</option>
               <option value="Part-time">Part-time</option>
+              <option value="Intern">Intern</option>
+              <option value="Contract">Contract</option>
+
             </select>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <div className="flex flex-col">
-            <label className="mb-2 font-bold text-black">Candidate's Full Name</label>
-            <input
-              type="text"
-              name="candidateFullName"
-              value={formData.candidateFullName}
-              onChange={handleChange}
-              className="p-3 border rounded shadow-sm text-black"
-            />
-          </div>
-          <div className="flex flex-col">
-            <label className="mb-2 font-bold text-black">Position Title</label>
-            <input
-              type="text"
-              name="positionTitle"
-              value={formData.positionTitle}
-              onChange={handleChange}
-              className="p-3 border rounded shadow-sm text-black"
-            />
-          </div>
-        </div>
+        {/* Department + Position Title */}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div className="flex flex-col">
-            <label className="mb-2 font-bold text-black">Department</label>
+          <label className="mb-2 text-black">Department</label>
             <input
               type="text"
               name="department"
               value={formData.department}
               onChange={handleChange}
               className="p-3 border rounded shadow-sm text-black"
+              placeholder='Enter Department'
+
             />
           </div>
           <div className="flex flex-col">
-            <label className="mb-2 font-bold text-black">Supervisor</label>
+            <label className="mb-2 text-black">Position Title</label>
             <input
               type="text"
-              name="supervisor"
-              value={formData.supervisor}
+              name="positionTitle"
+              value={formData.positionTitle}
               onChange={handleChange}
               className="p-3 border rounded shadow-sm text-black"
+              placeholder='Enter Position Title'
+
             />
           </div>
         </div>
 
+        {/* Location + Start Date */}
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div className="flex flex-col">
-            <label className="mb-2 font-bold text-black">Location</label>
+            <label className="mb-2 text-black">Location</label>
             <input
               type="text"
               name="location"
               value={formData.location}
               onChange={handleChange}
               className="p-3 border rounded shadow-sm text-black"
+              placeholder='Enter Job Location'
+
             />
           </div>
           <div className="flex flex-col">
-            <label className="mb-2 font-bold text-black">Expected Start Date</label>
+            <label className="mb-2 text-black">Expected Start Date</label>
             <input
               type="date"
               name="expectedStartDate"
               value={formData.expectedStartDate}
               onChange={handleChange}
               className="p-3 border rounded shadow-sm text-black"
+           
+
             />
           </div>
         </div>
 
-        <div className="mb-6">
-          <label className="block mb-2 font-bold text-black">Compensation Package</label>
+        {/* Compensation Package + Benefits */}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div className="flex flex-col">
+          <label className="block mb-2 text-black">Compensation Package and Benefits</label>
           <textarea
-            name="compensationPackage"
-            value={formData.compensationPackage}
+            name="compensationBenefits"
+            value={formData.compensationBenefits}
             onChange={handleChange}
             className="p-3 border rounded shadow-sm text-black w-full"
-          ></textarea>
-        </div>
+            placeholder='Enter Compensation Package and Benefits'
 
-        <div className="mb-6">
-          <label className="block mb-2 font-bold text-black">Benefits</label>
-          <textarea
-            name="benefits"
-            value={formData.benefits}
-            onChange={handleChange}
-            className="p-3 border rounded shadow-sm text-black w-full"
           ></textarea>
-        </div>
-
-        <div className="mb-6">
-          <label className="block mb-2 font-bold text-black">Work Hours</label>
+          </div>
+          <div className="flex flex-col">
+          <label className="block mb-2 text-black">Work Hours</label>
           <textarea
             name="workHours"
             value={formData.workHours}
             onChange={handleChange}
             className="p-3 border rounded shadow-sm text-black w-full"
-          ></textarea>
-        </div>
+            placeholder='Enter Work Hours Details'
 
-        <div className="mb-6">
-          <label className="block mb-2 font-bold text-black">Duration</label>
-          <textarea
-            name="duration"
-            value={formData.duration}
-            onChange={handleChange}
-            className="p-3 border rounded shadow-sm text-black w-full"
           ></textarea>
+          </div>
+        
         </div>
+     
+    
+        {/* Terms and Conditions + Deadline */}
 
-        <div className="mb-6">
-          <label className="block mb-2 font-bold text-black">Terms and Conditions</label>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div className="flex flex-col">
+          <label className="block mb-2 text-black">Terms and Conditions</label>
           <textarea
             name="termsConditions"
             value={formData.termsConditions}
             onChange={handleChange}
             className="p-3 border rounded shadow-sm text-black w-full"
-          ></textarea>
-        </div>
+            placeholder='Enter Terms and Conditions'
 
-        <div className="mb-6">
-          <label className="block mb-2 font-bold text-black">Deadline</label>
+          ></textarea>
+          </div>
+          <div className="flex flex-col">
+          <label className="block mb-2 text-black">Deadline</label>
           <textarea
             name="deadline"
             value={formData.deadline}
             onChange={handleChange}
             className="p-3 border rounded shadow-sm text-black w-full"
-          ></textarea>
-        </div>
+            placeholder='Offer Letter Acceptance Deadline'
 
-        <div className="mb-6">
-          <label className="block mb-2 font-bold text-black">Contact Information</label>
+          ></textarea>
+          </div>
+        </div>
+    
+        {/* Contact Information + Documents Needed */}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div className="flex flex-col">
+          <label className="block mb-2 text-black">Contact Information</label>
           <textarea
             name="contactInfo"
             value={formData.contactInfo}
             onChange={handleChange}
             className="p-3 border rounded shadow-sm text-black w-full"
-          ></textarea>
-        </div>
+            placeholder='Enter Conact Information'
 
-        <div className="mb-6">
-          <label className="block mb-2 font-bold text-black">Documents Needed</label>
+          ></textarea>
+          </div>
+          <div className="flex flex-col">
+          <label className="block mb-2 text-black">Documents Needed</label>
           <textarea
             name="documentsNeeded"
             value={formData.documentsNeeded}
             onChange={handleChange}
             className="p-3 border rounded shadow-sm text-black w-full"
+            placeholder='Documents Required'
+
           ></textarea>
+          </div>
         </div>
+    
+        {/* Closing Remarks */}
 
         <div className="mb-6">
-          <label className="block mb-2 font-bold text-black">Closing Remarks</label>
+          <label className="block mb-2 text-black">Closing Remarks</label>
           <textarea
             name="closingRemarks"
             value={formData.closingRemarks}
             onChange={handleChange}
             className="p-3 border rounded shadow-sm text-black w-full"
+            placeholder='Enter closing Remarks'
+
           ></textarea>
         </div>
 
-      
-
         <button
           type="submit"
-          className="w-full bg-blue-500 text-white font-bold py-3 px-6 rounded shadow-md hover:bg-blue-600"
+          className="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+
 
           disabled={loading}
         >
@@ -381,7 +385,7 @@ function OfferLetterService() {
 
       {generatedContent && (
         <div className="mt-6 p-6">
-          <h2 className="text-2xl font-bold mb-4">Generated Offer Letter:</h2>
+          <h2 className="text-2xl mb-4">Generated Offer Letter:</h2>
           <p className="text-black whitespace-pre-line">
                 {generatedContent.split('**').map((part, index) => { // Split content by '**' and map over parts
                   if (index % 2 === 1) { // Check if index is odd, indicating bold content
@@ -392,7 +396,7 @@ function OfferLetterService() {
                 })}
               </p>          
               <button
-                className="w-full p-3 bg-green-500 text-white font-bold rounded shadow-sm mt-4"
+                className="w-full p-3 bg-green-500 text-white rounded shadow-sm mt-4"
                 onClick={handleDownload('generated')}
           >
             Download Offer Letter
@@ -408,10 +412,10 @@ function OfferLetterService() {
 
       {translatedContent && (
         <div className="w-full max-w-3xl mx-auto p-8">
-          <h2 className="text-xl font-bold mb-4">Translated Offer Letter:</h2>
+          <h2 className="text-xl mb-4">Translated Offer Letter:</h2>
           <pre className="whitespace-pre-wrap text-black">{translatedContent}</pre>
           <button
-                className="w-full p-3 bg-green-500 text-white font-bold rounded shadow-sm mt-4"
+                className="w-full p-3 bg-green-500 text-white rounded shadow-sm mt-4"
                 onClick={handleDownload('translated')}
           >
             Download Translated Offer Letter
