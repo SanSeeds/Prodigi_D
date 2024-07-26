@@ -66,12 +66,24 @@ const TranslateComponent: React.FC<TranslateComponentProps> = ({ generatedConten
         onChange={(e) => setSelectedLanguage(e.target.value)}
         className="p-3 border rounded shadow-sm text-black mr-4"
       >
-        <option value="English">English</option>
-        <option value="Hindi">Hindi</option>
-        <option value="Telugu">Telugu</option>
-        <option value="Marathi">Marathi</option>
-        <option value="Kannada">Kannada</option>
-        <option value="Bengali">Bengali</option>
+        
+      <option value="English">English</option>
+      <option value="Hindi">Hindi</option>
+      <option value="Telugu">Telugu</option>
+      <option value="Marathi">Marathi</option>
+      <option value="Kannada">Kannada</option>
+      <option value="Bengali">Bengali</option>
+      <option value="Odia">Odia</option>
+      <option value="Assamese">Assamese</option>
+      <option value="Punjabi">Punjabi</option>
+      <option value="Malayalam">Malayalam</option>
+      <option value="Gujarati">Gujarati</option>
+      <option value="Urdu">Urdu</option>
+      <option value="Sanskrit">Sanskrit</option>
+      <option value="Nepali">Nepali</option>
+      <option value="Bodo">Bodo</option>
+      <option value="Maithili">Maithili</option>
+      <option value="Sindhi">Sindhi</option>
 
       </select>
       <button

@@ -1,4 +1,5 @@
 import React, { useState, useContext, ChangeEvent, FormEvent, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import Navbar from '../components/Global/Navbar';
 import axios, { AxiosError } from 'axios';
 import { AuthContext } from '../components/Global/AuthContext';
@@ -23,14 +24,7 @@ interface FormData {
   to: string;
   tone: string;
   num_words: string;
-  keyword_1: string;
-  keyword_2: string;
-  keyword_3: string;
-  keyword_4: string;
-  keyword_5: string;
-  keyword_6: string;
-  keyword_7: string;
-  keyword_8: string;
+  keywords: string;
   contextualBackground: string;
   callToAction: string;
   additionalDetails: string;
@@ -44,6 +38,7 @@ const EmailService: React.FC = () => {
     window.scrollTo(0, 0);
   }, []);
   
+  const navigate = useNavigate(); // Initialize useNavigate
   const [formData, setFormData] = useState<FormData>({
     purpose: '',
     otherPurpose: '',
@@ -52,14 +47,7 @@ const EmailService: React.FC = () => {
     rephraseSubject: false,
     to: '',
     tone: 'Formal',
-    keyword_1: '',
-    keyword_2: '',
-    keyword_3: '',
-    keyword_4: '',
-    keyword_5: '',
-    keyword_6: '',
-    keyword_7: '',
-    keyword_8: '',
+    keywords: '',
     contextualBackground: '',
     callToAction: 'Reply',
     additionalDetails: '',
@@ -94,7 +82,6 @@ const EmailService: React.FC = () => {
     setLoading(true);
     setError(null);
 
-
     try {
       const payload = JSON.stringify(formData);
       const encryptedPayload = CryptoJS.AES.encrypt(payload, AES_SECRET_KEY, { iv: AES_IV }).toString();
@@ -123,6 +110,9 @@ const EmailService: React.FC = () => {
         if (parsedContent.generated_content) {
           setGeneratedEmail(parsedContent.generated_content);
           toast.success('Email generated successfully!');
+
+          // Navigate to /content-display with the generated content
+          navigate('/content-display', { state: { generatedContent: parsedContent.generated_content } });
         } else {
           setError('Failed to generate email. No content received.');
         }
@@ -197,42 +187,60 @@ const EmailService: React.FC = () => {
       <Navbar />
       <div className="min-h-screen flex items-center justify-center">
         <div className="w-full max-w-3xl mx-auto p-8 rounded-lg">
-          <h1 className="text-center text-3xl mb-6 text-black font-bold" style={{ fontFamily: "'Poppins', sans-serif" }}>Email Generator</h1>
-          <form onSubmit={handleSubmit}>
-            <div className="mb-6">
-              <label className="block mb-2 font-bold text-black">Purpose (Optional)</label>
-              <select
-                name="purpose"
-                value={formData.purpose}
-                onChange={handleChange}
-                className="w-full p-3 mb-3 border rounded shadow-sm text-gray-700"
-              >
-                <option value="">Select Purpose</option>
-                <option value="Request Information">Request Information</option>
-                <option value="Confirm Details">Confirm Details</option>
-                <option value="Follow up on a Previous Discussion">Follow up on a Previous Discussion</option>
-                <option value="New Email">New Email</option>
-                <option value="Other">Other</option>
-              </select>
-              {formData.purpose === "Other" && (
-                <input
-                  type="text"
-                  name="otherPurpose"
-                  placeholder="If others, please specify"
-                  value={formData.otherPurpose}
+          <h1 className="text-center text-xl font-bold mb-6 text-black" style={{ fontFamily: "'Roboto Slab', sans-serif" }}>Email Generator</h1>
+          <form onSubmit={handleSubmit} className="mt-4">
+            {/* Form Fields */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+              <div className="flex flex-col">
+                <label className="block mb-2 text-black">Purpose</label>
+                <select
+                  name="purpose"
+                  value={formData.purpose}
+                  onChange={handleChange}
+                  className="w-full p-3 mb-3 border rounded shadow-sm text-gray-700"
+                >
+                  <option value="">Select Purpose</option>
+                  <option value="Request Information">Request Information</option>
+                  <option value="Confirm Details">Confirm Details</option>
+                  <option value="Follow up on a Previous Discussion">Follow up on a Previous Discussion</option>
+                  <option value="New Email">New Email</option>
+                  <option value="Other">Other</option>
+                </select>
+                {formData.purpose === "Other" && (
+                  <input
+                    type="text"
+                    name="otherPurpose"
+                    placeholder="If others, please specify"
+                    value={formData.otherPurpose}
+                    onChange={handleChange}
+                    className="w-full p-3 border rounded shadow-sm text-gray-700"
+                  />
+                )}
+              </div>
+              <div className="flex flex-col">
+                <label className="block mb-2 text-black">Tone</label>
+                <select
+                  name="tone"
+                  value={formData.tone}
                   onChange={handleChange}
                   className="w-full p-3 border rounded shadow-sm text-gray-700"
-                />
-              )}
+                >
+                  <option value="Formal">Formal</option>
+                  <option value="Informal">Informal</option>
+                  <option value="Persuasive">Persuasive</option>
+                  <option value="Urgent">Urgent</option>
+                </select>
+              </div>
             </div>
             <div className="mb-6">
-              <label className="block mb-2 font-bold text-black">Subject (Required)</label>
+              <label className="block mb-2 text-black">Subject</label>
               <input
                 type="text"
                 name="subject"
                 value={formData.subject}
                 onChange={handleChange}
                 className="w-full p-3 mb-3 border rounded shadow-sm text-gray-700"
+                placeholder='Enter Subject'
               />
               <div className="flex items-center">
                 <input
@@ -242,128 +250,119 @@ const EmailService: React.FC = () => {
                   onChange={handleChange}
                   className="mr-2"
                 />
-                <label className="font-bold text-black">Rephrase Subject</label>
+                <label className="text-black">Rephrase Subject</label>
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div className="flex flex-col">
-              <label className="block mb-2 font-bold text-black">To</label>
-              <input
-                type="text"
-                name="to"
-                value={formData.to}
-                onChange={handleChange}
-                className="w-full p-3 border rounded shadow-sm text-gray-700"
-              />
+                <label className="block mb-2 text-black">To</label>
+                <input
+                  type="text"
+                  name="to"
+                  value={formData.to}
+                  onChange={handleChange}
+                  className="w-full p-3 border rounded shadow-sm text-gray-700"
+                  placeholder='Enter your Recipient type'
+                />
               </div>
               <div className="flex flex-col">
-                <label className="mb-2 font-bold text-black">Number of words</label>
+                <label className="mb-2 text-black">Number of words</label>
                 <input
                   type="text"
                   name="num_words"
-                  value={formData.numberOfWords}
+                  value={formData.num_words}
                   onChange={handleChange}
                   className="p-3 border rounded shadow-sm text-black"
+                  placeholder='Enter Number of words'
                 />
               </div>
             </div>
             <div className="mb-6">
-              <label className="block mb-2 font-bold text-black">Tone</label>
-              <select
-                name="tone"
-                value={formData.tone}
-                onChange={handleChange}
-                className="w-full p-3 border rounded shadow-sm text-gray-700"
-              >
-                <option value="Formal">Formal</option>
-                <option value="Informal">Informal</option>
-                <option value="Persuasive">Persuasive</option>
-                <option value="Urgent">Urgent</option>
-              </select>
-            </div>
-            <div className="mb-6">
-              <label className="block mb-2 font-bold text-black">Keywords (Optional, add up to 8)</label>
-              {[...Array(8)].map((_, index) => (
-                <input
-                  key={index}
-                  type="text"
-                  name={`keyword_${index + 1}`}
-                  placeholder={`Keyword ${index + 1}`}
-                  value={formData[`keyword_${index + 1}`]}
-                  onChange={handleChange}
-                  className="w-full p-3 mb-3 border rounded shadow-sm text-gray-700"
-                />
-              ))}
-            </div>
-            <div className="mb-6">
-              <label className="block mb-2 font-bold text-black">Contextual Background (Optional)</label>
+              <label className="block mb-2 text-black">Keywords (Optional, add up to 8, separated by commas)</label>
               <textarea
-                name="contextualBackground"
-                value={formData.contextualBackground}
+                name="keywords"
+                value={formData.keywords}
                 onChange={handleChange}
                 className="w-full p-3 border rounded shadow-sm text-gray-700"
+                placeholder='Enter Keywords'
+                rows={2}
               />
             </div>
-            <div className="mb-6">
-              <label className="block mb-2 font-bold text-black">Call to Action (Required)</label>
-              <select
-                name="callToAction"
-                value={formData.callToAction}
-                onChange={handleChange}
-                className="w-full p-3 border rounded shadow-sm text-gray-700"
-              >
-                <option value="Reply">Reply</option>
-                <option value="Schedule a Meeting">Schedule a Meeting</option>
-                <option value="Provide Feedback">Provide Feedback</option>
-                <option value="Other">Other</option>
-              </select>
-              {formData.callToAction === "Other" && (
-                <input
-                  type="text"
-                  name="otherCallToAction"
-                  placeholder="If others, please specify"
-                  value={formData.otherCallToAction}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div className="flex flex-col">
+                <label className="block mb-2 text-black">Contextual Background</label>
+                <textarea
+                  name="contextualBackground"
+                  value={formData.contextualBackground}
                   onChange={handleChange}
                   className="w-full p-3 border rounded shadow-sm text-gray-700"
+                  placeholder='Enter Contextual Background'
                 />
-              )}
+              </div>
+              <div className="flex flex-col">
+                <label className="block mb-2 text-black">Additional Details</label>
+                <textarea
+                  name="additionalDetails"
+                  value={formData.additionalDetails}
+                  onChange={handleChange}
+                  className="w-full p-3 border rounded shadow-sm text-gray-700"
+                  placeholder='Enter Additional Details (If Any)'
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div className="flex flex-col">
+                <label className="block mb-2 text-black">Call to Action</label>
+                <select
+                  name="callToAction"
+                  value={formData.callToAction}
+                  onChange={handleChange}
+                  className="w-full p-3 border rounded shadow-sm text-gray-700"
+                >
+                  <option value="Reply">Reply</option>
+                  <option value="Schedule a Meeting">Schedule a Meeting</option>
+                  <option value="Provide Feedback">Provide Feedback</option>
+                  <option value="Other">Other</option>
+                </select>
+                {formData.callToAction === "Other" && (
+                  <input
+                    type="text"
+                    name="otherCallToAction"
+                    placeholder="If others, please specify"
+                    value={formData.otherCallToAction}
+                    onChange={handleChange}
+                    className="w-full p-3 border rounded shadow-sm text-gray-700"
+                  />
+                )}
+              </div>
+              <div className="flex flex-col">
+                <label className="block mb-2 text-black">Priority Level</label>
+                <select
+                  name="priorityLevel"
+                  value={formData.priorityLevel}
+                  onChange={handleChange}
+                  className="w-full p-3 border rounded shadow-sm text-gray-700"
+                >
+                  <option value="Low">Low</option>
+                  <option value="Medium">Medium</option>
+                  <option value="High">High</option>
+                </select>
+              </div>
             </div>
             <div className="mb-6">
-              <label className="block mb-2 font-bold text-black">Additional Details (Optional)</label>
-              <textarea
-                name="additionalDetails"
-                value={formData.additionalDetails}
-                onChange={handleChange}
-                className="w-full p-3 border rounded shadow-sm text-gray-700"
-              />
-            </div>
-            <div className="mb-6">
-              <label className="block mb-2 font-bold text-black">Priority Level (Required)</label>
-              <select
-                name="priorityLevel"
-                value={formData.priorityLevel}
-                onChange={handleChange}
-                className="w-full p-3 border rounded shadow-sm text-gray-700"
-              >
-                <option value="Low">Low</option>
-                <option value="Medium">Medium</option>
-                <option value="High">High</option>
-              </select>
-            </div>
-            <div className="mb-6">
-              <label className="block mb-2 font-bold text-black">Closing Remarks (Optional)</label>
+              <label className="block mb-2 text-black">Closing Remarks</label>
               <textarea
                 name="closingRemarks"
                 value={formData.closingRemarks}
                 onChange={handleChange}
                 className="w-full p-3 border rounded shadow-sm text-gray-700"
+                placeholder='Enter Closing Remarks'
               />
             </div>
             {error && <p className="text-red-500 mb-4">{error}</p>}
             <button
               type="submit"
-              className="w-full bg-blue-500 text-white font-bold py-3 px-6 rounded shadow-md hover:bg-blue-600"
-
+              className="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
               disabled={loading}
             >
               {loading ? 'Generating Email...' : 'Generate Email'}
@@ -371,50 +370,47 @@ const EmailService: React.FC = () => {
           </form>
           {generatedEmail && (
             <div className="mt-6 p-6">
-              <h2 className="text-2xl mb-4 text-black font-bold">Generated Email:</h2>
+              <h2 className="text-2xl mb-4 text-black">Generated Email:</h2>
               <p className="text-black whitespace-pre-line">
-                {generatedEmail.split('**').map((part, index) => { // Split content by '**' and map over parts
-                  if (index % 2 === 1) { // Check if index is odd, indicating bold content
-                    return <strong key={index}>{part}</strong>; // Render part in bold
+                {generatedEmail.split('**').map((part, index) => {
+                  if (index % 2 === 1) {
+                    return <strong key={index}>{part}</strong>;
                   } else {
-                    return part; // Render part as plain text
+                    return part;
                   }
                 })}
               </p>
               <button
-                className=" w-full p-3 bg-green-500 text-white font-bold rounded shadow-sm mt-4 hover:bg-green-600"
+                className="w-full p-3 bg-green-500 text-white rounded shadow-sm mt-4 hover:bg-green-600"
                 onClick={handleDownload('generated')}
               >
                 Download Generated Email
               </button>
               <TranslateComponent
-                generatedContent={generatedEmail} // Pass generatedContent to TranslateComponent
-                setTranslatedContent={setTranslatedEmail} // Pass setTranslatedContent function to TranslateComponent
-                setError={setError} // Pass setError function to TranslateComponent
+                generatedContent={generatedEmail}
+                setTranslatedContent={setTranslatedEmail}
+                setError={setError}
               />
-
             </div>
           )}
-          {translatedEmail && ( // Check if translatedContent exists
-            <div className="mt- p-6">
-              <h2 className="text-2xl font-bold mb-4">Translated Content</h2>
+          {translatedEmail && (
+            <div className="mt-6 p-6">
+              <h2 className="text-2xl mb-4">Translated Content</h2>
               <div dangerouslySetInnerHTML={{ __html: translatedEmail }} />
               <button
-                onClick={handleDownload('translated')} // Call handleDownload for translated content on click
-                className=" w-full p-3 bg-green-500 text-white font-bold rounded shadow-sm mt-4 hover:bg-green-600"
+                onClick={handleDownload('translated')}
+                className="w-full p-3 bg-green-500 text-white rounded shadow-sm mt-4 hover:bg-green-600"
               >
                 Download Translated Content
-                    </button>
+              </button>
             </div>
           )}
-          {error && ( // Check if error exists
-            <div className="mt-6 p-6 border rounded bg-red-100 text-red-800 shadow-sm"> 
-              <p>{error}</p> 
+          {error && (
+            <div className="mt-6 p-6 border rounded bg-red-100 text-red-800 shadow-sm">
+              <p>{error}</p>
             </div>
           )}
-          
-          <ToastContainer   position="bottom-right" autoClose={5000} />
-        
+          <ToastContainer position="bottom-right" autoClose={5000} />
         </div>
       </div>
     </>

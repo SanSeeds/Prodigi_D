@@ -22,7 +22,7 @@ const Navbar = () => {
   return (
     <nav className='pl-7 pr-7'>
       <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
-        <Link to="/" className="inline-block">
+        <Link to="/dashboard" className="inline-block">
           <img src={Logo} style={{height: '55px', width: '80px'}} alt="ProdigiDesk Logo" />
         </Link>
         <button

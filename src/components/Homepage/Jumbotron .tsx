@@ -8,10 +8,10 @@ const HeroSection: React.FC<HeroSectionProps> = ({ scrollToServices }) => {
   return (
     <section className="bg-center bg-no-repeat bg-blend-multiply h-full w-full flex items-center">
       <div className="px-4 mx-auto max-w-screen-xl text-center py-24 lg:py-6">
-        <h1 className="mb-4 text-4xl font-extrabold tracking-tight leading-none text-black md:text-5xl lg:text-6xl">
+        <h1 className="mb-4 text-4xl tracking-tight leading-none text-black md:text-5xl lg:text-7xl">
         Revolutionize Your Workflow with ProdigiDesk
         </h1>
-        <p className="mb-8 text-lg font-normal mt-8 text-black-300 lg:text-xl sm:px-16 lg:px-48">
+        <p className="mb-8 text-lg font-normal mt-8 text-black-300 lg:text-xl sm:px-16 lg:px-48 text-gray-500">
         Empower your productivity with ProdigiDesk: Transforming workflows into seamless successes.
         </p>
         <div className="flex flex-col space-y-4 sm:flex-row sm:justify-center sm:space-y-0">
