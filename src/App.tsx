@@ -19,7 +19,7 @@ import PrivateRoute from './components/Global/PrivateRoute'; // Import PrivateRo
 import Subscription from './Pages/Subscription';
 import Payment from './Pages/Payment';
 import PresentationGenerationService from './Pages/PPTGenerator';
-import AddSlide from './Pages/AddSlide';
+import ContentDisplayPage from './components/Global/ContentDisplay';
 
 
 
@@ -49,7 +49,7 @@ function App() {
               <Route path="/contentgeneration" element={<ContentGenerationService />} />
               <Route path="/profile" element={<ProfileForm />} />
               <Route path="/pptGeneration" element={<PresentationGenerationService />} />
-              <Route path="/addslide" element={<AddSlide />} />
+              <Route path='/content-display' element={<ContentDisplayPage/>}></Route>
 
             </Route>
           </Routes>

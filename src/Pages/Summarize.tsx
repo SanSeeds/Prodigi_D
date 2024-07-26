@@ -1,14 +1,15 @@
 import { useState, useContext, ChangeEvent, FormEvent, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import Navbar from "../components/Global/Navbar";
-import TranslateComponent from "../components/Global/TranslateContent";
 import { AuthContext } from '../components/Global/AuthContext';
 import CryptoJS from 'crypto-js';
-import { saveAs } from 'file-saver';
-import { Document, Packer, Paragraph, TextRun } from 'docx';
-import config from '../config';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import pdfToText from 'react-pdftotext'
+import mammoth from 'mammoth';
+
+import config from '../config';
 
 const apiUrl = config.apiUrl;
 
@@ -18,7 +19,7 @@ const ENCRYPTION_SECRET_KEY = CryptoJS.enc.Base64.parse("XGp3hFq56Vdse3sLTtXyQQ=
 function SummarizeService() {
     useEffect(() => {
         window.scrollTo(0, 0);
-      }, []);
+    }, []);
 
     const [formData, setFormData] = useState({
         documentContext: 'Research Paper',
@@ -34,11 +35,10 @@ function SummarizeService() {
         documentContent: '' // State for document content
     });
 
-    const [generatedContent, setGeneratedContent] = useState('');
-    const [translatedContent, setTranslatedContent] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const authContext = useContext(AuthContext);
+    const navigate = useNavigate();
 
     if (!authContext) {
         throw new Error('AuthContext must be used within an AuthProvider');
@@ -51,14 +51,49 @@ function SummarizeService() {
         setFormData({ ...formData, [name]: value });
     };
 
-    const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files.length > 0) {
             const file = e.target.files[0];
-            const reader = new FileReader();
-            reader.onload = () => {
-                setFormData({ ...formData, document: file, documentContent: reader.result as string });
-            };
-            reader.readAsText(file);
+            const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
+            // e.target.value = ''; // Clear the input field
+            if (!allowedTypes.includes(file.type)) {
+                toast.error('File type not allowed. Uplaod PDF, DOCX, TXT Files');
+                return;
+            }
+
+            setFormData({ ...formData, document: file });
+
+            try {
+                let fileContent = '';
+                const reader = new FileReader();
+                reader.onload = async () => {
+                    try {
+                        if (file.type === 'application/pdf') {
+                            const pdfText = await pdfToText(file);
+                            fileContent = pdfText.trim();
+                        } else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+                            const result = await mammoth.extractRawText({ arrayBuffer: reader.result as ArrayBuffer });
+                            fileContent = result.value;
+                        } else {
+                            fileContent = reader.result as string;
+                        }
+
+                        setFormData({ ...formData, document: file, documentContent: fileContent });
+                    } catch (err) {
+                        setError('Error processing file content.');
+                        console.error(err);
+                    }
+                };
+
+                if (file.type === 'application/pdf' || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+                    reader.readAsArrayBuffer(file);
+                } else {
+                    reader.readAsText(file);
+                }
+            } catch (err) {
+                setError('Error reading file content.');
+                console.error(err);
+            }
         }
     };
 
@@ -81,8 +116,14 @@ function SummarizeService() {
                 document_content: formData.documentContent // Add document content to payload
             });
 
-            const encryptedPayload = CryptoJS.AES.encrypt(payload, ENCRYPTION_SECRET_KEY, { iv: ENCRYPTION_IV }).toString();
+            if (!formData.documentContent) {
+                setLoading(false);
+                setError("No document content available.");
+                return;
+            }
 
+            const encryptedPayload = CryptoJS.AES.encrypt(payload, ENCRYPTION_SECRET_KEY, { iv: ENCRYPTION_IV }).toString();
+            
             const form = new FormData();
             form.append('encrypted_content', encryptedPayload);
 
@@ -105,8 +146,8 @@ function SummarizeService() {
                 const formattedContent = parsedContent.generated_content.replace(/\[|\]/g, '').replace(/\n/g, '\n');
                 toast.success('Document Summarized successfully!');
 
-                setGeneratedContent(formattedContent);
-                setTranslatedContent('');
+                // Redirect to /content-display with generated content as state
+                navigate('/content-display', { state: { generatedContent: formattedContent } });
             } else {
                 setError('Failed to generate content. No content received.');
             }
@@ -118,61 +159,14 @@ function SummarizeService() {
         }
     };
 
-    const generateDocx = (content: string, fileName: string) => {
-        const lines = content.split('\n');
-        const docContent = lines.map(line => {
-            const parts = line.split('**');
-            const textRuns = parts.map((part, index) => {
-                if (index % 2 === 1) {
-                    return new TextRun({ text: part, bold: true });
-                } else {
-                    return new TextRun(part);
-                }
-            });
-            return new Paragraph({ children: textRuns });
-        });
-
-        const doc = new Document({
-            sections: [
-                {
-                    properties: {},
-                    children: docContent,
-                },
-            ],
-        });
-
-        Packer.toBlob(doc).then(blob => {
-            saveAs(blob, `${fileName}.docx`);
-        });
-    };
-
-    const handleDownload = (type: string) => () => {
-        try {
-            if (type === 'generated') {
-                if (!generatedContent) {
-                    throw new Error('No generated content available.');
-                }
-                generateDocx(generatedContent, 'Generated_Content');
-            } else if (type === 'translated') {
-                if (!translatedContent) {
-                    throw new Error('No translated content available.');
-                }
-                generateDocx(translatedContent, 'Translated_Content');
-            } else {
-                throw new Error('Invalid download type.');
-            }
-        } catch (error) {
-            // setError(error.message);
-        }
-    };
-
     return (
         <>
             <Navbar />
             <div className="min-h-screen flex items-center justify-center">
                 <div className="w-full max-w-3xl mx-auto p-8 rounded-lg">
-                    <h1 className="text-center text-3xl" style={{ fontFamily: "'Poppins', sans-serif" }}>Summarize Document</h1>
+                    <h1 className="text-center text-xl font-bold mb-6" style={{ fontFamily: "'Roboto Slab', sans-serif" }}>Summarize Document</h1>
                     <form className="w-full max-w-3xl mx-auto p-8" onSubmit={handleSubmit}>
+                        {/* Form fields */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                             <div className="flex flex-col">
                                 <label className="mb-2 text-black">Document Context</label>
@@ -234,133 +228,92 @@ function SummarizeService() {
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                             <div className="flex flex-col">
-                                <label className="mb-2 text-black">Important Elements to Include</label>
-                                <textarea
+                                <label className="mb-2 text-black">Important Elements</label>
+                                <input
+                                    type='text'
                                     name="importantElements"
                                     value={formData.importantElements}
                                     onChange={handleChange}
                                     className="p-3 border rounded shadow-sm text-black"
-                                    placeholder='Enter impornant elements to include'
-
-                                    />
-                                </div>
-                                <div className="flex flex-col">
-                                    <label className="mb-2 text-black">Audience</label>
-                                    <input
-                                        type="text"
-                                        name="audience"
-                                        value={formData.audience}
-                                        onChange={handleChange}
-                                        className="p-3 border rounded shadow-sm text-black"
-                                        placeholder='Enter your audience'
-
-                                    />
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                                <div className="flex flex-col">
-                                    <label className="mb-2 text-black">Tone</label>
-                                    <input
-                                        type="text"
-                                        name="tone"
-                                        value={formData.tone}
-                                        onChange={handleChange}
-                                        className="p-3 border rounded shadow-sm text-black"
-                                        placeholder='Enter Tone'
-
-                                    />
-                                </div>
-                                <div className="flex flex-col">
-                                    <label className="mb-2 text-black">Format</label>
-                                    <input
-                                        type="text"
-                                        name="format"
-                                        value={formData.format}
-                                        onChange={handleChange}
-                                        className="p-3 border rounded shadow-sm text-black"
-                                        placeholder='Enter Format'
-
-                                    />
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-1 gap-6 mb-6">
-                                <div className="flex flex-col">
-                                    <label className="mb-2 text-black">Additional Instructions</label>
-                                    <textarea
-                                        name="additionalInstructions"
-                                        value={formData.additionalInstructions}
-                                        onChange={handleChange}
-                                        className="p-3 border rounded shadow-sm text-black"
-                                        placeholder='Enter Additional Instructions'
-
-                                    />
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-1 gap-6 mb-6">
-                                <div className="flex flex-col">
-                                    <label className="mb-2 text-black">Upload Document</label>
-                                    <input
-                                        type="file"
-                                        name="document"
-                                        onChange={handleFileChange}
-                                        className="p-3 border rounded shadow-sm text-black"
-                                    />
-                                </div>
-                            </div>
-                            <div className="flex justify-center">
-                                <button type="submit"           
-              className="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-
-                                    disabled={loading}>
-                                    {loading ? "Generating..." : "Summarize"}
-                                </button>
-                            </div>
-                        </form>
-                        {error && <div className="mt-4 text-red-500">{error}</div>}
-                        {generatedContent && (
-                            <div className="mt-4 p-4">
-                                <h2 className="text-2xl mb-2">Generated Content</h2>
-                                <p className="text-black whitespace-pre-line">
-                                    {generatedContent.split('**').map((part, index) => {
-                                        if (index % 2 === 1) {
-                                            return <strong key={index}>{part}</strong>;
-                                        } else {
-                                            return part;
-                                        }
-                                    })}
-                                </p>
-                                <button
-                                    onClick={handleDownload('generated')}
-                                    className="w-full p-3 bg-green-500 text-white rounded shadow-sm mt-4"
-                                >
-                                    Download Generated Content
-                                </button>
-                                <TranslateComponent 
-                                    generatedContent={generatedContent} 
-                                    setTranslatedContent={setTranslatedContent} 
-                                    setError={setError} 
+                                    placeholder='Enter Important Elements'
+                                    
                                 />
                             </div>
-                        )}
-                        {translatedContent && (
-                            <div className="mt-4 p-4">
-                                <h2 className="text-2xl mb-2">Translated Content</h2>
-                                <pre className="whitespace-pre-wrap">{translatedContent}</pre>
-                                <button
-                                    onClick={handleDownload('translated')}
-                                    className="w-full p-3 bg-green-500 text-white rounded shadow-sm mt-4"
-                                >
-                                    Download Translated Content
-                                </button>
-                            </div>
-                        )}
-                              <ToastContainer   position="bottom-right" autoClose={5000} />
+                            <div className="flex flex-col">
+                                <label className="mb-2 text-black">Target Audience</label>
+                                <input
+                                    type="text"
+                                    name="audience"
+                                    value={formData.audience}
+                                    onChange={handleChange}
+                                    className="p-3 border rounded shadow-sm text-black"
+                                    placeholder='Enter Target Audience'
 
-                    </div>
+                                />
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div className="flex flex-col">
+                                <label className="mb-2 text-black">Tone</label>
+                                <input
+                                    type="text"
+                                    name="tone"
+                                    value={formData.tone}
+                                    onChange={handleChange}
+                                    className="p-3 border rounded shadow-sm text-black"
+                                    placeholder='Enter Tone'
+
+                                />
+                            </div>
+                            <div className="flex flex-col">
+                                <label className="mb-2 text-black">Format</label>
+                                <input
+                                    type="text"
+                                    name="format"
+                                    value={formData.format}
+                                    onChange={handleChange}
+                                    className="p-3 border rounded shadow-sm text-black"
+                                    placeholder='Enter Format'
+
+                                />
+                            </div>
+                        </div>
+                        <div className="flex flex-col mb-6">
+                            <label className="mb-2 text-black">Additional Instructions</label>
+                            <textarea
+                                name="additionalInstructions"
+                                value={formData.additionalInstructions}
+                                onChange={handleChange}
+                                className="p-3 border rounded shadow-sm text-black"
+                                rows={2}
+                                placeholder='Enter Additional Instructions'
+
+                            />
+                        </div>
+                        <div className="flex flex-col mb-6">
+                            <label className="mb-2 text-black">Upload Document (PDF,DOCX,TXT)</label>
+                            <input
+                                type="file"
+                                accept=".pdf,.docx,.txt"
+                                onChange={handleFileChange}
+                                className="p-3 border rounded shadow-sm text-black"
+                            />
+                        </div>
+                        <button
+                            type="submit"
+                            className="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+
+                            disabled={loading}
+                        >
+                            {loading ? 'Generating...' : 'Generate Summary'}
+                        </button>
+                    </form>
+                    {error && <p className="text-red-500 text-center mt-4">{error}</p>}
                 </div>
-            </>
-        );
-    }
-    
-    export default SummarizeService;
-    
+            </div>
+            <ToastContainer position='bottom-right' autoClose={5000} />
+        </>
+    );
+}
+
+export default SummarizeService;

@@ -1,4 +1,5 @@
 import React, { useState, useContext, ChangeEvent, FormEvent, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import Navbar from '../components/Global/Navbar';
 import axios, { AxiosError } from 'axios';
 import { AuthContext } from '../components/Global/AuthContext';
@@ -23,7 +24,7 @@ interface FormData {
   to: string;
   tone: string;
   num_words: string;
-  keywords: string; // Changed from keyword_1 to keyword_8 to a single string
+  keywords: string;
   contextualBackground: string;
   callToAction: string;
   additionalDetails: string;
@@ -37,6 +38,7 @@ const EmailService: React.FC = () => {
     window.scrollTo(0, 0);
   }, []);
   
+  const navigate = useNavigate(); // Initialize useNavigate
   const [formData, setFormData] = useState<FormData>({
     purpose: '',
     otherPurpose: '',
@@ -45,7 +47,7 @@ const EmailService: React.FC = () => {
     rephraseSubject: false,
     to: '',
     tone: 'Formal',
-    keywords: '', // Initialize as an empty string
+    keywords: '',
     contextualBackground: '',
     callToAction: 'Reply',
     additionalDetails: '',
@@ -104,11 +106,13 @@ const EmailService: React.FC = () => {
         }
 
         const parsedContent = JSON.parse(decryptedText);
-        console.log(payload);
-        
+
         if (parsedContent.generated_content) {
           setGeneratedEmail(parsedContent.generated_content);
           toast.success('Email generated successfully!');
+
+          // Navigate to /content-display with the generated content
+          navigate('/content-display', { state: { generatedContent: parsedContent.generated_content } });
         } else {
           setError('Failed to generate email. No content received.');
         }
@@ -183,54 +187,51 @@ const EmailService: React.FC = () => {
       <Navbar />
       <div className="min-h-screen flex items-center justify-center">
         <div className="w-full max-w-3xl mx-auto p-8 rounded-lg">
-          <h1 className="text-center text-3xl mb-6 text-black" style={{ fontFamily: "'Poppins', sans-serif" }}>Email Generator</h1>
-          <form onSubmit={handleSubmit}>
-
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <h1 className="text-center text-xl font-bold mb-6 text-black" style={{ fontFamily: "'Roboto Slab', sans-serif" }}>Email Generator</h1>
+          <form onSubmit={handleSubmit} className="mt-4">
+            {/* Form Fields */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
               <div className="flex flex-col">
-              <label className="block mb-2 text-black">Purpose</label>
-              <select
-                name="purpose"
-                value={formData.purpose}
-                onChange={handleChange}
-                className="w-full p-3 mb-3 border rounded shadow-sm text-gray-700"
-              >
-                <option value="">Select Purpose</option>
-                <option value="Request Information">Request Information</option>
-                <option value="Confirm Details">Confirm Details</option>
-                <option value="Follow up on a Previous Discussion">Follow up on a Previous Discussion</option>
-                <option value="New Email">New Email</option>
-                <option value="Other">Other</option>
-              </select>
-              {formData.purpose === "Other" && (
-                <input
-                  type="text"
-                  name="otherPurpose"
-                  placeholder="If others, please specify"
-                  value={formData.otherPurpose}
+                <label className="block mb-2 text-black">Purpose</label>
+                <select
+                  name="purpose"
+                  value={formData.purpose}
+                  onChange={handleChange}
+                  className="w-full p-3 mb-3 border rounded shadow-sm text-gray-700"
+                >
+                  <option value="">Select Purpose</option>
+                  <option value="Request Information">Request Information</option>
+                  <option value="Confirm Details">Confirm Details</option>
+                  <option value="Follow up on a Previous Discussion">Follow up on a Previous Discussion</option>
+                  <option value="New Email">New Email</option>
+                  <option value="Other">Other</option>
+                </select>
+                {formData.purpose === "Other" && (
+                  <input
+                    type="text"
+                    name="otherPurpose"
+                    placeholder="If others, please specify"
+                    value={formData.otherPurpose}
+                    onChange={handleChange}
+                    className="w-full p-3 border rounded shadow-sm text-gray-700"
+                  />
+                )}
+              </div>
+              <div className="flex flex-col">
+                <label className="block mb-2 text-black">Tone</label>
+                <select
+                  name="tone"
+                  value={formData.tone}
                   onChange={handleChange}
                   className="w-full p-3 border rounded shadow-sm text-gray-700"
-                />
-              )}
-              </div>
-
-              <div className="flex flex-col">
-              <label className="block mb-2 text-black">Tone</label>
-              <select
-                name="tone"
-                value={formData.tone}
-                onChange={handleChange}
-                className="w-full p-3 border rounded shadow-sm text-gray-700"
-              >
-                <option value="Formal">Formal</option>
-                <option value="Informal">Informal</option>
-                <option value="Persuasive">Persuasive</option>
-                <option value="Urgent">Urgent</option>
-              </select>
+                >
+                  <option value="Formal">Formal</option>
+                  <option value="Informal">Informal</option>
+                  <option value="Persuasive">Persuasive</option>
+                  <option value="Urgent">Urgent</option>
+                </select>
               </div>
             </div>
-
             <div className="mb-6">
               <label className="block mb-2 text-black">Subject</label>
               <input
@@ -242,7 +243,7 @@ const EmailService: React.FC = () => {
                 placeholder='Enter Subject'
               />
               <div className="flex items-center">
-              <input
+                <input
                   type="checkbox"
                   name="rephraseSubject"
                   checked={formData.rephraseSubject}
@@ -252,7 +253,6 @@ const EmailService: React.FC = () => {
                 <label className="text-black">Rephrase Subject</label>
               </div>
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div className="flex flex-col">
                 <label className="block mb-2 text-black">To</label>
@@ -277,7 +277,6 @@ const EmailService: React.FC = () => {
                 />
               </div>
             </div>
-
             <div className="mb-6">
               <label className="block mb-2 text-black">Keywords (Optional, add up to 8, separated by commas)</label>
               <textarea
@@ -286,10 +285,9 @@ const EmailService: React.FC = () => {
                 onChange={handleChange}
                 className="w-full p-3 border rounded shadow-sm text-gray-700"
                 placeholder='Enter Keywords'
-                rows={4}
+                rows={2}
               />
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div className="flex flex-col">
                 <label className="block mb-2 text-black">Contextual Background</label>
@@ -301,7 +299,6 @@ const EmailService: React.FC = () => {
                   placeholder='Enter Contextual Background'
                 />
               </div>
-
               <div className="flex flex-col">
                 <label className="block mb-2 text-black">Additional Details</label>
                 <textarea
@@ -313,7 +310,6 @@ const EmailService: React.FC = () => {
                 />
               </div>
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div className="flex flex-col">
                 <label className="block mb-2 text-black">Call to Action</label>
@@ -339,7 +335,6 @@ const EmailService: React.FC = () => {
                   />
                 )}
               </div>
-
               <div className="flex flex-col">
                 <label className="block mb-2 text-black">Priority Level</label>
                 <select
@@ -354,7 +349,6 @@ const EmailService: React.FC = () => {
                 </select>
               </div>
             </div>
-
             <div className="mb-6">
               <label className="block mb-2 text-black">Closing Remarks</label>
               <textarea
@@ -374,7 +368,6 @@ const EmailService: React.FC = () => {
               {loading ? 'Generating Email...' : 'Generate Email'}
             </button>
           </form>
-
           {generatedEmail && (
             <div className="mt-6 p-6">
               <h2 className="text-2xl mb-4 text-black">Generated Email:</h2>
@@ -400,7 +393,6 @@ const EmailService: React.FC = () => {
               />
             </div>
           )}
-
           {translatedEmail && (
             <div className="mt-6 p-6">
               <h2 className="text-2xl mb-4">Translated Content</h2>
@@ -418,7 +410,6 @@ const EmailService: React.FC = () => {
               <p>{error}</p>
             </div>
           )}
-          
           <ToastContainer position="bottom-right" autoClose={5000} />
         </div>
       </div>
