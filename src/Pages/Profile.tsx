@@ -6,8 +6,13 @@ import { ToastContainer, toast } from 'react-toastify'; // Import Toast componen
 import 'react-toastify/dist/ReactToastify.css'; // Import Toast CSS
 import config from '../config';
 import { Link } from 'react-router-dom';
+import { LuEye } from "react-icons/lu";
+import { LuEyeOff } from "react-icons/lu";
+
+
 
 const apiUrl = config.apiUrl;
+
 // Define ProfileForm component
 const ProfileForm: React.FC = () => {
     // Access authentication context
@@ -36,6 +41,9 @@ const ProfileForm: React.FC = () => {
 
     const [passwordError, setPasswordError] = useState(''); // State for password error
     const [errors, setErrors] = useState<string[]>([]); // State for general errors
+    const [showCurrentPassword, setShowCurrentPassword] = useState(false); // State to toggle current password visibility
+    const [showNewPassword, setShowNewPassword] = useState(false); // State to toggle new password visibility
+    const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false); // State to toggle confirm new password visibility
 
     // Fetch profile data when user changes
     useEffect(() => {
@@ -224,28 +232,27 @@ const ProfileForm: React.FC = () => {
                     />
                     <input
                         type="text"
-                        name="birthDate"
-                        // value={formData.birthDate}
+                        name="subscription"
                         onChange={handleChange}
-                        placeholder="subscription"
+                        placeholder="Subscription"
                         className="w-full px-3 py-2 border rounded-md"
                         disabled
                     />
                     <div>
-                    <button
-                        type="submit"
-                        className="px-4 py-2 bg-blue-500 text-white rounded-md"
-                    >
-                        Update Profile
-                    </button> &nbsp;    
-                    <Link to='/subscription'>
-                    <button
-                        type="submit"
-                        className="px-4 py-2 bg-blue-500 text-white rounded-md"
-                    >
-                        Update Subscription
-                    </button>
-                    </Link>
+                        <button
+                            type="submit"
+                            className="px-4 py-2 bg-blue-500 text-white rounded-md"
+                        >
+                            Update Profile
+                        </button> &nbsp;
+                        <Link to='/subscription'>
+                            <button
+                                type="button"
+                                className="px-4 py-2 bg-blue-500 text-white rounded-md"
+                            >
+                                Update Subscription
+                            </button>
+                        </Link>
                     </div>
                 </form>
                 
@@ -260,30 +267,69 @@ const ProfileForm: React.FC = () => {
                 <h2 className="mt-8 text-xl font-bold">Change Password</h2>
                 {/* Form to change password */}
                 <form onSubmit={handleChangePassword} className="space-y-4 mt-4">
-                    <input
-                        type="password"
-                        name="currentPassword"
-                        value={formData.currentPassword}
-                        onChange={handleChange}
-                        placeholder="Current Password"
-                        className="w-full px-3 py-2 border rounded-md"
-                    />
-                    <input
-                        type="password"
-                        name="newPassword"
-                        value={formData.newPassword}
-                        onChange={handleChange}
-                        placeholder="New Password"
-                        className="w-full px-3 py-2 border rounded-md"
-                    />
-                    <input
-                        type="password"
-                        name="confirmNewPassword"
-                        value={formData.confirmNewPassword}
-                        onChange={handleChange}
-                        placeholder="Confirm New Password"
-                        className="w-full px-3 py-2 border rounded-md"
-                    />
+                    {/* Current Password */}
+                    <div className="flex">
+                        <input
+                            type={showCurrentPassword ? 'text' : 'password'}
+                            name="currentPassword"
+                            value={formData.currentPassword}
+                            onChange={handleChange}
+                            placeholder="Current Password"
+                            className="w-full px-3 py-2 border rounded-md"
+                        />
+                           <button
+                                type="button"
+                                className="ml-2 px-3 py-2 border border-gray-300 rounded-lg text-gray-600 focus:outline-none focus:ring-primary-600 focus:border-primary-600 dark:text-black dark:border-gray-500 dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                            >
+                                {showCurrentPassword ?  <LuEyeOff /> : <LuEye />
+                                }
+                            </button>
+                       
+                    </div>
+
+                    {/* New Password */}
+                    <div className="flex">
+                        <input
+                            type={showNewPassword ? 'text' : 'password'}
+                            name="newPassword"
+                            value={formData.newPassword}
+                            onChange={handleChange}
+                            placeholder="New Password"
+                            className="w-full px-3 py-2 border rounded-md"
+                        />
+                              <button
+                                type="button"
+                                className="ml-2 px-3 py-2 border border-gray-300 rounded-lg text-gray-600 focus:outline-none focus:ring-primary-600 focus:border-primary-600 dark:text-black dark:border-gray-500 dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                onClick={() => setShowNewPassword(!showNewPassword)}
+                            >
+                                {showNewPassword ?  <LuEyeOff /> : <LuEye />
+                                }
+                            </button>
+                
+                    </div>
+
+                    {/* Confirm New Password */}
+                    <div className="flex">
+                        <input
+                            type={showConfirmNewPassword ? 'text' : 'password'}
+                            name="confirmNewPassword"
+                            value={formData.confirmNewPassword}
+                            onChange={handleChange}
+                            placeholder="Confirm New Password"
+                            className="w-full px-3 py-2 border rounded-md"
+                        />
+                        <button
+                                type="button"
+                                className="ml-2 px-3 py-2 border border-gray-300 rounded-lg text-gray-600 focus:outline-none focus:ring-primary-600 focus:border-primary-600 dark:text-black dark:border-gray-500 dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                onClick={() => setShowConfirmNewPassword(!showConfirmNewPassword)}
+                            >
+                                {showConfirmNewPassword ?  <LuEyeOff /> : <LuEye />
+                                }
+                            </button>
+                      
+                    </div>
+
                     {passwordError && <p className="text-red-500">{passwordError}</p>}
                     <button
                         type="submit"

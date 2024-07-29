@@ -4,6 +4,9 @@ import Nav from "../Global/Nav";
 import toast, { Toaster } from 'react-hot-toast';
 import CryptoJS from 'crypto-js'; // Import CryptoJS library
 import config from './../../config';
+import { LuEye } from "react-icons/lu";
+import { LuEyeOff } from "react-icons/lu";
+
 
 const apiUrl = config.apiUrl;
 
@@ -13,6 +16,9 @@ const SignUpForm: React.FC = () => {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
     const navigate = useNavigate();
 
     // Constants for AES encryption
@@ -104,10 +110,12 @@ const SignUpForm: React.FC = () => {
                                     />
                                 </div>
                                 {/* Password */}
-                                <div>
                                     <label htmlFor="password" className="block mb-2 text-sm font-medium text-black dark:text-black">Password</label>
+                                    <div className="flex">
+
+
                                     <input
-                                        type="password"
+                                        type={showPassword ? "text" : "password"} 
                                         name="password"
                                         id="password"
                                         className="border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:placeholder-gray-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500"
@@ -116,12 +124,22 @@ const SignUpForm: React.FC = () => {
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                     />
+                                    <button
+                                            type="button"
+                                            className="ml-2 px-3 py-2 border border-gray-300 rounded-lg text-gray-600 focus:outline-none focus:ring-primary-600 focus:border-primary-600 dark:text-black dark:border-gray-500 dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                        >
+                                            {showPassword ?  <LuEyeOff /> : <LuEye />
+                                            }
+                                            </button>
+                                    
                                 </div>
                                 {/* Confirm Password */}
-                                <div>
                                     <label htmlFor="confirm_password" className="block mb-2 text-sm font-medium text-gray-900 dark:text-black">Confirm Password</label>
+                                <div className="flex">
+
                                     <input
-                                        type="password"
+                                        type={showConfirmPassword ? "text" : "password"}
                                         name="confirm_password"
                                         id="confirm_password"
                                         placeholder="••••••••"
@@ -130,6 +148,15 @@ const SignUpForm: React.FC = () => {
                                         value={confirmPassword}
                                         onChange={(e) => setConfirmPassword(e.target.value)}
                                     />
+                                      <button
+                                            type="button"
+                                            className="ml-2 px-3 py-2 border border-gray-300 rounded-lg text-gray-600 focus:outline-none focus:ring-primary-600 focus:border-primary-600 dark:text-black dark:border-gray-500 dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                        >
+                                            {showConfirmPassword ?  <LuEyeOff /> : <LuEye />
+                                            }
+                                            </button>
+                             
                                 </div>
                                 {/* Submit Button */}
                                 <button type="submit" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 w-full focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Sign Up</button>
