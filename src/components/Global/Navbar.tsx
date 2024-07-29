@@ -1,5 +1,5 @@
 import { AuthContext } from './AuthContext'; // Importing AuthContext from the AuthContext file
-import Logo from '../../assets/logo.png'; // Importing the logo image
+import Logo from '../../assets/img.png'; // Importing the logo image
 import '../../App.css'; // Importing global CSS file
 import { useContext, useState } from 'react'; // Importing useContext and useState hooks from React
 import { Link } from 'react-router-dom'; // Import Link component from react-router-dom for navigation
@@ -21,9 +21,9 @@ const Navbar = () => {
 
   return (
     <nav className='pl-7 pr-7'>
-      <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
+      <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto">
         <Link to="/dashboard" className="inline-block">
-          <img src={Logo} style={{height: '55px', width: '80px'}} alt="ProdigiDesk Logo" />
+          <img src={Logo} className='logo' alt="ProdigiDesk Logo" />
         </Link>
         <button
           onClick={handleMenuToggle}

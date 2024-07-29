@@ -1,4 +1,8 @@
-#nav-text:hover {
-    transform: scale(1.05) translateZ(0);
-    box-shadow: rgba(0, 0, 0, 0.2);
-}
+.logo {
+    height: 10em;
+    width: 10em;
+    display: block;
+    margin: -1em; /* Remove any default margins */
+    padding: -1em; /* Remove any default padding */
+  }
+  
