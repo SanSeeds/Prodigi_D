@@ -168,7 +168,7 @@ function SalesScriptService() {
       <Navbar />
       <div className="min-h-screen flex items-center justify-center">
         <div className="w-full max-w-3xl mx-auto p-8 rounded">
-          <h1 className="text-center text-xl font-bold" style={{ fontFamily: "'Roboto Slab', sans-serif" }}>
+          <h1 className="text-center text-xl font-semibold">
             Sales Script Generator
           </h1>
           <form className="w-full max-w-3xl mx-auto p-8" onSubmit={handleSubmit}>

@@ -1,10 +1,16 @@
-import { AuthContext } from './AuthContext'; // Importing AuthContext from the AuthContext file
-import Logo from '../../assets/img.png'; // Importing the logo image
+import { useContext, useEffect, useState } from 'react';
+import Logo from '../../assets/logo2.png'; // Importing the logo image
 import '../../App.css'; // Importing global CSS file
-import { useContext, useState } from 'react'; // Importing useContext and useState hooks from React
 import { Link } from 'react-router-dom'; // Import Link component from react-router-dom for navigation
+import config from '../../config'; // Ensure config file is correctly imported
+import { AuthContext } from './AuthContext';
+import { FaHome, FaUser, FaSignOutAlt } from 'react-icons/fa'; // Import icons from react-icons
+
+const apiUrl = config.apiUrl;
 
 const Navbar = () => {
+  const [userFirstName, setUserFirstName] = useState<string | null>(null); // State to store user's first name
+  const [isMenuOpen, setIsMenuOpen] = useState(false); // State for managing menu toggle
   const authContext = useContext(AuthContext); // Using useContext to get the authContext value
 
   if (!authContext) {
@@ -13,7 +19,29 @@ const Navbar = () => {
 
   const { user, logout } = authContext; // Destructuring user and logout from authContext
 
-  const [isMenuOpen, setIsMenuOpen] = useState(false); // State for managing menu toggle
+  // Fetch user details from API when the component mounts
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      try {
+        const response = await fetch(`${apiUrl}/profile/`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('accessToken')}` // Fetch token from local storage
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setUserFirstName(data.user.first_name); // Set user's first name
+        } else {
+          console.error('Failed to fetch user details');
+        }
+      } catch (error) {
+        console.error('Error fetching user details:', error);
+      }
+    };
+
+    fetchUserDetails();
+  }, []);
 
   const handleMenuToggle = () => {
     setIsMenuOpen(!isMenuOpen); // Toggling the menu state
@@ -21,7 +49,7 @@ const Navbar = () => {
 
   return (
     <nav className='pl-7 pr-7'>
-      <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto">
+      <div className="max-w-screen-2xl flex flex-wrap items-center justify-between mx-auto">
         <Link to="/dashboard" className="inline-block">
           <img src={Logo} className='logo' alt="ProdigiDesk Logo" />
         </Link>
@@ -41,19 +69,28 @@ const Navbar = () => {
         <div className={`w-full md:block md:w-auto ${isMenuOpen ? '' : 'hidden'}`} id="navbar-default">
           <ul className="font-medium flex flex-col p-4 md:p-0 mt-4 rounded-lg md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-5">
             <li>
-              <Link to="/dashboard" className="block py-2 px-3 text-black rounded md:bg-transparent md:p-0 dark:text-black md:hover:text-blue-700" aria-current="page">Home</Link>
+              <Link to="/dashboard" className="flex items-center py-2 px-3 text-black rounded md:bg-transparent md:p-0 dark:text-black md:hover:text-blue-700">
+                <FaHome className="mr-2" aria-hidden="true" /> {/* Home Icon */}
+                <span className="hidden md:inline">Home</span>
+              </Link>
             </li>
             <li>
-              <Link to="/profile" className="block py-2 px-3 text-black rounded md:bg-transparent md:p-0 dark:text-black md:hover:text-blue-700" aria-current="page">{user ? user.email : 'Profile'}</Link>
+              <Link to="/profile" className="flex items-center py-2 px-3 text-black rounded md:bg-transparent md:p-0 dark:text-black md:hover:text-blue-700">
+                <FaUser className="mr-2" aria-hidden="true" /> {/* User Icon */}
+                <span className="hidden md:inline">{userFirstName ? userFirstName : user?.email}</span>
+              </Link>
             </li>
             <li>
-              <button onClick={logout} className="block py-2 px-3 text-black rounded md:bg-transparent md:p-0 dark:text-black md:hover:text-blue-700">Logout</button>
+              <button onClick={logout} className="flex items-center py-2 px-3 text-black rounded md:bg-transparent md:p-0 dark:text-black md:hover:text-blue-700">
+                <FaSignOutAlt className="mr-2" aria-hidden="true" /> {/* Logout Icon */}
+                <span className="hidden md:inline">Logout</span>
+              </button>
             </li>
           </ul>
         </div>
       </div>
     </nav>
   );
-}
+};
 
 export default Navbar;

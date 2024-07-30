@@ -118,7 +118,7 @@ function BusinessProposalService() {
       <Navbar />
       <div className="min-h-screen flex items-center justify-center">
         <div className="w-full max-w-3xl mx-auto p-8 rounded">
-          <h1 className="text-center text-xl font-bold mb-6" style={{ fontFamily: "'Roboto Slab', sans-serif" }}>Business Proposal Generator</h1>
+          <h1 className="text-center text-xl font-semibold mb-6" >Business Proposal Generator</h1>
           <form onSubmit={handleSubmit} className="mt-4">
             {/* Form fields */}
             <div className="mb-6">

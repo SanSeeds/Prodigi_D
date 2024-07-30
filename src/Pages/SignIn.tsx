@@ -60,7 +60,10 @@ const SignInForm: React.FC = () => {
                 const accessToken = data.access;
                 const refreshToken = data.refresh;
                 const expiry = 3600 * 3600;
-                login({ email }, accessToken, refreshToken, expiry);
+                login({
+                    email,
+                    first_name: ''
+                }, accessToken, refreshToken, expiry);
                 toast.success('Logged in successfully');
                 navigate('/dashboard');
             } else {

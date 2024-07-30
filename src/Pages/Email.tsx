@@ -187,7 +187,7 @@ const EmailService: React.FC = () => {
       <Navbar />
       <div className="min-h-screen flex items-center justify-center">
         <div className="w-full max-w-3xl mx-auto p-8 rounded-lg">
-          <h1 className="text-center text-xl font-bold mb-6 text-black" style={{ fontFamily: "'Roboto Slab', sans-serif" }}>Email Generator</h1>
+          <h1 className="text-center text-xl font-semibold mb-6 text-black">Email Generator</h1>
           <form onSubmit={handleSubmit} className="mt-4">
             {/* Form Fields */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
