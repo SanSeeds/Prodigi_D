@@ -164,7 +164,7 @@ function SummarizeService() {
             <Navbar />
             <div className="min-h-screen flex items-center justify-center">
                 <div className="w-full max-w-3xl mx-auto p-8 rounded-lg">
-                    <h1 className="text-center text-xl font-bold mb-6" style={{ fontFamily: "'Roboto Slab', sans-serif" }}>Summarize Document</h1>
+                    <h1 className="text-center text-xl font-semibold mb-6">Summarize Document</h1>
                     <form className="w-full max-w-3xl mx-auto p-8" onSubmit={handleSubmit}>
                         {/* Form fields */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -291,7 +291,7 @@ function SummarizeService() {
                             />
                         </div>
                         <div className="flex flex-col mb-6">
-                            <label className="mb-2 text-black">Upload Document (PDF,DOCX,TXT)</label>
+                            <label className="mb-2 text-black">Upload Document (.pdf, .docx, .txt)</label>
                             <input
                                 type="file"
                                 accept=".pdf,.docx,.txt"

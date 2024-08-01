@@ -8,6 +8,7 @@ const apiUrl = config.apiUrl;
 // Define an interface for a User object
 interface User {
     // The user's email address
+    first_name: string;
     email: string;
 }
 

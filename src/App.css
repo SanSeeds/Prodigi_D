@@ -14,23 +14,3 @@ body{
   background-attachment: fixed;
 }
 
-/* styles/Services.css */
-/* Ensure the HeroSection takes full viewport height */
-.hero-section-wrapper {
-  height: 50%;
-  display: flex;
-  align-items: center; /* Center the content vertically */
-  justify-content: center;
-  margin: 0; /* Ensure there's no margin */
-  padding: 0; /* Ensure there's no padding */
-}
-
-/* Apply padding/margin to Services to ensure it's correctly positioned */
-.services-section-wrapper {
-  min-height: 90vh;
-  display: flex;
-  align-items: center; /* Center the content vertically */
-  justify-content: center;
-  padding: 0; /* Adjust padding to your preference */
-  margin-top: 0; /* Remove any top margin */
-}

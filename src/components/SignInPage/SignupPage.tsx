@@ -4,13 +4,13 @@ import Nav from "../Global/Nav";
 import toast, { Toaster } from 'react-hot-toast';
 import CryptoJS from 'crypto-js'; // Import CryptoJS library
 import config from './../../config';
-import { LuEye } from "react-icons/lu";
-import { LuEyeOff } from "react-icons/lu";
-
+import { LuEye, LuEyeOff } from "react-icons/lu";
 
 const apiUrl = config.apiUrl;
 
 const SignUpForm: React.FC = () => {
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -37,7 +37,7 @@ const SignUpForm: React.FC = () => {
         try {
             // Encrypt form data payload
             const encryptedPayload = CryptoJS.AES.encrypt(
-                JSON.stringify({ username, email, password, confirm_password: confirmPassword }),
+                JSON.stringify({ first_name: firstName, last_name: lastName, username, email, password, confirm_password: confirmPassword }),
                 AES_SECRET_KEY,
                 { iv: AES_IV }
             ).toString();
@@ -71,105 +71,110 @@ const SignUpForm: React.FC = () => {
         <>
             <Nav />
             <Toaster />
-            <section>
-                <div className="flex flex-col items-center justify-start mt-12 px-6 py-8 mx-auto md:h-screen lg:py-0">
-                    <div className="w-full rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0">
-                        <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
-                            <h1 className="text-xl font-bold leading-tight tracking-tight text-center md:text-2xl dark:text-black">
-                                Sign Up
-                            </h1>
-                            {error && <div className="text-red-500 text-center">{error}</div>}
-                            <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit}>
-                                {/* Form fields */}
-                                {/* Username */}
-                                <div>
-                                    <label htmlFor="username" className="block mb-2 text-sm font-medium text-black dark:text-black">Username</label>
-                                    <input
-                                        type="text"
-                                        name="username"
-                                        id="username"
-                                        className="border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:placeholder-gray-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                        placeholder="John Doe"
-                                        required
-                                        value={username}
-                                        onChange={(e) => setUsername(e.target.value)}
-                                    />
-                                </div>
-                                {/* Email */}
-                                <div>
-                                    <label htmlFor="email" className="block mb-2 text-sm font-medium text-black dark:text-black">Email</label>
-                                    <input
-                                        type="email"
-                                        name="email"
-                                        id="email"
-                                        className="border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:placeholder-gray-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                        placeholder="name@company.com"
-                                        required
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                    />
-                                </div>
-                                {/* Password */}
-                                    <label htmlFor="password" className="block mb-2 text-sm font-medium text-black dark:text-black">Password</label>
-                                    <div className="flex">
-
-
-                                    <input
-                                        type={showPassword ? "text" : "password"} 
-                                        name="password"
-                                        id="password"
-                                        className="border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:placeholder-gray-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                        placeholder="••••••••"
-                                        required
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                    />
-                                    <button
+            <div className="flex flex-col items-center min-h-screen">
+                <div className="w-full max-w-xl p-8">
+                    <h1 className="text-2xl font-bold text-center mb-6 text-gray-900">Sign Up</h1>
+                    {error && <div className="text-red-500 text-center mb-4">{error}</div>}
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="flex flex-col">
+                                <label className="mb-2 text-gray-700">First Name</label>
+                                <input
+                                    type="text"
+                                    name="firstName"
+                                    className="p-3 border rounded-lg shadow-sm text-gray-900"
+                                    placeholder='Enter First Name'
+                                    value={firstName}
+                                    onChange={(e) => setFirstName(e.target.value)}
+                                />
+                            </div>
+                            <div className="flex flex-col">
+                                <label className="mb-2 text-gray-700">Last Name</label>
+                                <input
+                                    type="text"
+                                    name="lastName"
+                                    className="p-3 border rounded-lg shadow-sm text-gray-900"
+                                    placeholder='Enter Last Name'
+                                    value={lastName}
+                                    onChange={(e) => setLastName(e.target.value)}
+                                />
+                            </div>
+                        </div>
+                        <div className="flex flex-col">
+                            <label className="mb-2 text-gray-700">Username</label>
+                            <input
+                                type="text"
+                                name="username"
+                                className="p-3 border rounded-lg shadow-sm text-gray-900"
+                                placeholder='Enter Username'
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                            />
+                        </div>
+                        <div className="flex flex-col">
+                            <label className="mb-2 text-gray-700">Email</label>
+                            <input
+                                type="email"
+                                name="email"
+                                className="p-3 border rounded-lg shadow-sm text-gray-900"
+                                placeholder='Enter Email'
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                            />
+                        </div>
+                        <div className="flex flex-col">
+                            <label className="mb-2 text-gray-700">Password</label>
+                            <div className="flex">
+                                <input
+                                    type={showPassword ? 'text' : 'password'}
+                                    name="password"
+                                    className="w-full p-3 border rounded-lg shadow-sm text-gray-900"
+                                    placeholder='Enter Password'
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                />
+                                <button
                                             type="button"
                                             className="ml-2 px-3 py-2 border border-gray-300 rounded-lg text-gray-600 focus:outline-none focus:ring-primary-600 focus:border-primary-600 dark:text-black dark:border-gray-500 dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                             onClick={() => setShowPassword(!showPassword)}
                                         >
-                                            {showPassword ?  <LuEyeOff /> : <LuEye />
+                                            {showPassword ?  <LuEyeOff />  : <LuEye />
                                             }
                                             </button>
-                                    
-                                </div>
-                                {/* Confirm Password */}
-                                    <label htmlFor="confirm_password" className="block mb-2 text-sm font-medium text-gray-900 dark:text-black">Confirm Password</label>
-                                <div className="flex">
-
-                                    <input
-                                        type={showConfirmPassword ? "text" : "password"}
-                                        name="confirm_password"
-                                        id="confirm_password"
-                                        placeholder="••••••••"
-                                        className="border border-gray-300 text-black sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:placeholder-gray-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                        required
-                                        value={confirmPassword}
-                                        onChange={(e) => setConfirmPassword(e.target.value)}
-                                    />
-                                      <button
+                            
+                            </div>
+                        </div>
+                        <div className="flex flex-col">
+                            <label className="mb-2 text-gray-700">Confirm Password</label>
+                            <div className="flex">
+                                <input
+                                    type={showConfirmPassword ? 'text' : 'password'}
+                                    name="confirmPassword"
+                                    className="w-full p-3 border rounded-lg shadow-sm text-gray-900"
+                                    placeholder='Enter Confirm Password'
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                />
+                                <button
                                             type="button"
                                             className="ml-2 px-3 py-2 border border-gray-300 rounded-lg text-gray-600 focus:outline-none focus:ring-primary-600 focus:border-primary-600 dark:text-black dark:border-gray-500 dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                                         >
-                                            {showConfirmPassword ?  <LuEyeOff /> : <LuEye />
+                                            {showConfirmPassword ?  <LuEyeOff />  : <LuEye />
                                             }
                                             </button>
-                             
-                                </div>
-                                {/* Submit Button */}
-                                <button type="submit" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 w-full focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Sign Up</button>
-
-                                {/* Sign In Link */}
-                                <p className="text-sm font-light text-gray-500 dark:text-gray-400 text-center">
-                                    Already A User? <a href="/signin" className="font-medium text-primary-600 hover:underline dark:text-primary-500">Log In!</a>
-                                </p>
-                            </form>
+                              
+                            </div>
                         </div>
-                    </div>
+                        <button
+                            type="submit"
+                            className="w-full py-3 px-4 rounded-lg text-white bg-blue-600 hover:bg-blue-700"
+                        >
+                            Sign Up
+                        </button>
+                    </form>
                 </div>
-            </section>
+            </div>
         </>
     );
 };

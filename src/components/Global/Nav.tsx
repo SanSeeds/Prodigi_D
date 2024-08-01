@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Logo from '../../assets/img2.png';
 import '../../styles/Nav.css';
+import { FaSignInAlt, FaInfoCircle, FaLanguage } from 'react-icons/fa'; // Import icons from react-icons
 
 function Nav() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -22,7 +23,7 @@ function Nav() {
   return (
     <>
       <nav className='pl-7 pr-7'>
-        <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto">
+        <div className="max-w-screen-2xl flex flex-wrap items-center justify-between mx-auto">
           <a href="/">
             <img src={Logo} className="logo" alt="ProdigiDesk Logo" />
           </a>
@@ -42,13 +43,22 @@ function Nav() {
           <div className={`w-full md:block md:w-auto ${isMenuOpen ? '' : 'hidden'}`} id="navbar-default">
             <ul className="font-medium flex flex-col p-4 md:p-0 rounded-lg md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-5">
               <li>
-                <a href="/signin" className="block py-2 px-3 text-black rounded md:bg-transparent md:p-0 dark:text-black md:hover:text-blue-700" aria-current="page" id='nav-text'>Sign In</a>
+                <a href="/signin" className="flex items-center py-2 px-3 text-black rounded md:bg-transparent md:p-0 dark:text-black md:hover:text-blue-700" aria-current="page" id='nav-text'>
+                  <FaSignInAlt className="mr-2" aria-hidden="true" />
+                  <span>Sign In</span>
+                </a>
               </li>
               <li>
-                <button id="about-btn" onClick={openModal} className="block py-2 px-3 text-black rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-black md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-black md:dark:hover:bg-transparent">About</button>
+                <button id="about-btn" onClick={openModal} className="flex items-center py-2 px-3 text-black rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-black md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-black md:dark:hover:bg-transparent">
+                  <FaInfoCircle className="mr-2" aria-hidden="true" />
+                  <span>About</span>
+                </button>
               </li>
               <li>
-                <a href="/translate" id='nav-text' className="block py-2 px-3 text-black rounded md:bg-transparent md:p-0 dark:text-black md:hover:text-blue-700" aria-current="page">Translate</a>
+                <a href="/translate" id='nav-text' className="flex items-center py-2 px-3 text-black rounded md:bg-transparent md:p-0 dark:text-black md:hover:text-blue-700" aria-current="page">
+                  <FaLanguage className="mr-2" aria-hidden="true" />
+                  <span>Translate</span>
+                </a>
               </li>
             </ul>
           </div>
