@@ -45,19 +45,19 @@ function Nav() {
               <li>
                 <a href="/signin" className="flex items-center py-2 px-3 text-black rounded md:bg-transparent md:p-0 dark:text-black md:hover:text-blue-700" aria-current="page" id='nav-text'>
                   <FaSignInAlt className="mr-2" aria-hidden="true" />
-                  <span className="md:inline hidden">Sign In</span>
+                  <span>Sign In</span>
                 </a>
               </li>
               <li>
                 <button id="about-btn" onClick={openModal} className="flex items-center py-2 px-3 text-black rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-black md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-black md:dark:hover:bg-transparent">
                   <FaInfoCircle className="mr-2" aria-hidden="true" />
-                  <span className="md:inline hidden">About</span>
+                  <span>About</span>
                 </button>
               </li>
               <li>
                 <a href="/translate" id='nav-text' className="flex items-center py-2 px-3 text-black rounded md:bg-transparent md:p-0 dark:text-black md:hover:text-blue-700" aria-current="page">
                   <FaLanguage className="mr-2" aria-hidden="true" />
-                  <span className="md:inline hidden">Translate</span>
+                  <span>Translate</span>
                 </a>
               </li>
             </ul>

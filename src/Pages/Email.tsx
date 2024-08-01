@@ -405,11 +405,7 @@ const EmailService: React.FC = () => {
               </button>
             </div>
           )}
-          {error && (
-            <div className="mt-6 p-6 border rounded bg-red-100 text-red-800 shadow-sm">
-              <p>{error}</p>
-            </div>
-          )}
+          
           <ToastContainer position="bottom-right" autoClose={5000} />
         </div>
       </div>

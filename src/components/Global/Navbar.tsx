@@ -1,37 +1,36 @@
 import { useContext, useEffect, useState } from 'react';
-import Logo from '../../assets/logo2.png'; // Importing the logo image
-import '../../App.css'; // Importing global CSS file
-import { Link } from 'react-router-dom'; // Import Link component from react-router-dom for navigation
-import config from '../../config'; // Ensure config file is correctly imported
+import Logo from '../../assets/logo2.png';
+import '../../App.css';
+import { Link } from 'react-router-dom';
+import config from '../../config';
 import { AuthContext } from './AuthContext';
-import { FaHome, FaUser, FaSignOutAlt } from 'react-icons/fa'; // Import icons from react-icons
+import { FaHome, FaUser, FaSignOutAlt } from 'react-icons/fa';
 
 const apiUrl = config.apiUrl;
 
 const Navbar = () => {
-  const [userFirstName, setUserFirstName] = useState<string | null>(null); // State to store user's first name
-  const [isMenuOpen, setIsMenuOpen] = useState(false); // State for managing menu toggle
-  const authContext = useContext(AuthContext); // Using useContext to get the authContext value
+  const [userFirstName, setUserFirstName] = useState<string | null>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const authContext = useContext(AuthContext);
 
   if (!authContext) {
-    throw new Error("AuthContext must be used within an AuthProvider"); // Throwing an error if AuthContext is not provided
+    throw new Error("AuthContext must be used within an AuthProvider");
   }
 
-  const { user, logout } = authContext; // Destructuring user and logout from authContext
+  const { user, logout } = authContext;
 
-  // Fetch user details from API when the component mounts
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
         const response = await fetch(`${apiUrl}/profile/`, {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('accessToken')}` // Fetch token from local storage
+            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
           }
         });
 
         if (response.ok) {
           const data = await response.json();
-          setUserFirstName(data.user.first_name); // Set user's first name
+          setUserFirstName(data.user.first_name);
         } else {
           console.error('Failed to fetch user details');
         }
@@ -44,7 +43,7 @@ const Navbar = () => {
   }, []);
 
   const handleMenuToggle = () => {
-    setIsMenuOpen(!isMenuOpen); // Toggling the menu state
+    setIsMenuOpen(!isMenuOpen);
   };
 
   return (
@@ -71,19 +70,19 @@ const Navbar = () => {
             <li>
               <Link to="/dashboard" className="flex items-center py-2 px-3 text-black rounded md:bg-transparent md:p-0 dark:text-black md:hover:text-blue-700">
                 <FaHome className="mr-2" aria-hidden="true" /> {/* Home Icon */}
-                <span className="hidden md:inline">Home</span>
+                <span>Home</span>
               </Link>
             </li>
             <li>
               <Link to="/profile" className="flex items-center py-2 px-3 text-black rounded md:bg-transparent md:p-0 dark:text-black md:hover:text-blue-700">
                 <FaUser className="mr-2" aria-hidden="true" /> {/* User Icon */}
-                <span className="hidden md:inline">{userFirstName ? userFirstName : user?.email}</span>
+                <span>{userFirstName ? userFirstName : user?.email}</span>
               </Link>
             </li>
             <li>
               <button onClick={logout} className="flex items-center py-2 px-3 text-black rounded md:bg-transparent md:p-0 dark:text-black md:hover:text-blue-700">
                 <FaSignOutAlt className="mr-2" aria-hidden="true" /> {/* Logout Icon */}
-                <span className="hidden md:inline">Logout</span>
+                <span>Logout</span>
               </button>
             </li>
           </ul>

@@ -121,7 +121,7 @@ function ContentGenerationService() {
     <>
       <Navbar />
       <div className="min-h-screen flex items-center justify-center">
-        <div className="w-full max-w-3xl mx-auto p-8 rounded-lg">
+        <div className="w-full max-w-3xl mx-auto p-8 rounded">
           <h1 className="text-center text-xl font-semibold">Content Generator</h1>
           <form className="mx-auto p-8" onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">

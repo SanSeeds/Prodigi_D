@@ -124,7 +124,7 @@ const SignUpForm: React.FC = () => {
                         </div>
                         <div className="flex flex-col">
                             <label className="mb-2 text-gray-700">Password</label>
-                            <div className="relative">
+                            <div className="flex">
                                 <input
                                     type={showPassword ? 'text' : 'password'}
                                     name="password"
@@ -133,17 +133,20 @@ const SignUpForm: React.FC = () => {
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                 />
-                                <div
-                                    className="absolute right-3 top-3 cursor-pointer"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                >
-                                    {showPassword ? <LuEyeOff /> : <LuEye />}
-                                </div>
+                                <button
+                                            type="button"
+                                            className="ml-2 px-3 py-2 border border-gray-300 rounded-lg text-gray-600 focus:outline-none focus:ring-primary-600 focus:border-primary-600 dark:text-black dark:border-gray-500 dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                        >
+                                            {showPassword ?  <LuEyeOff />  : <LuEye />
+                                            }
+                                            </button>
+                            
                             </div>
                         </div>
                         <div className="flex flex-col">
                             <label className="mb-2 text-gray-700">Confirm Password</label>
-                            <div className="relative">
+                            <div className="flex">
                                 <input
                                     type={showConfirmPassword ? 'text' : 'password'}
                                     name="confirmPassword"
@@ -152,12 +155,15 @@ const SignUpForm: React.FC = () => {
                                     value={confirmPassword}
                                     onChange={(e) => setConfirmPassword(e.target.value)}
                                 />
-                                <div
-                                    className="absolute right-3 top-3 cursor-pointer"
-                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                >
-                                    {showConfirmPassword ? <LuEyeOff /> : <LuEye />}
-                                </div>
+                                <button
+                                            type="button"
+                                            className="ml-2 px-3 py-2 border border-gray-300 rounded-lg text-gray-600 focus:outline-none focus:ring-primary-600 focus:border-primary-600 dark:text-black dark:border-gray-500 dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                        >
+                                            {showConfirmPassword ?  <LuEyeOff />  : <LuEye />
+                                            }
+                                            </button>
+                              
                             </div>
                         </div>
                         <button

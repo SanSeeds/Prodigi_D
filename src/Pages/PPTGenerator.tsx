@@ -111,8 +111,8 @@ function CreatePresentationService() {
     return (
         <>
             <Navbar />
-            <div className="max-h-screen flex items-center justify-center">
-                <div className="w-full max-w-3xl mx-auto p-8 rounded-lg">
+            <div className="min-h-screen flex ">
+                <div className="w-full max-w-3xl mx-auto p-8">
                     <h1 className="text-center text-xl font-semibold">Create Presentation</h1>
                     <form className="w-full max-w-3xl mx-auto p-8" onSubmit={handleSubmit}>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
