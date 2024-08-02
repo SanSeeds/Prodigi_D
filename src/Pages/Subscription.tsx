@@ -2,9 +2,9 @@ import { Link } from "react-router-dom";
 
 const Subscription = () => {
   const plans = [
-    { name: "Basic plan", price: 500, features: ["1 Device"], unavailable: ["API Access", "Complete documentation", "24×7 phone & email support"] },
-    { name: "Standard plan", price: 1000, features: ["2 Devices", "API Access"], unavailable: ["Complete documentation", "24×7 phone & email support"] },
-    { name: "Premium plan", price: 2000, features: ["2 Devices", "API Access", "Complete documentation", "24×7 phone & email support"] }
+    { name: "1 Month plan", price: 299, features: ["1 Device"], unavailable: ["API Access", "Complete documentation", "24×7 phone & email support"] },
+    { name: "6 Months plan", price: 1499, features: ["2 Devices", "API Access"], unavailable: ["Complete documentation", "24×7 phone & email support"] },
+    { name: "12 Months plan", price: 2699, features: ["2 Devices", "API Access", "Complete documentation", "24×7 phone & email support"] }
   ];
 
   return (
