@@ -9,6 +9,7 @@ const Subscription = () => {
 
   return (
     <>
+  
       <div className="flex justify-center items-center mt-10 mb-5 flex-col">
         <h1 className="text-3xl font-bold text-gray-800 dark:text-black">Choose Your Plan</h1>
       </div>

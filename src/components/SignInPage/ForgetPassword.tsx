@@ -7,6 +7,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import config from './../../config';
 import { LuEye, LuEyeOff } from "react-icons/lu";
+import TooltipIcon from '../Global/ToolTip';
 
 const apiUrl = config.apiUrl;
 
@@ -15,10 +16,10 @@ const ForgetPassword: React.FC = () => {
     const [otp, setOtp] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [, setError] = useState('');
     const [step, setStep] = useState(1);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const authContext = useContext(AuthContext);
 
@@ -57,32 +58,29 @@ const ForgetPassword: React.FC = () => {
 
     const handleEmailSubmit = async (event: FormEvent) => {
         event.preventDefault();
-        setError('');
-    
+        setLoading(true); // Start loading
+
         try {
             const response = await axios.post(`${apiUrl}/send_otp/`, { email });
     
             if (response.status === 200) {
                 setStep(2);
             } else {
-                // Handle specific error responses from the backend
                 const errorMessage = response.data.error || 'An error occurred.';
-                setError(errorMessage);
                 toast.error(errorMessage);
             }
         } catch (error) {
             if (axios.isAxiosError(error)) {
                 const errorMessage = error.response?.data?.error || 'Something went wrong. Please try again later.';
-                setError(errorMessage);
                 toast.error(errorMessage);
             } else {
                 console.error('Error during send OTP:', error);
-                setError('Something went wrong. Please try again later.');
                 toast.error('Something went wrong. Please try again later.');
             }
+        } finally {
+            setLoading(false); // End loading
         }
     };
-    
 
     const handleResetPasswordSubmit = async (event: FormEvent) => {
         event.preventDefault();
@@ -105,22 +103,21 @@ const ForgetPassword: React.FC = () => {
             });
 
             if (response.status === 200) {
-                navigate('/signin');
+                toast.success('Password reset successfully. Redirecting to sign in...');
+                setTimeout(() => {
+                    navigate('/signin');
+                }, 3000);
             } else {
                 const errorMessage = response.data.error || 'Something went wrong. Please try again later.';
-                setError(errorMessage);
                 toast.error(errorMessage);
             }
         } catch (error) {
             if (axios.isAxiosError(error)) {
                 const errorMessage = error.response?.data?.error || 'Something went wrong. Please try again later.';
-                setError(errorMessage);
                 toast.error(errorMessage);
             } else {
                 console.error('Error during reset password:', error);
-                const errorMessage = 'Something went wrong. Please try again later.';
-                setError(errorMessage);
-                toast.error(errorMessage);
+                toast.error('Something went wrong. Please try again later.');
             }
         }
     };
@@ -182,7 +179,10 @@ const ForgetPassword: React.FC = () => {
                                             />
                                         </div>
                                         <div>
-                                            <label htmlFor="new_password" className="block mb-2 text-sm font-medium text-black dark:text-black">New Password</label>
+                                            <label htmlFor="new_password" className="block mb-2 text-sm font-medium text-black dark:text-black flex item-center">
+                                                New Password &nbsp;
+                                            <TooltipIcon />
+                                            </label>
                                             <div className="flex">
                                                 <input 
                                                     type={showNewPassword ? 'text' : 'password'}
@@ -204,7 +204,11 @@ const ForgetPassword: React.FC = () => {
                                             </div>
                                         </div>
                                         <div>
-                                            <label htmlFor="confirm_password" className="block mb-2 text-sm font-medium text-black dark:text-black">Confirm Password</label>
+                                            <label htmlFor="confirm_password" className="block mb-2 text-sm font-medium text-black dark:text-black flex item-center">
+                                                Confirm Password
+                                                &nbsp;
+                                            <TooltipIcon />
+                                                </label>
                                             <div className="flex">
                                                 <input 
                                                     type={showConfirmPassword ? 'text' : 'password'}
@@ -230,9 +234,9 @@ const ForgetPassword: React.FC = () => {
                                 <button 
                                     type="submit"
                                     className="w-full py-3 px-4 rounded-lg text-white bg-blue-600 hover:bg-blue-700"
-                                    disabled={step === 1 && !email || step === 2 && (!otp || !validatePassword(newPassword) || !validatePassword(confirmPassword))}
+                                    disabled={loading}
                                 >
-                                    {step === 1 ? 'Send OTP' : 'Reset Password'}
+                                    {step === 1 ? (loading ? 'Sending OTP...' : 'Send OTP') : 'Reset Password'}
                                 </button>
                                 {step === 2 && (
                                     <p 

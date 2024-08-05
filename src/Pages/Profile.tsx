@@ -1,32 +1,23 @@
-// Import necessary dependencies
 import React, { useContext, useEffect, useState, FormEvent } from 'react';
-import Navbar from '../components/Global/Navbar'; // Import Navbar component
-import { AuthContext } from '../components/Global/AuthContext'; // Import AuthContext for authentication
-import { ToastContainer, toast } from 'react-toastify'; // Import Toast components for notifications
-import 'react-toastify/dist/ReactToastify.css'; // Import Toast CSS
+import Navbar from '../components/Global/Navbar';
+import { AuthContext } from '../components/Global/AuthContext';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import config from '../config';
 import { Link } from 'react-router-dom';
-import { LuEye } from "react-icons/lu";
-import { LuEyeOff } from "react-icons/lu";
-
-
+import { LuEye, LuEyeOff } from "react-icons/lu";
 
 const apiUrl = config.apiUrl;
 
-// Define ProfileForm component
 const ProfileForm: React.FC = () => {
-    // Access authentication context
     const authContext = useContext(AuthContext);
 
-    // Ensure AuthContext is used within an AuthProvider
     if (!authContext) {
         throw new Error("AuthContext must be used within an AuthProvider");
     }
 
-    // Destructure user and accessToken from authContext
     const { user, accessToken } = authContext;
 
-    // Define state for form data, password error, and general errors
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -39,29 +30,27 @@ const ProfileForm: React.FC = () => {
         confirmNewPassword: ''
     });
 
-    const [passwordError, setPasswordError] = useState(''); // State for password error
-    const [errors, setErrors] = useState<string[]>([]); // State for general errors
-    const [showCurrentPassword, setShowCurrentPassword] = useState(false); // State to toggle current password visibility
-    const [showNewPassword, setShowNewPassword] = useState(false); // State to toggle new password visibility
-    const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false); // State to toggle confirm new password visibility
+    const [passwordError, setPasswordError] = useState('');
+    const [errors, setErrors] = useState<string[]>([]);
+    const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
 
-    // Fetch profile data when user changes
     useEffect(() => {
         if (user) {
             setFormData((prevData) => ({
                 ...prevData,
-                email: user.email // Set email in form data
+                email: user.email
             }));
-            fetchProfileData(); // Fetch profile data
+            fetchProfileData();
         }
     }, [user]);
 
-    // Function to fetch profile data from the backend
     const fetchProfileData = async () => {
         try {
             const response = await fetch(`${apiUrl}/profile/`, {
                 headers: {
-                    'Authorization': `Bearer ${accessToken}` // Set authorization header
+                    'Authorization': `Bearer ${accessToken}`
                 }
             });
 
@@ -79,15 +68,14 @@ const ProfileForm: React.FC = () => {
                     confirmNewPassword: ''
                 });
             } else {
-                toast.error('Failed to fetch profile data'); // Show error toast
+                toast.error('Failed to fetch profile data');
             }
         } catch (error) {
             console.error('Error fetching profile data:', error);
-            toast.error('Something went wrong. Please try again later.'); // Show error toast
+            toast.error('Something went wrong. Please try again later.');
         }
     };
 
-    // Handle changes in input fields
     const handleChange = (e: { target: { name: any; value: any; }; }) => {
         const { name, value } = e.target;
         setFormData({
@@ -96,16 +84,15 @@ const ProfileForm: React.FC = () => {
         });
     };
 
-    // Handle profile update form submission
     const handleProfileUpdate = async (e: FormEvent) => {
         e.preventDefault();
-        setErrors([]); // Reset errors
+        setErrors([]);
         try {
             const response = await fetch(`${apiUrl}/profile/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${accessToken}` // Set authorization header
+                    'Authorization': `Bearer ${accessToken}`
                 },
                 body: JSON.stringify({
                     first_name: formData.firstName,
@@ -117,24 +104,22 @@ const ProfileForm: React.FC = () => {
             });
 
             if (response.ok) {
-                toast.success('Profile updated successfully'); // Show success toast
-                fetchProfileData(); // Optionally refetch the profile data
+                toast.success('Profile updated successfully');
+                fetchProfileData();
             } else {
                 const data = await response.json();
-                setErrors(data.errors || ['Failed to update profile']); // Set errors from response
+                setErrors(data.errors || ['Failed to update profile']);
             }
         } catch (error) {
             console.error('Error updating profile:', error);
-            toast.error('Something went wrong. Please try again later.'); // Show error toast
+            toast.error('Something went wrong. Please try again later.');
         }
     };
 
-    // Handle password change form submission
     const handleChangePassword = async (e: FormEvent) => {
         e.preventDefault();
-        setPasswordError(''); // Reset password error
+        setPasswordError('');
 
-        // Check if new passwords match
         if (formData.newPassword !== formData.confirmNewPassword) {
             setPasswordError('New passwords do not match.');
             return;
@@ -145,7 +130,7 @@ const ProfileForm: React.FC = () => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${accessToken}` // Set authorization header
+                    'Authorization': `Bearer ${accessToken}`
                 },
                 body: JSON.stringify({
                     current_password: formData.currentPassword,
@@ -155,7 +140,7 @@ const ProfileForm: React.FC = () => {
             });
 
             if (response.ok) {
-                toast.success('Password changed successfully'); // Show success toast
+                toast.success('Password changed successfully');
                 setFormData((prevData) => ({
                     ...prevData,
                     currentPassword: '',
@@ -164,21 +149,19 @@ const ProfileForm: React.FC = () => {
                 }));
             } else {
                 const data = await response.json();
-                setPasswordError(data.error); // Set password error from response
+                setPasswordError(data.error);
             }
         } catch (error) {
             console.error('Error changing password:', error);
-            setPasswordError('Something went wrong. Please try again later.'); // Show error toast
+            setPasswordError('Something went wrong. Please try again later.');
         }
     };
 
-    // Render ProfileForm component
     return (
         <>
-            <Navbar /> {/* Render Navbar component */}
+            <Navbar />
             <div className="max-w-lg mx-auto p-6">
                 <h1 className="text-center text-3xl mb-6 text-black">Profile</h1>
-                {/* Form to update profile */}
                 <form onSubmit={handleProfileUpdate} className="space-y-4">
                     <div className="flex space-x-4">
                         <input
@@ -232,9 +215,9 @@ const ProfileForm: React.FC = () => {
                     />
                     <input
                         type="text"
-                        name="subscription"
+                        name="birthDate"
                         onChange={handleChange}
-                        placeholder="Subscription"
+                        placeholder="subscription"
                         className="w-full px-3 py-2 border rounded-md"
                         disabled
                     />
@@ -244,10 +227,10 @@ const ProfileForm: React.FC = () => {
                             className="px-4 py-2 bg-blue-500 text-white rounded-md"
                         >
                             Update Profile
-                        </button> &nbsp;
+                        </button> &nbsp;    
                         <Link to='/subscription'>
                             <button
-                                type="button"
+                                type="submit"
                                 className="px-4 py-2 bg-blue-500 text-white rounded-md"
                             >
                                 Update Subscription
@@ -255,8 +238,7 @@ const ProfileForm: React.FC = () => {
                         </Link>
                     </div>
                 </form>
-                
-                {/* Display errors */}
+
                 {errors.length > 0 && (
                     <div className="text-red-500 mt-4">
                         {errors.map((error, index) => (
@@ -264,55 +246,46 @@ const ProfileForm: React.FC = () => {
                         ))}
                     </div>
                 )}
+
                 <h2 className="mt-8 text-xl font-bold">Change Password</h2>
-                {/* Form to change password */}
                 <form onSubmit={handleChangePassword} className="space-y-4 mt-4">
-                    {/* Current Password */}
                     <div className="flex">
                         <input
-                            type={showCurrentPassword ? 'text' : 'password'}
+                            type={showCurrentPassword ? "text" : "password"}
                             name="currentPassword"
                             value={formData.currentPassword}
                             onChange={handleChange}
                             placeholder="Current Password"
                             className="w-full px-3 py-2 border rounded-md"
                         />
-                           <button
-                                type="button"
-                                className="ml-2 px-3 py-2 border border-gray-300 rounded-lg text-gray-600 focus:outline-none focus:ring-primary-600 focus:border-primary-600 dark:text-black dark:border-gray-500 dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                            >
-                                {showCurrentPassword ?  <LuEyeOff /> : <LuEye />
-                                }
-                            </button>
-                       
+                        <button
+                            type="button"
+                            className="ml-2 px-3 py-2 border border-gray-300 rounded-lg text-gray-600 focus:outline-none focus:ring-primary-600 focus:border-primary-600 dark:text-black dark:border-gray-500 dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                        >
+                            {showCurrentPassword ? <LuEyeOff /> : <LuEye />}
+                        </button>
                     </div>
-
-                    {/* New Password */}
                     <div className="flex">
                         <input
-                            type={showNewPassword ? 'text' : 'password'}
+                            type={showNewPassword ? "text" : "password"}
                             name="newPassword"
                             value={formData.newPassword}
                             onChange={handleChange}
                             placeholder="New Password"
                             className="w-full px-3 py-2 border rounded-md"
                         />
-                              <button
-                                type="button"
-                                className="ml-2 px-3 py-2 border border-gray-300 rounded-lg text-gray-600 focus:outline-none focus:ring-primary-600 focus:border-primary-600 dark:text-black dark:border-gray-500 dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                onClick={() => setShowNewPassword(!showNewPassword)}
-                            >
-                                {showNewPassword ?  <LuEyeOff /> : <LuEye />
-                                }
-                            </button>
-                
+                        <button
+                            type="button"
+                            className="ml-2 px-3 py-2 border border-gray-300 rounded-lg text-gray-600 focus:outline-none focus:ring-primary-600 focus:border-primary-600 dark:text-black dark:border-gray-500 dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            onClick={() => setShowNewPassword(!showNewPassword)}
+                        >
+                            {showNewPassword ? <LuEyeOff /> : <LuEye />}
+                        </button>
                     </div>
-
-                    {/* Confirm New Password */}
                     <div className="flex">
                         <input
-                            type={showConfirmNewPassword ? 'text' : 'password'}
+                            type={showConfirmNewPassword ? "text" : "password"}
                             name="confirmNewPassword"
                             value={formData.confirmNewPassword}
                             onChange={handleChange}
@@ -320,26 +293,25 @@ const ProfileForm: React.FC = () => {
                             className="w-full px-3 py-2 border rounded-md"
                         />
                         <button
-                                type="button"
-                                className="ml-2 px-3 py-2 border border-gray-300 rounded-lg text-gray-600 focus:outline-none focus:ring-primary-600 focus:border-primary-600 dark:text-black dark:border-gray-500 dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                onClick={() => setShowConfirmNewPassword(!showConfirmNewPassword)}
-                            >
-                                {showConfirmNewPassword ?  <LuEyeOff /> : <LuEye />
-                                }
-                            </button>
-                      
+                            type="button"
+                            className="ml-2 px-3 py-2 border border-gray-300 rounded-lg text-gray-600 focus:outline-none focus:ring-primary-600 focus:border-primary-600 dark:text-black dark:border-gray-500 dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            onClick={() => setShowConfirmNewPassword(!showConfirmNewPassword)}
+                        >
+                            {showConfirmNewPassword ? <LuEyeOff /> : <LuEye />}
+                        </button>
                     </div>
-
-                    {passwordError && <p className="text-red-500">{passwordError}</p>}
                     <button
                         type="submit"
                         className="px-4 py-2 bg-blue-500 text-white rounded-md"
                     >
                         Change Password
                     </button>
+                    {passwordError && (
+                        <div className="text-red-500 mt-4">{passwordError}</div>
+                    )}
                 </form>
             </div>
-            <ToastContainer position="bottom-right" autoClose={5000} /> {/* Toast container for notifications */}
+            <ToastContainer position="bottom-right" autoClose={5000} />
         </>
     );
 };

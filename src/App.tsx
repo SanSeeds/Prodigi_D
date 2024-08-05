@@ -21,6 +21,9 @@ import Payment from './Pages/Payment';
 import PresentationGenerationService from './Pages/PPTGenerator';
 import ContentDisplayPage from './components/Global/ContentDisplay';
 
+import TermsConditionsPage from './Pages/Terms&Conditions';
+import PrivacyPage from './Pages/Privacy';
+
 
 
 function App() {
@@ -38,6 +41,9 @@ function App() {
             <Route path="/subscription" element={<Subscription />} />
             <Route path="/payment" element={<Payment />} />
             <Route path="/forgotPassword" element={<ForgetPassword />} />
+            <Route path="/termscondition" element={<TermsConditionsPage />} />
+            <Route path="/privacypage" element={<PrivacyPage />} />
+
             {/* Protected Routes */}
             <Route element={<PrivateRoute />}>
               <Route path="/dashboard" element={<Homepage />} />
