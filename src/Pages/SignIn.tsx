@@ -1,4 +1,4 @@
-import React, { useState, useContext, FormEvent } from 'react';
+import React, { useState, useContext, FormEvent, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../components/Global/AuthContext';
 import Nav from "../components/Global/Nav";
@@ -17,6 +17,10 @@ const AES_IV = CryptoJS.enc.Base64.parse("3G1Nd0j0l5BdPmJh01NrYg==");
 const AES_SECRET_KEY = CryptoJS.enc.Base64.parse("XGp3hFq56Vdse3sLTtXyQQ==");
 
 const SignInForm: React.FC = () => {
+    useEffect(() => {
+        window.scrollTo(0, 0);
+      }, []);
+      
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);

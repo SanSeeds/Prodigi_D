@@ -1,10 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import '../../styles/Services.css';
+import '../../styles/Services.css'; // You can keep this if needed for additional custom styles
 
 const EmailService: React.FC = () => (
     <div className='pl-5 pr-5'>
-        <Link to="/email" className="cards mt-8 block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:border-gray-700">
+        <Link to="/email" className="cards mt-8 block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-blue-100 hover:border-blue-300 hover:shadow-lg transition-all duration-300">
             <h5 className="mb-2 text-2xl font-bold tracking-tight text-black dark:text-black">Email</h5>
             <p className="font-normal text-black dark:text-black">Create and manage your email content.</p>
         </Link>
@@ -13,7 +13,7 @@ const EmailService: React.FC = () => (
 
 const BusinessProposalService: React.FC = () => (
     <div className='pl-5 pr-5'>
-        <Link to="/businessproposal" className="cards mt-8 block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:border-gray-700">
+        <Link to="/businessproposal" className="cards mt-8 block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-blue-100 hover:border-blue-300 hover:shadow-lg transition-all duration-300">
             <h5 className="mb-2 text-2xl font-bold tracking-tight text-black dark:text-black">Business Proposal</h5>
             <p className="font-normal text-black dark:text-black">Generate business proposals.</p>
         </Link>
@@ -22,7 +22,7 @@ const BusinessProposalService: React.FC = () => (
 
 const OfferLetterService: React.FC = () => (
     <div className='pl-5 pr-5'>
-        <Link to="/offerletter" className="cards mt-8 block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:border-gray-700">
+        <Link to="/offerletter" className="cards mt-8 block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-blue-100 hover:border-blue-300 hover:shadow-lg transition-all duration-300">
             <h5 className="mb-2 text-2xl font-bold tracking-tight text-black dark:text-black">Offer Letter</h5>
             <p className="font-normal text-black dark:text-black">Create offer letters for new hires.</p>
         </Link>
@@ -31,7 +31,7 @@ const OfferLetterService: React.FC = () => (
 
 const SalesScriptService: React.FC = () => (
     <div className='pl-5 pr-5'>
-        <Link to="/sales" className="cards mt-8 block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:border-gray-700">
+        <Link to="/sales" className="cards mt-8 block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-blue-100 hover:border-blue-300 hover:shadow-lg transition-all duration-300">
             <h5 className="mb-2 text-2xl font-bold tracking-tight text-black dark:text-black">Sales Script</h5>
             <p className="font-normal text-black dark:text-black">Generate sales scripts for your products.</p>
         </Link>
@@ -40,7 +40,7 @@ const SalesScriptService: React.FC = () => (
 
 const SummarizeService: React.FC = () => (
     <div className='pl-5 pr-5'>
-        <Link to="/summarize" className="cards mt-8 block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:border-gray-700">
+        <Link to="/summarize" className="cards mt-8 block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-blue-100 hover:border-blue-300 hover:shadow-lg transition-all duration-300">
             <h5 className="mb-2 text-2xl font-bold tracking-tight text-black dark:text-black">Summarize</h5>
             <p className="font-normal text-black dark:text-black">Summarize documents quickly.</p>
         </Link>
@@ -49,7 +49,7 @@ const SummarizeService: React.FC = () => (
 
 const ContentGenerationService: React.FC = () => (
     <div className='pl-5 pr-5'>
-        <Link to="/contentgeneration" className="cards mt-8 block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:border-gray-700">
+        <Link to="/contentgeneration" className="cards mt-8 block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-blue-100 hover:border-blue-300 hover:shadow-lg transition-all duration-300">
             <h5 className="mb-2 text-2xl font-bold tracking-tight text-black dark:text-black">Content Generation</h5>
             <p className="font-normal text-black dark:text-black">Create engaging content for your audience.</p>
         </Link>
@@ -58,7 +58,7 @@ const ContentGenerationService: React.FC = () => (
 
 const PPTGeneratorService: React.FC = () => (
     <div className='pl-5 pr-5'>
-        <Link to="/pptGeneration" className="cards mt-8 block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:border-gray-700">
+        <Link to="/pptGeneration" className="cards mt-8 block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-blue-100 hover:border-blue-300 hover:shadow-lg transition-all duration-300">
             <h5 className="mb-2 text-2xl font-bold tracking-tight text-black dark:text-black">PPT Generator</h5>
             <p className="font-normal text-black dark:text-black">Create engaging PPT for your audience.</p>
         </Link>

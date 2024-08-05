@@ -1,6 +1,7 @@
 import Navbar from "../components/Global/Navbar";
 import { motion } from 'framer-motion';
 import Services from "../components/Homepage/ServicesOffered";
+import { useEffect } from "react";
 
 const containerVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -14,6 +15,9 @@ const containerVariants = {
 
 
 function Homepage() {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   return (
     <>
     <Navbar/>
