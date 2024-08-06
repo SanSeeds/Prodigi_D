@@ -59,6 +59,7 @@ const EmailService: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [generatedEmail, setGeneratedEmail] = useState<string>('');
   const [translatedEmail, setTranslatedEmail] = useState<string>('');
+  const [wordCountError, setWordCountError] = useState<string | null>(null);
 
   const authContext = useContext(AuthContext);
 
@@ -72,16 +73,28 @@ const EmailService: React.FC = () => {
     const { name, value, type } = e.target;
     if (type === 'checkbox' && e.target instanceof HTMLInputElement) {
       setFormData({ ...formData, [name]: e.target.checked });
+    } else if (name === 'num_words') {
+      const numValue = parseInt(value, 10);
+      if (numValue < 75 || numValue > 450) {
+        setWordCountError('Number of words must be between 75 and 450.');
+      } else if (numValue < 0) {
+        setWordCountError('Number of words cannot be negative.');
+      } else {
+        setWordCountError(null);
+      }
+      setFormData({ ...formData, [name]: value });
     } else {
       setFormData({ ...formData, [name]: value });
     }
   };
 
+  
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
+    
     try {
       const payload = JSON.stringify(formData);
       const encryptedPayload = CryptoJS.AES.encrypt(payload, AES_SECRET_KEY, { iv: AES_IV }).toString();
@@ -265,17 +278,19 @@ const EmailService: React.FC = () => {
                   placeholder='Enter your Recipient type'
                 />
               </div>
-              <div className="flex flex-col">
-                <label className="mb-2 text-black">Number of words</label>
-                <input
-                  type="text"
-                  name="num_words"
-                  value={formData.num_words}
-                  onChange={handleChange}
-                  className="p-3 border rounded shadow-sm text-black"
-                  placeholder='Enter Number of words'
-                />
-              </div>
+              <div className="mb-6">
+        <label className="block mb-2 text-black">Number of Words</label>
+        <input
+          type="number"
+          name="num_words"
+          value={formData.num_words}
+          onChange={handleChange}
+          className="w-full p-3 border rounded shadow-sm text-gray-700"
+          placeholder="Enter number of words (75-450)"
+          min="0" // Prevent negative input
+        />
+        {wordCountError && <p className="text-red-500 mt-2">{wordCountError}</p>}
+      </div>
             </div>
             <div className="mb-6">
               <label className="block mb-2 text-black">Keywords (Optional, add up to 8, separated by commas)</label>

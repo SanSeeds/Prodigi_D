@@ -38,6 +38,7 @@ function BusinessProposalService() {
 
   const [,setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [wordCountError, setWordCountError] = useState<string | null>(null);
 
   const authContext = useContext(AuthContext);
   if (!authContext) {
@@ -48,6 +49,19 @@ function BusinessProposalService() {
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+    if (name === 'numberOfWords') {
+      const numValue = parseInt(value, 10);
+      if (numValue < 75 || numValue > 450) {
+        setWordCountError('Number of words must be between 75 and 450.');
+      } else if (numValue < 0) {
+        setWordCountError('Number of words cannot be negative.');
+      } else {
+        setWordCountError(null);
+      }
+      setFormData({ ...formData, [name]: value });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -150,13 +164,15 @@ function BusinessProposalService() {
               <div className="flex flex-col">
                 <label className="mb-2 text-black">Number of words</label>
                 <input
-                  type="text"
+                  type="number"
                   name="numberOfWords"
                   value={formData.numberOfWords}
                   onChange={handleChange}
                   className="p-3 border rounded shadow-sm text-black"
-                  placeholder='Enter Number of Words'
+                  placeholder="Enter number of words (75-450)"
+                  min="0" // Prevent negative input
                 />
+                {wordCountError && <p className="text-red-500 mt-2">{wordCountError}</p>}
               </div>
             </div>
 
