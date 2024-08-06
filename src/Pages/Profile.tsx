@@ -8,6 +8,21 @@ import config from '../config';
 import { Link } from 'react-router-dom';
 
 const apiUrl = config.apiUrl;
+
+// Define the TypeScript interface for form data
+interface FormData {
+    firstName: string;
+    lastName: string;
+    email: string;
+    bio: string;
+    location: string;
+    birthDate: string;
+    validTill: string | null; // Include validTill as string or null
+    currentPassword: string;
+    newPassword: string;
+    confirmNewPassword: string;
+};
+
 // Define ProfileForm component
 const ProfileForm: React.FC = () => {
     // Access authentication context
@@ -22,13 +37,14 @@ const ProfileForm: React.FC = () => {
     const { user, accessToken } = authContext;
 
     // Define state for form data, password error, and general errors
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<FormData>({
         firstName: '',
         lastName: '',
         email: '',
         bio: '',
         location: '',
         birthDate: '',
+        validTill: null, // Initialize with null
         currentPassword: '',
         newPassword: '',
         confirmNewPassword: ''
@@ -66,6 +82,7 @@ const ProfileForm: React.FC = () => {
                     bio: data.profile.bio,
                     location: data.profile.location,
                     birthDate: data.profile.birth_date,
+                    validTill: data.profile.valid_till || '', // Handle validTill
                     currentPassword: '',
                     newPassword: '',
                     confirmNewPassword: ''
@@ -222,30 +239,24 @@ const ProfileForm: React.FC = () => {
                         placeholder="dd-mm-yyyy"
                         className="w-full px-3 py-2 border rounded-md"
                     />
-                    <input
-                        type="text"
-                        name="birthDate"
-                        // value={formData.birthDate}
-                        onChange={handleChange}
-                        placeholder="subscription"
-                        className="w-full px-3 py-2 border rounded-md"
-                        disabled
-                    />
+                      <div className="w-full px-3 py-2 border rounded-md">
+                        Subscription valid till: <span>{formData.validTill || 'Not specified'}</span>
+                    </div>
                     <div>
-                    <button
-                        type="submit"
-                        className="px-4 py-2 bg-blue-500 text-white rounded-md"
-                    >
-                        Update Profile
-                    </button> &nbsp;    
-                    <Link to='/subscription'>
-                    <button
-                        type="submit"
-                        className="px-4 py-2 bg-blue-500 text-white rounded-md"
-                    >
-                        Update Subscription
-                    </button>
-                    </Link>
+                        <button
+                            type="submit"
+                            className="px-4 py-2 bg-blue-500 text-white rounded-md"
+                        >
+                            Update Profile
+                        </button> &nbsp;
+                        <Link to='/subscription'>
+                            <button
+                                type="button" // Change type to button to prevent form submission
+                                className="px-4 py-2 bg-blue-500 text-white rounded-md"
+                            >
+                                Update Subscription
+                            </button>
+                        </Link>
                     </div>
                 </form>
                 
