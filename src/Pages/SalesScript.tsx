@@ -44,6 +44,7 @@ function SalesScriptService() {
   const [error, setError] = useState(''); // State for error messages
   const authContext = useContext(AuthContext); // Accessing the authentication context
   const [loading, setLoading] = useState(false);
+  const [wordCountError, setWordCountError] = useState<string | null>(null);
 
   if (!authContext) {
     throw new Error("AuthContext must be used within an AuthProvider"); // Throwing an error if AuthContext is not available
@@ -55,6 +56,19 @@ function SalesScriptService() {
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target; // Extracting name and value from the input event
     setFormData({ ...formData, [name]: value }); // Updating formData state with the new input value
+    if (name === 'num_words') {
+      const numValue = parseInt(value, 10);
+      if (numValue < 75 || numValue > 450) {
+        setWordCountError('Number of words must be between 75 and 450.');
+      } else if (numValue < 0) {
+        setWordCountError('Number of words cannot be negative.');
+      } else {
+        setWordCountError(null);
+      }
+      setFormData({ ...formData, [name]: value });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
   // Handle form submission
@@ -191,8 +205,10 @@ function SalesScriptService() {
                   value={formData.num_words}
                   onChange={handleChange}
                   className="p-3 border rounded shadow-sm text-black"
-                  placeholder='Enter number of words'
+                  placeholder="Enter number of words (75-450)"
+                  min="0" // Prevent negative input
                 />
+                {wordCountError && <p className="text-red-500 mt-2">{wordCountError}</p>}
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">

@@ -34,6 +34,7 @@ function ContentGenerationService() {
 
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [wordCountError, setWordCountError] = useState<string | null>(null);
 
   const authContext = useContext(AuthContext);
   if (!authContext) {
@@ -44,6 +45,19 @@ function ContentGenerationService() {
   const handleChange = (e: { target: { name: any; value: any; }; }) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+    if (name === 'numberOfWords') {
+      const numValue = parseInt(value, 10);
+      if (numValue < 75 || numValue > 450) {
+        setWordCountError('Number of words must be between 75 and 450.');
+      } else if (numValue < 0) {
+        setWordCountError('Number of words cannot be negative.');
+      } else {
+        setWordCountError(null);
+      }
+      setFormData({ ...formData, [name]: value });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
   const handleSubmit = async (e: { preventDefault: () => void; }) => {
@@ -225,8 +239,11 @@ function ContentGenerationService() {
                   value={formData.numberOfWords}
                   onChange={handleChange}
                   className="p-3 border rounded shadow-sm text-black"
-                  placeholder='Enter Number of Words'
+                  placeholder="Enter number of words (75-450)"
+                  min="0" // Prevent negative input
                 />
+                {wordCountError && <p className="text-red-500 mt-2">{wordCountError}</p>}
+                
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
