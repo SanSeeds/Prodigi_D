@@ -17,7 +17,7 @@ const AES_SECRET_KEY = CryptoJS.enc.Base64.parse("XGp3hFq56Vdse3sLTtXyQQ==");
 const SignInForm: React.FC = () => {
     useEffect(() => {
         window.scrollTo(0, 0);
-      }, []);
+    }, []);
 
     const [loginInput, setLoginInput] = useState('');
     const [password, setPassword] = useState('');
@@ -61,7 +61,7 @@ const SignInForm: React.FC = () => {
                 const data = JSON.parse(decryptedText);
                 const accessToken = data.access;
                 const refreshToken = data.refresh;
-                const expiry = 3600 * 3600;
+                const expiry =  2 * 60 * 60;
                 login({
                     email: '', // Adjust as necessary
                     first_name: ''
@@ -75,8 +75,13 @@ const SignInForm: React.FC = () => {
         } catch (error: any) {
             console.error('Error during sign in:', error);
             if (error.response && error.response.data && error.response.data.error) {
-                toast.error(error.response.data.error);
-                setError(error.response.data.error);
+                const errorMessage = error.response.data.error;
+                if (errorMessage.includes('Invalid login input or password')) {
+                    toast.error('Email or username does not exist.');
+                } else {
+                    toast.error(errorMessage);
+                }
+                setError(errorMessage);
             } else {
                 toast.error('Something went wrong. Please try again later.');
                 setError('Something went wrong. Please try again later.');
@@ -88,7 +93,7 @@ const SignInForm: React.FC = () => {
         <>
             <Nav />
             <section>
-                <div className="flex flex-col items-center justify-start mt-12 px-6 py-8 mx-auto ">
+                <div className="flex flex-col items-center justify-start mt-12 px-6 py-8 mx-auto">
                     <div className="w-full rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0">
                         <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
                             <h1 className="text-xl leading-tight tracking-tight text-center md:text-2xl dark:text-black">

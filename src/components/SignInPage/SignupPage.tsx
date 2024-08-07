@@ -56,16 +56,16 @@ const SignUpForm: React.FC = () => {
 
     const handleSubmit = async (event: FormEvent) => {
         event.preventDefault();
-
+    
         if (password !== confirmPassword) {
             toast.error('Passwords do not match.');
             return;
         }
-
+    
         if (!validatePassword(password)) {
             return;
         }
-
+    
         try {
             const response = await fetch(`${apiUrl}/add_user/`, {
                 method: 'POST',
@@ -74,13 +74,15 @@ const SignUpForm: React.FC = () => {
                 },
                 body: JSON.stringify({ first_name: firstName, last_name: lastName, username, email, password, confirm_password: confirmPassword }),
             });
-
+    
             const data = await response.json();
-
+    
             if (response.ok) {
-                toast.success('User created successfully. Redirecting to sign in...');
+                localStorage.setItem('email', email); // Store email in local storage
+                toast.success('Regisration successfull.');
+    
                 setTimeout(() => {
-                    navigate('/signin');
+                    navigate(`/subscription?email=${email}`);
                 }, 3000);
             } else {
                 toast.error(data.error || 'Signup failed.');
@@ -90,6 +92,7 @@ const SignUpForm: React.FC = () => {
             toast.error('Something went wrong. Please try again later.');
         }
     };
+    
 
     return (
         <>
@@ -191,7 +194,7 @@ const SignUpForm: React.FC = () => {
                         </div>
                         <button
                             type="submit"
-                            className="w-full py-3 px-4 rounded-lg text-white bg-blue-600 hover:bg-blue-700"
+                            className="w-full py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
                         >
                             Sign Up
                         </button>
