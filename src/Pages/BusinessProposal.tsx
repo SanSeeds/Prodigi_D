@@ -51,8 +51,8 @@ function BusinessProposalService() {
     setFormData({ ...formData, [name]: value });
     if (name === 'numberOfWords') {
       const numValue = parseInt(value, 10);
-      if (numValue < 75 || numValue > 450) {
-        setWordCountError('Number of words must be between 75 and 450.');
+      if (numValue < 50 || numValue > 450) {
+        setWordCountError('Number of words must be between 50 and 450.');
       } else if (numValue < 0) {
         setWordCountError('Number of words cannot be negative.');
       } else {
@@ -143,6 +143,8 @@ function BusinessProposalService() {
                 onChange={handleChange}
                 className="w-full p-3 border rounded shadow-sm text-gray-700"
                 placeholder='Write About your business'
+                
+
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -169,8 +171,9 @@ function BusinessProposalService() {
                   value={formData.numberOfWords}
                   onChange={handleChange}
                   className="p-3 border rounded shadow-sm text-black"
-                  placeholder="Enter number of words (75-450)"
-                  min="0" // Prevent negative input
+                  placeholder="Enter number of words (50-450)"
+                  min="50" // Prevent negative input
+                  max="450"
                 />
                 {wordCountError && <p className="text-red-500 mt-2">{wordCountError}</p>}
               </div>
@@ -188,6 +191,8 @@ function BusinessProposalService() {
                     value={formData.scopeOfWork}
                     onChange={handleChange}
                     className="w-full p-3 border rounded shadow-sm text-gray-700"
+                    
+
                   />
                 </div>
                 <div className="flex flex-col">
@@ -198,6 +203,8 @@ function BusinessProposalService() {
                     value={formData.projectPhases}
                     onChange={handleChange}
                     className="w-full p-3 border rounded shadow-sm text-gray-700"
+                    
+
                   />
                 </div>
               </div>
@@ -210,6 +217,8 @@ function BusinessProposalService() {
                     value={formData.expectedOutcomes}
                     onChange={handleChange}
                     className="w-full p-3 border rounded shadow-sm text-gray-700"
+                    
+
                   />
                 </div>
                 <div className="flex flex-col">
@@ -220,6 +229,8 @@ function BusinessProposalService() {
                     onChange={handleChange}
                     className="w-full p-3 border rounded shadow-sm text-gray-700"
                     placeholder='Technologies Used and Innovative Approaches (Optional)'
+                    
+
                   />
                 </div>
               </div>

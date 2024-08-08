@@ -61,7 +61,7 @@ const SignInForm: React.FC = () => {
                 const data = JSON.parse(decryptedText);
                 const accessToken = data.access;
                 const refreshToken = data.refresh;
-                const expiry =  2 * 60 * 60;
+                const expiry = 4 * 60 * 60;
                 login({
                     email: '', // Adjust as necessary
                     first_name: ''
@@ -76,8 +76,10 @@ const SignInForm: React.FC = () => {
             console.error('Error during sign in:', error);
             if (error.response && error.response.data && error.response.data.error) {
                 const errorMessage = error.response.data.error;
-                if (errorMessage.includes('Invalid login input or password')) {
-                    toast.error('Email or username does not exist.');
+                if (errorMessage.includes('Username or email not found')) {
+                    toast.error('Username or email not found.');
+                } else if (errorMessage.includes('Password not correct')) {
+                    toast.error('Password not correct.');
                 } else {
                     toast.error(errorMessage);
                 }

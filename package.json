@@ -5,16 +5,16 @@
   "type": "module",
   "proxy": "http://43.205.83.83",
   "scripts": {
-    "dev:development": "cross-env VITE_APP_ENV=development vite",
-    "dev:test": "cross-env VITE_APP_ENV=test vite",
-    "dev:production": "cross-env VITE_APP_ENV=production vite",
-    "build:dev": "cross-env VITE_APP_ENV=development tsc && vite build",
-    "build:test": "cross-env VITE_APP_ENV=test tsc && vite build",
-    "build:prod": "cross-env VITE_APP_ENV=production tsc && vite build",
+    "dev:development": "cross-env VITE_APP_ENV=development GENERATE_SOURCEMAP=true vite",
+    "dev:test": "cross-env VITE_APP_ENV=test GENERATE_SOURCEMAP=true vite",
+    "dev:production": "cross-env VITE_APP_ENV=production GENERATE_SOURCEMAP=false vite",
+    "build:dev": "cross-env VITE_APP_ENV=development GENERATE_SOURCEMAP=true tsc && vite build",
+    "build:test": "cross-env VITE_APP_ENV=test GENERATE_SOURCEMAP=true tsc && vite build",
+    "build:prod": "cross-env VITE_APP_ENV=production GENERATE_SOURCEMAP=false tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview:dev": "cross-env VITE_APP_ENV=development vite preview",
-    "preview:test": "cross-env VITE_APP_ENV=test vite preview",
-    "preview:prod": "cross-env VITE_APP_ENV=production vite preview"
+    "preview:dev": "cross-env VITE_APP_ENV=development GENERATE_SOURCEMAP=true vite preview",
+    "preview:test": "cross-env VITE_APP_ENV=test GENERATE_SOURCEMAP=true vite preview",
+    "preview:prod": "cross-env VITE_APP_ENV=production GENERATE_SOURCEMAP=false vite preview"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.6.0",
@@ -48,7 +48,7 @@
     "react-pdftotext": "^1.3.0",
     "react-router-dom": "^6.23.1",
     "react-toastify": "^10.0.5",
-    "react-tooltip": "^5.27.1",
+    "react-tooltip": "^5.28.0",
     "redirect": "^0.2.0",
     "redocx": "^1.1.4",
     "typewriter-effect": "^2.21.0"
@@ -59,6 +59,7 @@
     "@types/pdf-parse": "^1.1.4",
     "@types/react": "^18.2.66",
     "@types/react-dom": "^18.2.22",
+    "@types/react-tooltip": "^4.2.4",
     "@typescript-eslint/eslint-plugin": "^7.2.0",
     "@typescript-eslint/parser": "^7.2.0",
     "@vitejs/plugin-react": "^4.2.1",

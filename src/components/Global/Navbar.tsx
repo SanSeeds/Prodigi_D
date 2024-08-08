@@ -71,19 +71,19 @@ const Navbar = () => {
             <li>
               <Link to="/dashboard" className="flex items-center py-2 px-3 text-black rounded md:bg-transparent md:p-0 dark:text-black md:hover:text-blue-700">
                 <FaHome className="mr-2" aria-hidden="true" /> {/* Home Icon */}
-                <span className="hidden md:inline">Home</span>
+                <span>Home</span>
               </Link>
             </li>
             <li>
               <Link to="/profile" className="flex items-center py-2 px-3 text-black rounded md:bg-transparent md:p-0 dark:text-black md:hover:text-blue-700">
                 <FaUser className="mr-2" aria-hidden="true" /> {/* User Icon */}
-                <span className="hidden md:inline">{userFirstName ? userFirstName : user?.email}</span>
+                <span>{userFirstName ? userFirstName : user?.email}</span>
               </Link>
             </li>
             <li>
               <button onClick={logout} className="flex items-center py-2 px-3 text-black rounded md:bg-transparent md:p-0 dark:text-black md:hover:text-blue-700">
                 <FaSignOutAlt className="mr-2" aria-hidden="true" /> {/* Logout Icon */}
-                <span className="hidden md:inline">Logout</span>
+                <span>Logout</span>
               </button>
             </li>
           </ul>

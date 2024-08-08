@@ -22,17 +22,13 @@ import PresentationGenerationService from './Pages/PPTGenerator';
 import ContentDisplayPage from './components/Global/ContentDisplay';
 
 import TermsConditionsPage from './Pages/Terms&Conditions';
-import PrivacyPage from './Pages/Privacy';
-
-
-
+import PrivacyPage from './Pages/Privacy'
 function App() {
   return (
     <AuthProvider>
       <div className="flex flex-col min-h-screen">
         
         <BrowserRouter>
- 
           <Routes>
             <Route path="/" element={<WelcomePage />} />
             <Route path="/signin" element={<SignInForm />} />
@@ -40,10 +36,10 @@ function App() {
             <Route path="/translate" element={<Translate />} />
             <Route path="/subscription" element={<Subscription />} />
             <Route path="/payment" element={<Payment />} />
-            <Route path="/forgotPassword" element={<ForgetPassword />} />
             <Route path="/termscondition" element={<TermsConditionsPage />} />
             <Route path="/privacypage" element={<PrivacyPage />} />
 
+            <Route path="/forgotPassword" element={<ForgetPassword />} />
             {/* Protected Routes */}
             <Route element={<PrivateRoute />}>
               <Route path="/dashboard" element={<Homepage />} />

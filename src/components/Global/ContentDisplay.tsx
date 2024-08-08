@@ -66,7 +66,7 @@ function ContentDisplayPage() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen flex items-center justify-center">
+      <div className=" flex items-center justify-center">
         <div className="w-full max-w-3xl mx-auto p-8 rounded-lg">
           <h1 className="text-center text-3xl" style={{ fontFamily: "'Poppins', sans-serif" }}>Content Display</h1>
           {generatedContent && (
