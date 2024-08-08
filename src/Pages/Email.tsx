@@ -75,8 +75,8 @@ const EmailService: React.FC = () => {
       setFormData({ ...formData, [name]: e.target.checked });
     } else if (name === 'num_words') {
       const numValue = parseInt(value, 10);
-      if (numValue < 75 || numValue > 450) {
-        setWordCountError('Number of words must be between 75 and 450.');
+      if (numValue < 50 || numValue > 450) {
+        setWordCountError('Number of words must be between 50 and 450.');
       } else if (numValue < 0) {
         setWordCountError('Number of words cannot be negative.');
       } else {
@@ -119,7 +119,8 @@ const EmailService: React.FC = () => {
         }
 
         const parsedContent = JSON.parse(decryptedText);
-
+ 
+          
         if (parsedContent.generated_content) {
           setGeneratedEmail(parsedContent.generated_content);
           toast.success('Email generated successfully!');
@@ -227,6 +228,7 @@ const EmailService: React.FC = () => {
                     value={formData.otherPurpose}
                     onChange={handleChange}
                     className="w-full p-3 border rounded shadow-sm text-gray-700"
+                    required
                   />
                 )}
               </div>
@@ -237,6 +239,8 @@ const EmailService: React.FC = () => {
                   value={formData.tone}
                   onChange={handleChange}
                   className="w-full p-3 border rounded shadow-sm text-gray-700"
+                  required
+
                 >
                   <option value="Formal">Formal</option>
                   <option value="Informal">Informal</option>
@@ -254,6 +258,8 @@ const EmailService: React.FC = () => {
                 onChange={handleChange}
                 className="w-full p-3 mb-3 border rounded shadow-sm text-gray-700"
                 placeholder='Enter Subject'
+                required
+
               />
               <div className="flex items-center">
                 <input
@@ -286,8 +292,9 @@ const EmailService: React.FC = () => {
           value={formData.num_words}
           onChange={handleChange}
           className="w-full p-3 border rounded shadow-sm text-gray-700"
-          placeholder="Enter number of words (75-450)"
-          min="0" // Prevent negative input
+          placeholder="Enter number of words (50-450)"
+          min="50" // Prevent negative input
+          max="450"
         />
         {wordCountError && <p className="text-red-500 mt-2">{wordCountError}</p>}
       </div>

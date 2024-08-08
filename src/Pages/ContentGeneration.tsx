@@ -47,8 +47,8 @@ function ContentGenerationService() {
     setFormData({ ...formData, [name]: value });
     if (name === 'numberOfWords') {
       const numValue = parseInt(value, 10);
-      if (numValue < 75 || numValue > 450) {
-        setWordCountError('Number of words must be between 75 and 450.');
+      if (numValue < 50 || numValue > 450) {
+        setWordCountError('Number of words must be between 50 and 450.');
       } else if (numValue < 0) {
         setWordCountError('Number of words cannot be negative.');
       } else {
@@ -134,8 +134,8 @@ function ContentGenerationService() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-full max-w-3xl mx-auto p-8 rounded">
+      <div className="flex items-center justify-center">
+        <div className="w-full max-w-3xl mx-auto p-8">
           <h1 className="text-center text-xl font-semibold">Content Generator</h1>
           <form className="mx-auto p-8" onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -239,8 +239,9 @@ function ContentGenerationService() {
                   value={formData.numberOfWords}
                   onChange={handleChange}
                   className="p-3 border rounded shadow-sm text-black"
-                  placeholder="Enter number of words (75-450)"
-                  min="0" // Prevent negative input
+                  placeholder="Enter number of words (50-450)"
+                  min="50" // Prevent negative input
+                  max="450"
                 />
                 {wordCountError && <p className="text-red-500 mt-2">{wordCountError}</p>}
                 

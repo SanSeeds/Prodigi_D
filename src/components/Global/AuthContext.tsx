@@ -73,7 +73,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         // Check if all necessary data is available in local storage
         if (storedUser && storedAccessToken && storedRefreshToken && tokenExpiry) {
             // Check if the stored token has expired
-            const isExpired = new Date().getTime() > parseInt(tokenExpiry, 100);
+            const isExpired = new Date().getTime() > parseInt(tokenExpiry, 10);
             
             // If the token has not expired, update state with stored values
             if (!isExpired) {
